@@ -1,0 +1,45 @@
+{
+  "name": "knowvia-website",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "NEXT_PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA NEXT_PUBLIC_POSTHOG_KEY=phc_e2e_test NEXT_PUBLIC_POSTHOG_HOST=https://eu.i.posthog.com NEXT_PUBLIC_GOOGLE_TAG_ID=G-E2ETEST SITE_URL=http://localhost:3200 next build && playwright test",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build"
+  },
+  "dependencies": {
+    "@phosphor-icons/react": "2.1.10",
+    "drizzle-orm": "0.45.3",
+    "next": "16.3.8",
+    "pg": "8.23.1",
+    "posthog-js": "1.435.6",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "resend": "6.32.0",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@electric-sql/pglite": "0.5.8",
+    "@playwright/test": "1.63.0",
+    "@types/node": "24.19.1",
+    "@types/pg": "8.23.1",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "drizzle-kit": "0.31.11",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.8",
+    "typescript": "^5",
+    "vitest": "5.0.3"
+  },
+  "engines": {
+    "node": ">=22.12"
+  }
+}
