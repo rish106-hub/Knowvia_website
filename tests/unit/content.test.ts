@@ -45,7 +45,7 @@ describe("evidence register", () => {
     for (const mark of supportMarks) {
       expect(mark.sha256).toMatch(/^[a-f0-9]{64}$/);
       expect(mark.approval).toBeTruthy();
-      expect(mark.file).toMatch(/^\/support\/.+\.svg$/);
+      expect(mark.file).toMatch(/^\/support\/.+\.png$/);
     }
   });
 

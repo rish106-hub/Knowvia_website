@@ -65,6 +65,7 @@ export function ConsentProvider({ children }: { children: React.ReactNode }) {
   const decided = stored !== null && stored !== undefined;
   const [draft, setDraft] = useState<ConsentChoice>(REJECT_ALL);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const bannerRef = useRef<HTMLElement>(null);
 
   // Synchronise the analytics adapters (an external system) with the stored choice.
   useEffect(() => {
@@ -72,6 +73,23 @@ export function ConsentProvider({ children }: { children: React.ReactNode }) {
     if (stored === null) markConsentUndecided();
     else void applyConsent(stored);
   }, [stored]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const banner = bannerRef.current;
+    if (decided || !banner) {
+      root.style.setProperty("--consent-offset", "0px");
+      return;
+    }
+    const update = () => root.style.setProperty("--consent-offset", `${Math.ceil(banner.getBoundingClientRect().height)}px`);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(banner);
+    return () => {
+      observer.disconnect();
+      root.style.setProperty("--consent-offset", "0px");
+    };
+  }, [decided]);
 
   const save = useCallback((next: ConsentChoice) => {
     const record = consentStore.save(next);
@@ -92,7 +110,7 @@ export function ConsentProvider({ children }: { children: React.ReactNode }) {
     <ConsentContext.Provider value={value}>
       {children}
       {!decided && (
-        <section className="consent-banner" aria-labelledby="consent-title" data-testid="consent-banner">
+        <section ref={bannerRef} className="consent-banner" aria-labelledby="consent-title" data-testid="consent-banner">
           <div className="consent-banner-copy">
             <h2 id="consent-title">Your choice on cookies</h2>
             <p>

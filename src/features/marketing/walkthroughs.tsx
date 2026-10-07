@@ -31,11 +31,11 @@ export function FamilyWalkthrough() {
             <div className="demo-block">
               <p className="muted">Members: {familyDemo.members.join(", ")}</p>
               <table className="demo-table">
-                <caption className="sr-only">Policies held by the household</caption>
+                <caption className="sr-only">Health plans held by the household</caption>
                 <thead>
                   <tr>
-                    <th scope="col">Policy</th>
-                    <th scope="col">Sum insured</th>
+                    <th scope="col">Plan</th>
+                    <th scope="col">Cover amount</th>
                     <th scope="col">Covers</th>
                   </tr>
                 </thead>
@@ -56,8 +56,8 @@ export function FamilyWalkthrough() {
           ),
         },
         {
-          id: "evidence",
-          label: "Evidence status",
+          id: "answers",
+          label: "What we know",
           content: (
             <ul className="fact-rows">
               {familyDemo.facts.map((fact) => (
@@ -66,7 +66,7 @@ export function FamilyWalkthrough() {
                   <div>
                     <p className="fact-row-label">{fact.label}</p>
                     <p className="muted">{fact.detail}</p>
-                    {"source" in fact && fact.source ? <p className="fact-source">Source: {fact.source}</p> : null}
+                    {"source" in fact && fact.source ? <p className="fact-source">Page: {fact.source}</p> : null}
                   </div>
                 </li>
               ))}
@@ -75,7 +75,7 @@ export function FamilyWalkthrough() {
         },
         {
           id: "cash",
-          label: "Cash scenario",
+          label: "Hospital cost",
           content: (
             <div className="demo-block">
               <p className="muted">
@@ -115,7 +115,7 @@ export function TeamWalkthrough() {
       steps={[
         {
           id: "enrolment",
-          label: "Enrolment visibility",
+          label: "Enrolment status",
           content: (
             <ul className="meter-list">
               {teamDemo.enrolment.map((row) => (
@@ -157,7 +157,7 @@ export function TeamWalkthrough() {
         },
         {
           id: "handoffs",
-          label: "Handoffs",
+          label: "Who does what",
           content: (
             <ul className="fact-rows">
               {teamDemo.handoffs.map((handoff) => (

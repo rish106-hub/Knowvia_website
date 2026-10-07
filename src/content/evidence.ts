@@ -16,43 +16,43 @@ export interface SupportMark {
 export const supportMarks: SupportMark[] = [
   {
     name: "Lightspeed India Partners",
-    file: "/support/lightspeed-india.svg",
-    width: 1807,
-    height: 640,
+    file: "/support/lightspeed-india.png",
+    width: 904,
+    height: 320,
     sourceUrl: "https://lsvp.com/wp-content/uploads/2023/08/LSVP-INDIA.svg",
-    retrievedAt: "2026-10-02",
-    sha256: "fbad1702883d31e88cca52b661c04f6c67f26aa2a482b76772e28ff57e2d4edc",
-    modification: null,
+    retrievedAt: "2026-10-06",
+    sha256: "b17eb32108a6a873e990aa5e6a0994f234671c94eaa767d36137ee6b163cb424",
+    modification: "Rasterized from the approved source SVG to a transparent PNG; artwork unchanged.",
     approval: "Logo use and relationship wording approved by the Knowvia founder, 2026-10-02.",
   },
   {
     name: "Plum",
-    file: "/support/plum.svg",
-    width: 316,
-    height: 97,
-    sourceUrl: "https://www.plumhq.com/ (header logo asset)",
-    retrievedAt: "2026-10-02",
-    sha256: "33611bb353dc9c01676ebcdd982d6164d791663f99b10cc96448cfdffcd8af62",
-    modification: "Single-colour fill changed from #FFFAF2 (for dark backgrounds) to #1C1C1C for a light background.",
+    file: "/support/plum.png",
+    width: 632,
+    height: 194,
+    sourceUrl: "https://cdn.prod.website-files.com/63413ad4dec8a91fe53f4fb0/6875d6002f4ee75eaa3bed48_plum%20logo.svg",
+    retrievedAt: "2026-10-06",
+    sha256: "9e77cbbb3e87f4f1fdc8bc628f323bd4eecc74fb7313a2290fcd98eb2187233f",
+    modification: "Rasterized from the approved source SVG to a transparent PNG; artwork unchanged.",
     approval: "Logo use and relationship wording approved by the Knowvia founder, 2026-10-02.",
   },
   {
     name: "Insurance Samadhan",
-    file: "/support/insurance-samadhan.svg",
-    width: 202,
-    height: 40,
+    file: "/support/insurance-samadhan.png",
+    width: 808,
+    height: 160,
     sourceUrl: "https://www.insurancesamadhan.com/images/logo.svg",
-    retrievedAt: "2026-10-02",
-    sha256: "1004fa84900b2da72cbff4b516c496098ef77d0048b03aff80a29a710f65b3c7",
-    modification: null,
+    retrievedAt: "2026-10-06",
+    sha256: "8f36314264e1599f12c5b21da34cbe425ccc8b7c66a8ab3fcc7f14f2450a09d0",
+    modification: "Rasterized from the approved source SVG to a transparent PNG; artwork unchanged.",
     approval: "Logo use and relationship wording approved by the Knowvia founder, 2026-10-02.",
   },
 ];
 
 export const researchClaim = {
   headline: "Shaped by 50+ family conversations",
-  provenance:
-    "Founder-reported count of conversations with families and benefits teams in 2026. A directional study that shaped the product, not a survey or a measure of demand.",
+  note:
+    "The founder spoke with 50+ families and benefits teams in 2026. Those conversations shaped what Knowvia shows and how it works.",
 } as const;
 
 export interface ApprovedQuote {

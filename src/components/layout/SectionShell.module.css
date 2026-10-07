@@ -1,0 +1,11 @@
+.section {
+  padding-block: var(--section-space);
+}
+
+.compact {
+  padding-block: var(--section-space-tight);
+}
+
+.inner {
+  position: relative;
+}

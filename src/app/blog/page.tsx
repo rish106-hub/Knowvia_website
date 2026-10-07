@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { GuidePreview } from "@/components/marketing/GuidePreview";
 import { PageHeader } from "@/components/marketing/PageHeader";
 import { articles } from "@/content/articles";
 import { pageMetadata } from "@/lib/seo";
+import styles from "./BlogPage.module.css";
 
 export const metadata = pageMetadata({
   title: "Guides",
@@ -10,33 +12,40 @@ export const metadata = pageMetadata({
 });
 
 const dateFormatter = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "long", year: "numeric" });
-const audienceLabel = { family: "For families", team: "For HR teams", both: "For families and HR teams" } as const;
+const categories = [
+  { title: "For families", filter: (audience: string) => audience === "family" || audience === "both" },
+  { title: "For HR teams", filter: (audience: string) => audience === "team" || audience === "both" },
+] as const;
 
 export default function BlogIndexPage() {
   return (
     <>
       <PageHeader
-        title="Guides"
-        lede="Plain answers to the policy questions that matter most at the hospital desk. Each guide links to the regulation or document it relies on."
+        title="Guides for decisions that cannot wait"
+        lede="Plain answers to the policy questions that matter most at the hospital desk. Every guide shows its sources and limits."
         path="/blog"
       />
-      <section className="section-tight">
-        <div className="wrap">
-          <ul className="article-list">
-            {articles.map((article) => (
-              <li key={article.slug}>
-                <Link href={`/blog/${article.slug}`}>
-                  <h2 style={{ fontFamily: "var(--font-sans)", fontSize: "var(--step-1)", fontWeight: 600 }}>{article.title}</h2>
-                  <p>{article.description}</p>
-                  <span className="article-meta">
-                    {audienceLabel[article.audience]}
-                    <br />
-                    Updated <time dateTime={article.updatedAt}>{dateFormatter.format(new Date(article.updatedAt))}</time>
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+      <section className={styles.featured} aria-label="Featured guides">
+        <div className="wrap"><GuidePreview articles={articles.slice(0, 3)} /></div>
+      </section>
+      <section className="section-tight" aria-label="Guides by audience">
+        <div className={`wrap ${styles.categories}`}>
+          {categories.map((category) => (
+            <section key={category.title} className={styles.category}>
+              <h2>{category.title}</h2>
+              <ul className={styles.list}>
+                {articles.filter((article) => category.filter(article.audience)).map((article) => (
+                  <li key={article.slug}>
+                    <Link href={`/blog/${article.slug}`}>
+                      <h3>{article.title}</h3>
+                      <p>{article.description}</p>
+                      <span className={styles.meta}>Updated <time dateTime={article.updatedAt}>{dateFormatter.format(new Date(article.updatedAt))}</time></span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
         </div>
       </section>
     </>

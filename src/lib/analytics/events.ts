@@ -1,4 +1,5 @@
 import * as z from "zod/mini";
+import { explainerVideos, type ExplainerVideoKey } from "@/content/videos";
 
 // zod/mini keeps the client bundle small; jitless avoids its eval feature probe (blocked by our CSP).
 z.config({ jitless: true });
@@ -9,6 +10,7 @@ z.config({ jitless: true });
 const slug = z.string().check(z.regex(/^[a-z0-9-]{1,80}$/));
 const placement = z.enum(["hero", "guide", "article", "footer", "page"]);
 const audience = z.enum(["family", "team"]);
+const videoKeys = Object.keys(explainerVideos) as [ExplainerVideoKey, ...ExplainerVideoKey[]];
 
 export const analyticsEventSchemas = {
   hero_cta_clicked: z.strictObject({ cta: z.enum(["join_early_access", "see_how_it_works"]) }),
@@ -23,6 +25,8 @@ export const analyticsEventSchemas = {
   }),
   newsletter_verified: z.strictObject({}),
   article_opened: z.strictObject({ slug }),
+  explainer_video_played: z.strictObject({ video: z.enum(videoKeys), placement }),
+  walkthrough_video_paused: z.strictObject({ journey: audience }),
   consent_updated: z.strictObject({ analytics: z.boolean(), advertising: z.boolean() }),
 } as const;
 

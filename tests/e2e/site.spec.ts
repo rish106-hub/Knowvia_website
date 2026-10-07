@@ -94,25 +94,36 @@ test.describe("public pages", () => {
     expect(response?.status()).toBe(404);
     await expect(page.getByRole("link", { name: "Go to the home page" })).toBeVisible();
   });
+
+  test("the homepage remains useful without JavaScript", async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
+    const page = await context.newPage();
+    await page.goto("/");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Don’t discover your cover at the hospital.");
+    await expect(page.getByRole("link", { name: "See Knowvia work" })).toBeVisible();
+    await expect(page.getByLabel("Illustrative Rao household policy clarity preview")).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+    await context.close();
+  });
 });
 
 test.describe("consent", () => {
   test("no analytics or advertising request before consent, or after rejecting", async ({ page }) => {
     const contacted = await blockThirdParties(page);
     await page.goto("/");
-    await page.getByRole("link", { name: "For my family" }).click();
-    await page.waitForLoadState("networkidle");
+    await page.goto("/for-families");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     expect(contacted).toEqual([]);
     await decideConsent(page, "Reject all");
     await page.goto("/blog/room-rent-limit");
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     expect(contacted).toEqual([]);
   });
 
   test("accepting loads analytics and advertising only after the click", async ({ page }) => {
     const contacted = await blockThirdParties(page);
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     expect(contacted).toEqual([]);
     await decideConsent(page, "Accept all");
     await expect.poll(() => contacted.some((host) => host.includes("googletagmanager.com"))).toBe(true);
@@ -158,17 +169,18 @@ test.describe("interaction", () => {
     await expect(page.locator("#main")).toBeFocused();
   });
 
-  test("walkthrough tabs work with arrow keys", async ({ page }) => {
-    const tablist = page.getByRole("tablist", { name: "The Rao household steps" });
-    await tablist.getByRole("tab", { name: /Household cover/ }).focus();
+  test("hero proof tabs work with arrow keys", async ({ page }) => {
+    const tablist = page.getByRole("tablist", { name: "Known, unknown and next action" });
+    await tablist.getByRole("tab", { name: /Known/ }).focus();
     await page.keyboard.press("ArrowRight");
-    await expect(tablist.getByRole("tab", { name: /Evidence status/ })).toHaveAttribute("aria-selected", "true");
-    await expect(page.getByText("Cataract sub-limit on the senior policy")).toBeVisible();
+    await expect(tablist.getByRole("tab", { name: /Unknown/ })).toHaveAttribute("aria-selected", "true");
+    await expect(tablist.getByRole("tab", { name: /Two cataract limits conflict/ })).toBeVisible();
     await page.keyboard.press("End");
-    await expect(tablist.getByRole("tab", { name: /Next steps/ })).toBeFocused();
+    await expect(tablist.getByRole("tab", { name: /Next/ })).toBeFocused();
   });
 
   test("cash scenario recalculates from the controls", async ({ page }) => {
+    await page.goto("/for-families");
     const tablist = page.getByRole("tablist", { name: "The Rao household steps" });
     await tablist.getByRole("tab", { name: /Cash scenario/ }).click();
     await expect(page.getByText("₹57,000")).toBeVisible();
@@ -200,10 +212,28 @@ test.describe("interaction", () => {
     await expect(fresh.getByTestId("consent-banner")).toBeHidden();
     await context.close();
   });
+
+  test("walkthrough exposes both theme cuts, controls and chapters without development UI", async ({ page }) => {
+    const theatre = page.locator(".theatre").getByRole("tabpanel");
+    const videos = theatre.locator("video");
+    await expect(videos).toHaveCount(2);
+    for (const video of await videos.all()) {
+      await expect(video).toHaveAttribute("width", "960");
+      await expect(video).toHaveAttribute("height", "600");
+      await expect(video).toHaveAttribute("poster", /\/walkthroughs\/family-(light|dark)\.jpg/);
+      await expect(video).toHaveAttribute("src", /\/walkthroughs\/family-(light|dark)\.webm/);
+    }
+    await expect(theatre.getByRole("button", { name: /walkthrough/i })).toBeVisible();
+    await expect(theatre.getByRole("list", { name: /chapters/i }).getByRole("button")).toHaveCount(4);
+    await expect(page.locator("nextjs-portal, [data-nextjs-toast], [data-next-badge-root]")).toHaveCount(0);
+
+    await page.getByRole("tab", { name: "For a team" }).click();
+    await expect(page.locator(".theatre").getByRole("tabpanel").getByRole("list", { name: /chapters/i }).getByRole("button")).toHaveCount(3);
+  });
 });
 
 test.describe("responsive layout", () => {
-  for (const width of [320, 360, 390, 412, 768, 1280]) {
+  for (const width of [320, 390, 768, 1280, 1440]) {
     test(`no horizontal scroll or clipped hero CTA at ${width}px`, async ({ browser }) => {
       const context = await browser.newContext({ viewport: { width, height: 800 }, reducedMotion: "reduce" });
       const page = await context.newPage();
@@ -214,7 +244,7 @@ test.describe("responsive layout", () => {
         expect(overflow, route).toBeLessThanOrEqual(0);
       }
       await page.goto("/");
-      const cta = page.locator(".hero").getByRole("link", { name: "Join early access" });
+      const cta = page.getByRole("link", { name: "See Knowvia work" });
       const box = await cta.boundingBox();
       expect(box!.height).toBeLessThan(60); // label did not wrap
       await context.close();

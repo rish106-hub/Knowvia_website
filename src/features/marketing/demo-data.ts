@@ -15,11 +15,11 @@ export const familyDemo = {
   members: ["Anil, 52", "Meera, 49", "Kavya, 21", "Lakshmi (Anil's mother), 76"],
   policies: [
     {
-      name: "Employer group cover",
+      name: "Work health cover",
       holder: "Anil",
       sumInsured: "₹5,00,000",
       covers: "Anil, Meera, Kavya",
-      note: "Ends if Anil leaves the job, unless the policy is migrated.",
+      note: "May end if Anil leaves the job. Ask how to keep it.",
     },
     {
       name: "Family floater",
@@ -29,11 +29,11 @@ export const familyDemo = {
       note: "Room rent limited to ₹5,000 a day in the wording.",
     },
     {
-      name: "Senior citizen policy",
+      name: "Senior health plan",
       holder: "Lakshmi",
       sumInsured: "₹3,00,000",
       covers: "Lakshmi",
-      note: "Co-payment of 20% stated in the schedule.",
+      note: "Lakshmi pays 20% of each approved bill.",
     },
   ],
   facts: [
@@ -45,19 +45,19 @@ export const familyDemo = {
     },
     {
       status: "known",
-      label: "Lakshmi's co-payment",
-      detail: "20% of each admissible claim.",
-      source: "Policy schedule, page 2",
+      label: "Lakshmi's share",
+      detail: "She pays 20% of each approved bill.",
+      source: "Plan summary, page 2",
     },
     {
       status: "gap",
       label: "Lakshmi is not on the group cover",
-      detail: "Parents were not added at enrolment. Her only cover is ₹3,00,000 with a co-payment.",
+      detail: "Parents were not added at enrolment. Her only cover is ₹3,00,000, and she pays 20% herself.",
       source: "Group enrolment list",
     },
     {
       status: "unknown",
-      label: "Cataract sub-limit on the senior policy",
+      label: "Cataract limit on the senior plan",
       detail: "The schedule and the wording state different amounts. Only the insurer can confirm which applies.",
       source: "Schedule page 2 and wording page 21 disagree",
     },
@@ -84,7 +84,7 @@ export const teamDemo = {
   ],
   questions: [
     { topic: "Adding parents mid-year", count: 14, answer: "The group policy allows additions only at enrolment and for new joiners." },
-    { topic: "Room rent limits", count: 11, answer: "Single private room up to 1% of the sum insured a day, per the group schedule." },
+    { topic: "Room limits", count: 11, answer: "A single private room up to 1% of the cover amount each day, shown on the plan summary." },
     { topic: "Cover after resignation", count: 6, answer: "Cover stops on the exit date. Migration options depend on the insurer." },
     { topic: "Maternity waiting period", count: 4, answer: "Unknown for this policy year. The broker has been asked to confirm." },
   ],

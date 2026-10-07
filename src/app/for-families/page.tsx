@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { EarlyAccessSection } from "@/components/marketing/EarlyAccessSection";
 import { PageHeader } from "@/components/marketing/PageHeader";
+import { VideoShelf } from "@/components/media/VideoShelf";
+import { WalkthroughVideo } from "@/components/media/WalkthroughVideo";
 import { FamilyWalkthrough } from "@/features/marketing/walkthroughs";
 import { pageMetadata } from "@/lib/seo";
 
@@ -15,20 +17,31 @@ export default function ForFamiliesPage() {
   return (
     <>
       <PageHeader
-        title="Your household's cover, in one place"
-        lede="Employer cover, a family floater, a parent's policy: Knowvia lines them up, shows what each one says, and keeps what is unclear in plain view."
+        title="3 policies. 1 hospital. No time to search."
+        lede="Work cover, family cover and a parent's plan: Knowvia lines them up and shows what each one means."
         path="/for-families"
       />
 
-      <section className="section-tight">
+      <section className="section-tight" aria-labelledby="family-video-title">
+        <div className="wrap">
+          <div className="section-head" data-reveal>
+            <p className="eyebrow">Watch first</p>
+            <h2 id="family-video-title">1 household, 3 policies, 4 steps</h2>
+          </div>
+          <div data-reveal>
+            <WalkthroughVideo journey="family" />
+          </div>
+        </div>
+      </section>
+
+      <section className="section-tight" id="try-family" aria-label="Try the family example">
         <div className="wrap split">
           <div className="stack" style={{ "--stack-space": "1.5rem" } as React.CSSProperties}>
-            <ul className="plain-list">
+            <ul className="plain-list" data-reveal-stagger>
               <li>
-                <h3>Policy clarity</h3>
+                <h3>Cover at a glance</h3>
                 <p className="muted">
-                  Sum insured, room-rent limits, co-payments, waiting periods and sub-limits for each person, each with the
-                  page it came from.
+                  Cover amount, room limits, what you pay yourself, waiting time and smaller limits for each person.
                 </p>
               </li>
               <li>
@@ -53,18 +66,23 @@ export default function ForFamiliesPage() {
               </li>
             </ul>
             <p className="notice">
-              <strong>What Knowvia does not do</strong>
-              It does not sell insurance, approve claims or tell you what an insurer will pay. It shows what your documents
-              say and what they leave open.
+              <strong>Everything in 1 view</strong>
+              Your health plans, limits, open questions and next steps, ready before a hospital visit.
             </p>
           </div>
           <FamilyWalkthrough />
         </div>
       </section>
 
+      <VideoShelf
+        id="family-explainers-title"
+        title="Explainers worth a few minutes"
+        videos={["roomRentLimit", "cashlessVsReimbursement", "claimsAwareness"]}
+      />
+
       <section className="section-tight">
         <div className="wrap">
-          <div className="section-head">
+          <div className="section-head" data-reveal>
             <h2>Guides for families</h2>
           </div>
           <ul className="plain-list">

@@ -1,0 +1,83 @@
+.grid {
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 14px;
+}
+
+.card {
+  display: grid;
+  align-content: end;
+  gap: 10px;
+  min-height: 250px;
+  padding: clamp(22px, 3vw, 36px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  transition: transform 200ms ease, border-color 200ms ease;
+}
+
+.card:first-child {
+  grid-row: span 2;
+  min-height: 514px;
+  background:
+    linear-gradient(180deg, transparent 20%, rgb(13 52 55 / 0.92) 82%),
+    url("/editorial-policy-scatter.png") center / cover;
+  color: #f1f8f7;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  border-color: var(--action);
+  text-decoration: none;
+}
+
+.audience {
+  font-size: 0.78rem;
+  font-weight: 760;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.card h3 {
+  max-width: 18ch;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.4vw, 2.5rem);
+  letter-spacing: -0.04em;
+}
+
+.card p {
+  max-width: 50ch;
+  color: var(--text-muted);
+}
+
+.card:first-child p {
+  color: #c7d8d5;
+}
+
+.open {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-weight: 720;
+}
+
+@media (max-width: 760px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card:first-child {
+    grid-row: auto;
+    min-height: 360px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+}

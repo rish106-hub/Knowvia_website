@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { EarlyAccessSection } from "@/components/marketing/EarlyAccessSection";
 import { PageHeader } from "@/components/marketing/PageHeader";
+import { VideoShelf } from "@/components/media/VideoShelf";
+import { WalkthroughVideo } from "@/components/media/WalkthroughVideo";
 import { TeamWalkthrough } from "@/features/marketing/walkthroughs";
 import { pageMetadata } from "@/lib/seo";
 
@@ -15,20 +17,31 @@ export default function ForEmployersPage() {
   return (
     <>
       <PageHeader
-        title="Group cover your people actually understand"
-        lede="Employees get clear answers about the policy you already pay for. HR sees what is incomplete and who owns each next step."
+        title="Employees should not discover their cover during a crisis."
+        lede="Employees understand the group health insurance you already pay for. HR sees what is missing and who handles it."
         path="/for-employers"
       />
 
-      <section className="section-tight">
+      <section className="section-tight" aria-labelledby="team-video-title">
+        <div className="wrap">
+          <div className="section-head" data-reveal>
+            <p className="eyebrow">Watch first</p>
+            <h2 id="team-video-title">What HR sees, without seeing anyone&apos;s health details</h2>
+          </div>
+          <div data-reveal>
+            <WalkthroughVideo journey="team" />
+          </div>
+        </div>
+      </section>
+
+      <section className="section-tight" id="try-team" aria-label="Try the team example">
         <div className="wrap split">
           <div className="stack" style={{ "--stack-space": "1.5rem" } as React.CSSProperties}>
-            <ul className="plain-list">
+            <ul className="plain-list" data-reveal-stagger>
               <li>
                 <h3>Employee clarity</h3>
                 <p className="muted">
-                  Each employee sees what the group policy covers for them and their dependants, in plain language, with
-                  the clause it comes from.
+                  Each employee sees what the work plan covers for them and their family, with the exact page behind it.
                 </p>
               </li>
               <li>
@@ -41,12 +54,11 @@ export default function ForEmployersPage() {
               <li>
                 <h3>Onboarding and exits</h3>
                 <p className="muted">
-                  New joiners learn how cashless works on day one. Leavers learn when cover ends and what migration or
-                  portability could mean for them.
+                  New joiners learn how hospital payment works on day 1. Leavers see when cover ends and how they may keep it.
                 </p>
               </li>
               <li>
-                <h3>Actionable handoffs</h3>
+                <h3>Clear ownership</h3>
                 <p className="muted">
                   Questions the documents cannot answer go to the broker or insurer with an owner and a date, instead of
                   sitting in an inbox.
@@ -63,9 +75,15 @@ export default function ForEmployersPage() {
         </div>
       </section>
 
+      <VideoShelf
+        id="team-explainers-title"
+        title="Explainers to share with your team"
+        videos={["retainEmployerCover", "portability", "cashlessVsReimbursement"]}
+      />
+
       <section className="section-tight">
         <div className="wrap">
-          <div className="section-head">
+          <div className="section-head" data-reveal>
             <h2>Guides for HR teams</h2>
           </div>
           <ul className="plain-list">

@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Newsreader, Source_Sans_3 } from "next/font/google";
+import { Geist, Source_Sans_3 } from "next/font/google";
 import { ConsentProvider } from "@/components/consent/ConsentProvider";
 import { KnowviaGuide } from "@/components/guide/KnowviaGuide";
+import { MotionRoot } from "@/components/motion/MotionRoot";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { headInitScript } from "@/lib/init-scripts";
@@ -9,16 +10,16 @@ import { JsonLd, organizationJsonLd } from "@/lib/seo";
 import { assertProductionConfig, siteConfig } from "@/lib/site";
 import "./globals.css";
 import "./components.css";
+import "./motion.css";
 
 assertProductionConfig();
 
 // Fonts are downloaded at build time and served from this site; no runtime request to Google.
 const sourceSans = Source_Sans_3({ subsets: ["latin"], variable: "--font-source-sans", display: "swap" });
-const newsreader = Newsreader({
+const geist = Geist({
   subsets: ["latin"],
-  variable: "--font-newsreader",
+  variable: "--font-geist",
   display: "swap",
-  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
@@ -39,7 +40,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en-IN" className={`${sourceSans.variable} ${newsreader.variable}`} suppressHydrationWarning>
+    <html lang="en-IN" className={`${sourceSans.variable} ${geist.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: headInitScript }} />
         <JsonLd data={organizationJsonLd()} />
@@ -55,6 +56,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </main>
           <SiteFooter />
           <KnowviaGuide />
+          <MotionRoot />
         </ConsentProvider>
       </body>
     </html>

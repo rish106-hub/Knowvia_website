@@ -64,7 +64,7 @@ export function CashScenarioDemo() {
         <dl className="fact-list">
           <dt>Total bill</dt>
           <dd>{formatRupees(result.totalBill)}</dd>
-          <dt>Insurer pays (illustrative)</dt>
+          <dt>Insurer pays here</dt>
           <dd>{formatRupees(result.insurerPays)}</dd>
           <dt>Family pays</dt>
           <dd>
@@ -77,8 +77,7 @@ export function CashScenarioDemo() {
             : "No proportion applies here, so only the room charge above the limit (if any) is left to the family."}
         </p>
         <p className="small muted">
-          Illustration only, using invented amounts. Your own outcome depends on your policy wording, the hospital&apos;s
-          billing and the insurer&apos;s decision.
+          Your amount depends on your plan documents, the hospital&apos;s billing and the insurer&apos;s decision.
         </p>
       </div>
     </div>

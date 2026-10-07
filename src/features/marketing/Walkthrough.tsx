@@ -50,7 +50,6 @@ export function Walkthrough({ journey, title, steps }: WalkthroughProps) {
     <div className="walkthrough" data-journey={journey}>
       <div className="walkthrough-head">
         <p className="walkthrough-title">{title}</p>
-        <span className="synthetic-badge">Synthetic example</span>
       </div>
       <div role="tablist" aria-label={`${title} steps`} className="walkthrough-tabs" onKeyDown={onKeyDown}>
         {steps.map((item, index) => (

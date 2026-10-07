@@ -16,7 +16,7 @@ export const siteConfig = {
   url: resolveSiteUrl(),
   tagline: "Know your cover. Before you need it.",
   description:
-    "See what your policies cover, what remains unclear, and the next action for your family or team.",
+    "Understand all your health insurance in one place: what is covered, what needs checking and what to do next.",
   privacyEmail: process.env.PRIVACY_EMAIL?.trim() || null,
   operatorName: process.env.RESPONSIBLE_OPERATOR_NAME?.trim() || null,
   // Search engines index only the production deployment.

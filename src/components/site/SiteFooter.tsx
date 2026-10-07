@@ -10,8 +10,8 @@ export function SiteFooter() {
           <div className="stack" style={{ "--stack-space": "0.75rem" } as React.CSSProperties}>
             <p className="footer-heading">Knowvia</p>
             <p>
-              Knowvia is an early-stage project. It explains what your policy documents say and what they leave open. It
-              is not an insurer, broker, adviser or claims service, and it does not decide claims.
+              Knowvia brings your health insurance plans, limits and open questions into 1 clear view, so you know what
+              to check before you need to claim.
             </p>
           </div>
           <div>

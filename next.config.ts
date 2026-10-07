@@ -15,6 +15,8 @@ function originOf(value: string | undefined): string | null {
 const posthogOrigin = originOf(process.env.NEXT_PUBLIC_POSTHOG_HOST);
 const googleEnabled = Boolean(process.env.NEXT_PUBLIC_GOOGLE_TAG_ID);
 const turnstile = "https://challenges.cloudflare.com";
+// Explainer videos load from YouTube's privacy-enhanced domain, and only after a visitor presses play.
+const youtube = "https://www.youtube-nocookie.com";
 const google = googleEnabled
   ? [
       "https://www.googletagmanager.com",
@@ -36,7 +38,7 @@ const contentSecurityPolicy = [
   ["img-src 'self' data: blob:", ...google].join(" "),
   "font-src 'self'",
   ["connect-src 'self'", posthogOrigin ?? "", ...google, isDev ? "ws:" : ""].filter(Boolean).join(" "),
-  `frame-src ${turnstile}`,
+  `frame-src ${turnstile} ${youtube}`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -65,6 +67,7 @@ const nextConfig: NextConfig = {
   // Self-contained server bundle for the Docker image (EC2, Cloud Run, Azure Container Apps).
   output: "standalone",
   poweredByHeader: false,
+  devIndicators: false,
   reactStrictMode: true,
   async headers() {
     return [

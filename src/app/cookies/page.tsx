@@ -28,6 +28,13 @@ const storage = [
     duration: "Session",
   },
   {
+    name: "YouTube (youtube-nocookie.com)",
+    category: "Third party, on request",
+    purpose:
+      "Set by YouTube only after you press play on an explainer video. Nothing loads from YouTube before that press.",
+    duration: "Set by YouTube",
+  },
+  {
     name: "ph_* (PostHog)",
     category: "Analytics",
     purpose: "Counts a fixed list of site actions. Only after you allow analytics.",
@@ -47,7 +54,7 @@ export default function CookiesPage() {
       title="Cookie notice"
       path="/cookies"
       lede="Only essential storage is used until you choose otherwise. Analytics and advertising stay off unless you turn them on."
-      updated="2 October 2026"
+      updated="6 October 2026"
     >
       <p>
         <CookieSettingsButton className="button" />

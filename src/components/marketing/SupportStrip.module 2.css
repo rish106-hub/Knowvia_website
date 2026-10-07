@@ -1,0 +1,275 @@
+.section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-block: 1px solid var(--line);
+  background:
+    radial-gradient(circle at 18% 110%, color-mix(in srgb, var(--gold) 10%, transparent), transparent 34%),
+    radial-gradient(circle at 82% -20%, color-mix(in srgb, var(--harbour) 10%, transparent), transparent 38%),
+    color-mix(in srgb, var(--surface) 78%, transparent);
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(8.5rem, 0.25fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(1rem, 3vw, 2.5rem);
+  min-height: 158px;
+}
+
+.label {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.ambient {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.ambient span {
+  position: absolute;
+  display: block;
+  border: 1px solid color-mix(in srgb, var(--harbour) 28%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 58%, transparent);
+}
+
+.ambient span:nth-child(1) {
+  width: 16px;
+  height: 16px;
+  left: 6%;
+  top: 22%;
+}
+
+.ambient span:nth-child(2) {
+  width: 9px;
+  height: 9px;
+  right: 8%;
+  top: 18%;
+  background: color-mix(in srgb, var(--gold) 42%, transparent);
+  border-color: color-mix(in srgb, var(--gold) 50%, transparent);
+}
+
+.ambient span:nth-child(3) {
+  width: 24px;
+  height: 24px;
+  right: 30%;
+  bottom: 10%;
+}
+
+.viewport {
+  min-width: 0;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+
+.track {
+  display: flex;
+  width: max-content;
+  gap: 18px;
+  padding-block: 24px;
+  will-change: transform;
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.logo {
+  width: 244px;
+  height: 82px;
+  flex: none;
+}
+
+.float,
+.logoCard {
+  width: 100%;
+  height: 100%;
+}
+
+.logoCard {
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+  border-radius: 16px;
+  background: color-mix(in srgb, #fbfdfc 96%, var(--surface));
+  box-shadow:
+    0 18px 36px -26px rgb(14 46 49 / 0.72),
+    inset 0 1px 0 rgb(255 255 255 / 0.9);
+  overflow: hidden;
+  transition:
+    transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 260ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    border-color 260ms ease;
+}
+
+.logoCard img {
+  width: auto;
+  height: auto;
+  max-width: 80%;
+  max-height: 38px;
+  object-fit: contain;
+}
+
+.logo[data-mark="Lightspeed India Partners"] .logoCard img {
+  max-width: 87%;
+  max-height: 58px;
+}
+
+.logo[data-mark="Plum"] {
+  width: 196px;
+}
+
+.logo[data-mark="Plum"] .logoCard {
+  background: #3a174f;
+  border-color: color-mix(in srgb, #8f65a6 44%, transparent);
+  box-shadow:
+    0 18px 38px -25px rgb(58 23 79 / 0.8),
+    inset 0 1px 0 rgb(255 255 255 / 0.15);
+}
+
+.logo[data-mark="Plum"] .logoCard img {
+  max-width: 70%;
+  max-height: 42px;
+}
+
+.logo:hover .logoCard {
+  transform: translateY(-4px) scale(1.018);
+  border-color: color-mix(in srgb, var(--harbour) 42%, var(--line));
+  box-shadow:
+    0 24px 44px -27px rgb(14 46 49 / 0.78),
+    inset 0 1px 0 rgb(255 255 255 / 0.92);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .track {
+    animation: support-drift 26s linear infinite;
+  }
+
+  .float {
+    animation: logo-float 4.8s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+
+  .logo:nth-child(2) .float {
+    animation-duration: 5.6s;
+    animation-delay: -2.1s;
+  }
+
+  .logo:nth-child(3) .float {
+    animation-duration: 4.2s;
+    animation-delay: -3.4s;
+  }
+
+  .ambient span:nth-child(1) {
+    animation: ambient-float 6.5s ease-in-out infinite alternate;
+  }
+
+  .ambient span:nth-child(2) {
+    animation: ambient-float 5.2s ease-in-out -2.6s infinite alternate-reverse;
+  }
+
+  .ambient span:nth-child(3) {
+    animation: ambient-float 7.4s ease-in-out -4.1s infinite alternate;
+  }
+
+  .viewport:hover .track,
+  .viewport:focus-within .track {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes support-drift {
+  to {
+    transform: translate3d(calc(-50% - 9px), 0, 0);
+  }
+}
+
+@keyframes logo-float {
+  from {
+    transform: translate3d(0, 4px, 0) rotate(-0.45deg);
+  }
+
+  to {
+    transform: translate3d(0, -5px, 0) rotate(0.45deg);
+  }
+}
+
+@keyframes ambient-float {
+  from {
+    transform: translate3d(-5px, 4px, 0) scale(0.92);
+    opacity: 0.42;
+  }
+
+  to {
+    transform: translate3d(7px, -7px, 0) scale(1.08);
+    opacity: 0.86;
+  }
+}
+
+@media (max-width: 680px) {
+  .inner {
+    grid-template-columns: 1fr;
+    gap: 2px;
+    min-height: 150px;
+    padding-block: 16px;
+  }
+
+  .viewport {
+    width: calc(100% + 2 * var(--gutter));
+    margin-inline: calc(var(--gutter) * -1);
+  }
+
+  .label {
+    padding-inline: 2px;
+  }
+
+  .track,
+  .group {
+    gap: 12px;
+  }
+
+  .track {
+    padding-block: 14px;
+  }
+
+  .logo {
+    width: 210px;
+    height: 72px;
+  }
+
+  .logo[data-mark="Plum"] {
+    width: 174px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viewport {
+    overflow-x: auto;
+    mask-image: none;
+  }
+
+  .track > .group:last-child {
+    display: none;
+  }
+
+  .ambient {
+    display: none;
+  }
+}

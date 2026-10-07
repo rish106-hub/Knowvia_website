@@ -16,7 +16,7 @@ export function EarlyAccessSection({ placement = "footer", defaultAudience = "in
             when there is a place for you.
           </p>
           <ul className="muted">
-            <li>One confirmation email, then only what you asked for.</li>
+            <li>1 confirmation email, then only what you asked for.</li>
             <li>No policy documents, health details or phone number needed.</li>
             <li>Stop at any time from any email.</li>
           </ul>

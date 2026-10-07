@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { YouTubeFacade } from "@/components/media/YouTubeFacade";
+import { articleVideos } from "@/content/videos";
 import { notFound } from "next/navigation";
 import { ArticleOpenedEvent } from "@/components/marketing/ArticleOpenedEvent";
 import { EarlyAccessSection } from "@/components/marketing/EarlyAccessSection";
@@ -132,6 +134,16 @@ export default async function ArticlePage({ params }: PageProps<"/blog/[slug]">)
           {article.body.map((block, index) => (
             <Block key={index} block={block} order={order} />
           ))}
+          {articleVideos[article.slug] ? (
+            <section className="article-video" aria-labelledby="watch-title" data-reveal>
+              <h2 id="watch-title">Prefer to watch?</h2>
+              <YouTubeFacade video={articleVideos[article.slug]!} placement="article" />
+              <p className="small muted">
+                A public explainer from another publisher, chosen for its topic. Knowvia has no relationship with the
+                publisher. Where it differs from this guide or your policy wording, the wording and the cited rules apply.
+              </p>
+            </section>
+          ) : null}
           <h2 id="sources">Sources</h2>
           <ol className="source-list">
             {order.map((id) => (
