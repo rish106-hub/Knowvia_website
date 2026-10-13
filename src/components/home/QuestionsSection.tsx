@@ -22,7 +22,7 @@ export function QuestionsSection({ v }: { v: Any }) {
               {"Write to us. A person replies, not a bot."}
             </p>
             <a className="kv-light" href={`mailto:${site.contactEmail}`} style={{alignSelf: "flex-start", display: "inline-flex", alignItems: "center", height: "44px", padding: "0 18px", borderRadius: "999px", background: "#FFFFFF", color: "#176F69", fontSize: "16px", fontWeight: "700", textDecoration: "none"}}>
-              {""}{site.contactEmail}{""}
+              {"Write to us"}
             </a>
           </div>
         </div>

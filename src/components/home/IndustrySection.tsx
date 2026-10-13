@@ -20,41 +20,41 @@ export function IndustrySection({ v }: { v: Any }) {
           <p style={{margin: "0", fontSize: "15px", fontWeight: "600", letterSpacing: "0.01em", color: "#C8E6A0"}}>
             {"Across India, not just in our research"}
           </p>
-          <h2 id="industry-h" style={{margin: "0", fontFamily: "var(--font-display), 'Iowan Old Style', Georgia, serif", fontWeight: "400", fontSize: "clamp(36px,4vw,60px)", lineHeight: "1.04", letterSpacing: "-0.02em", color: "#FFFFFF", maxWidth: "14ch"}}>
+          <h2 id="industry-h" style={{margin: "0", fontFamily: "var(--font-display), 'Iowan Old Style', Georgia, serif", fontWeight: "400", fontSize: "clamp(34px,3.6vw,52px)", lineHeight: "1.08", letterSpacing: "-0.015em", color: "#FFFFFF", maxWidth: "18ch", textWrap: "balance"}}>
             {"This keeps happening to families."}
           </h2>
         </div>
       </div>
       {" "}
-      <div style={{position: "relative", maxWidth: "1200px", margin: "0 auto 40px", padding: "0 clamp(20px,5vw,80px)", boxSizing: "border-box"}}>
-        <div style={{background: "#FFFFFF", borderRadius: "20px", padding: "18px clamp(18px,2.4vw,32px) 20px", display: "flex", flexDirection: "column", gap: "12px", boxShadow: "0 18px 44px rgba(0,0,0,0.18)"}}>
-          <p style={{margin: "0", fontSize: "12px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#55696D"}}>
+      <div style={{position: "relative", maxWidth: "1200px", margin: "0 auto 40px", padding: "0 clamp(20px,5vw,80px)"}}>
+        <div style={{borderTop: "1px solid rgba(168,220,203,0.28)", borderBottom: "1px solid rgba(168,220,203,0.28)", padding: "18px 0 20px", display: "flex", flexDirection: "column", gap: "14px"}}>
+          <p style={{margin: "0", fontSize: "12px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#A8DCCB"}}>
             {"Where these numbers come from"}
           </p>
-          <ul aria-label="Data sources" style={{listStyle: "none", margin: "0", padding: "0", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "14px 20px"}}>
+          <ul aria-label="Data sources" style={{listStyle: "none", margin: "0", padding: "0", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "14px 28px"}}>
             <li>
               <a className="kv-src" href="https://www.moneylife.in/article/health-insurance-claims-worth-rs2603765-crore-rejected-by-insurers-in-fy2324-govt/76282.html" style={{display: "block", borderRadius: "10px", padding: "4px"}}>
-                <img className="kv-srclogo" src="/logos/lok-sabha.png" alt="Lok Sabha, Parliament of India" style={{display: "block", height: "44px", width: "auto"}} />
+                <img className="kv-srclogo" src="/logos/lok-sabha.png" alt="Lok Sabha, Parliament of India" style={{display: "block", height: "44px", width: "auto", filter: "brightness(0) invert(1)", opacity: "0.9"}} />
               </a>
             </li>
             <li>
               <a className="kv-src" href="https://www.moneylife.in/article/health-insurance-claims-worth-rs2603765-crore-rejected-by-insurers-in-fy2324-govt/76282.html" style={{display: "block", borderRadius: "10px", padding: "4px"}}>
-                <img className="kv-srclogo" src="/logos/ministry-of-finance.png" alt="Ministry of Finance, Government of India" style={{display: "block", height: "44px", width: "auto"}} />
+                <img className="kv-srclogo" src="/logos/ministry-of-finance.png" alt="Ministry of Finance, Government of India" style={{display: "block", height: "44px", width: "auto", filter: "brightness(0) invert(1)", opacity: "0.9"}} />
               </a>
             </li>
             <li>
               <a className="kv-src" href="https://www.moneylife.in/article/health-insurance-claims-worth-rs2603765-crore-rejected-by-insurers-in-fy2324-govt/76282.html" style={{display: "block", borderRadius: "10px", padding: "4px"}}>
-                <img className="kv-srclogo" src="/logos/irdai.png" alt="Insurance Regulatory and Development Authority of India (IRDAI)" style={{display: "block", height: "36px", width: "auto"}} />
+                <img className="kv-srclogo" src="/logos/irdai.png" alt="Insurance Regulatory and Development Authority of India (IRDAI)" style={{display: "block", height: "36px", width: "auto", filter: "brightness(0) invert(1)", opacity: "0.9"}} />
               </a>
             </li>
             <li>
               <a className="kv-src" href="https://www.pib.gov.in/PressReleasePage.aspx?PRID=2265816&lang=1&reg=3" style={{display: "block", borderRadius: "10px", padding: "4px"}}>
-                <img className="kv-srclogo" src="/logos/ministry-of-health.png" alt="Ministry of Health and Family Welfare, Government of India" style={{display: "block", height: "40px", width: "auto"}} />
+                <img className="kv-srclogo" src="/logos/ministry-of-health.png" alt="Ministry of Health and Family Welfare, Government of India" style={{display: "block", height: "40px", width: "auto", filter: "brightness(0) invert(1)", opacity: "0.9"}} />
               </a>
             </li>
             <li>
               <a className="kv-src" href="https://www.localcircles.com/a/press/page/health-insurance-claim-survey" style={{display: "block", borderRadius: "10px", padding: "4px"}}>
-                <img className="kv-srclogo" src="/logos/localcircles.png" alt="LocalCircles" style={{display: "block", height: "30px", width: "auto"}} />
+                <img className="kv-srclogo" src="/logos/localcircles.png" alt="LocalCircles" style={{display: "block", height: "30px", width: "auto", filter: "brightness(0) invert(1)", opacity: "0.9"}} />
               </a>
             </li>
           </ul>
@@ -62,7 +62,7 @@ export function IndustrySection({ v }: { v: Any }) {
       </div>
       {" "}
       <div style={{position: "relative"}}>
-        <div id="stats-track" className="kv-hscroll" tabIndex={0} role="region" aria-label="Industry numbers. Scroll sideways for more." style={{display: "flex", gap: "24px", overflowX: "auto", scrollSnapType: "x mandatory", scrollPaddingLeft: "clamp(20px,5vw,80px)", padding: "4px clamp(20px,5vw,80px) 24px", WebkitOverflowScrolling: "touch"}}>
+        <div id="stats-track" className="kv-hscroll" tabIndex={0} role="region" aria-label="Industry numbers. Scroll sideways for more." style={{display: "flex", gap: "24px", overflowX: "auto", scrollSnapType: "x mandatory", scrollPaddingLeft: "max(clamp(20px,5vw,80px),calc((100% - 1200px) / 2))", padding: "4px max(clamp(20px,5vw,80px),calc((100% - 1200px) / 2)) 24px", WebkitOverflowScrolling: "touch"}}>
           <article className="kv-tile" style={{scrollSnapAlign: "start", flex: "0 0 auto", width: "min(480px,84vw)", boxSizing: "border-box", borderRadius: "24px", padding: "clamp(26px,3vw,40px)", display: "flex", flexDirection: "column", gap: "16px", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(168,220,203,0.32)"}}>
             <p style={{margin: "0", fontFamily: "var(--font-display), 'Iowan Old Style', Georgia, serif", fontWeight: "400", fontSize: "clamp(76px,8vw,128px)", lineHeight: "0.9", letterSpacing: "-0.03em", color: "#C8E6A0", fontVariantNumeric: "tabular-nums"}}>
               {v.n.claims}
@@ -84,12 +84,12 @@ export function IndustrySection({ v }: { v: Any }) {
                 </Fragment>
               ))}
             </div>
-            <div style={{marginTop: "auto", display: "flex", flexDirection: "column", gap: "10px", background: "#FFFFFF", borderRadius: "16px", padding: "14px 18px", boxShadow: "0 6px 18px rgba(15,74,58,0.12)"}}>
-              <span style={{fontSize: "12px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#55696D"}}>
+            <div style={{marginTop: "auto", display: "flex", flexDirection: "column", gap: "10px", borderTop: "1px solid rgba(168,220,203,0.28)", paddingTop: "16px"}}>
+              <span style={{fontSize: "12px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#A8DCCB"}}>
                 {"Source"}
               </span>
               <div style={{display: "flex", flexWrap: "wrap", alignItems: "center", gap: "12px 22px"}}>
-                <img src="/logos/localcircles.png" alt="LocalCircles" style={{display: "block", height: "26px", width: "auto"}} />
+                <img src="/logos/localcircles.png" alt="LocalCircles" style={{display: "block", height: "22px", width: "auto", filter: "brightness(0) invert(1)", opacity: "0.9"}} />
               </div>
             </div>
             <p style={{margin: "0", fontSize: "15px", lineHeight: "1.45", color: "#A8DCCB"}}>
@@ -117,14 +117,14 @@ export function IndustrySection({ v }: { v: Any }) {
                 </span>
               </div>
             </div>
-            <div style={{marginTop: "auto", display: "flex", flexDirection: "column", gap: "10px", background: "#FFFFFF", borderRadius: "16px", padding: "14px 18px", boxShadow: "0 6px 18px rgba(15,74,58,0.12)"}}>
-              <span style={{fontSize: "12px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#55696D"}}>
+            <div style={{marginTop: "auto", display: "flex", flexDirection: "column", gap: "10px", borderTop: "1px solid rgba(15,74,58,0.18)", paddingTop: "16px"}}>
+              <span style={{fontSize: "12px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#2E6B4A"}}>
                 {"Sources"}
               </span>
               <div style={{display: "flex", flexWrap: "wrap", alignItems: "center", gap: "12px 22px"}}>
-                <img src="/logos/ministry-of-finance.png" alt="Ministry of Finance, Government of India" style={{display: "block", height: "38px", width: "auto"}} />
-                <img src="/logos/lok-sabha.png" alt="Lok Sabha, Parliament of India" style={{display: "block", height: "38px", width: "auto"}} />
-                <img src="/logos/irdai.png" alt="Insurance Regulatory and Development Authority of India (IRDAI)" style={{display: "block", height: "34px", width: "auto"}} />
+                <img src="/logos/ministry-of-finance.png" alt="Ministry of Finance, Government of India" style={{display: "block", height: "34px", width: "auto", filter: "brightness(0)", opacity: "0.72"}} />
+                <img src="/logos/lok-sabha.png" alt="Lok Sabha, Parliament of India" style={{display: "block", height: "34px", width: "auto", filter: "brightness(0)", opacity: "0.72"}} />
+                <img src="/logos/irdai.png" alt="Insurance Regulatory and Development Authority of India (IRDAI)" style={{display: "block", height: "30px", width: "auto", filter: "brightness(0)", opacity: "0.72"}} />
               </div>
             </div>
             <p style={{margin: "0", fontSize: "15px", lineHeight: "1.45", color: "#2E6B4A"}}>
@@ -161,13 +161,13 @@ export function IndustrySection({ v }: { v: Any }) {
                 </span>
               </div>
             </div>
-            <div style={{marginTop: "auto", display: "flex", flexDirection: "column", gap: "10px", background: "#FFFFFF", borderRadius: "16px", padding: "14px 18px", boxShadow: "0 6px 18px rgba(15,74,58,0.12)"}}>
-              <span style={{fontSize: "12px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#55696D"}}>
+            <div style={{marginTop: "auto", display: "flex", flexDirection: "column", gap: "10px", borderTop: "1px solid rgba(15,74,58,0.18)", paddingTop: "16px"}}>
+              <span style={{fontSize: "12px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#2E6B4A"}}>
                 {"Sources"}
               </span>
               <div style={{display: "flex", flexWrap: "wrap", alignItems: "center", gap: "12px 22px"}}>
-                <img src="/logos/localcircles.png" alt="LocalCircles" style={{display: "block", height: "26px", width: "auto"}} />
-                <img src="/logos/irdai.png" alt="Insurance Regulatory and Development Authority of India (IRDAI)" style={{display: "block", height: "34px", width: "auto"}} />
+                <img src="/logos/localcircles.png" alt="LocalCircles" style={{display: "block", height: "22px", width: "auto", filter: "brightness(0)", opacity: "0.72"}} />
+                <img src="/logos/irdai.png" alt="Insurance Regulatory and Development Authority of India (IRDAI)" style={{display: "block", height: "30px", width: "auto", filter: "brightness(0)", opacity: "0.72"}} />
               </div>
             </div>
             <p style={{margin: "0", fontSize: "15px", lineHeight: "1.45", color: "#163F42"}}>
@@ -188,12 +188,12 @@ export function IndustrySection({ v }: { v: Any }) {
                 </Fragment>
               ))}
             </div>
-            <div style={{marginTop: "auto", display: "flex", flexDirection: "column", gap: "10px", background: "#FFFFFF", borderRadius: "16px", padding: "14px 18px", boxShadow: "0 6px 18px rgba(15,74,58,0.12)"}}>
-              <span style={{fontSize: "12px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#55696D"}}>
+            <div style={{marginTop: "auto", display: "flex", flexDirection: "column", gap: "10px", borderTop: "1px solid rgba(168,220,203,0.28)", paddingTop: "16px"}}>
+              <span style={{fontSize: "12px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#A8DCCB"}}>
                 {"Source"}
               </span>
               <div style={{display: "flex", flexWrap: "wrap", alignItems: "center", gap: "12px 22px"}}>
-                <img src="/logos/ministry-of-health.png" alt="Ministry of Health and Family Welfare, Government of India" style={{display: "block", height: "38px", width: "auto"}} />
+                <img src="/logos/ministry-of-health.png" alt="Ministry of Health and Family Welfare, Government of India" style={{display: "block", height: "34px", width: "auto", filter: "brightness(0) invert(1)", opacity: "0.9"}} />
               </div>
             </div>
             <p style={{margin: "0", fontSize: "15px", lineHeight: "1.45", color: "#A8DCCB"}}>
@@ -222,7 +222,7 @@ export function IndustrySection({ v }: { v: Any }) {
         </div>
       </div>
       {" "}
-      <p style={{position: "relative", maxWidth: "1200px", margin: "48px auto 0", padding: "0 clamp(20px,5vw,80px)", boxSizing: "border-box", fontSize: "clamp(19px,1.6vw,23px)", lineHeight: "1.5", color: "#FFFFFF"}}>
+      <p style={{position: "relative", maxWidth: "1200px", margin: "48px auto 0", padding: "0 clamp(20px,5vw,80px)", fontSize: "clamp(19px,1.6vw,23px)", lineHeight: "1.5", color: "#FFFFFF"}}>
         {"Knowvia cannot overrule an insurer. "}
         <strong style={{fontWeight: "700", color: "#C8E6A0"}}>
           {"It changes the part you control:"}

@@ -7,12 +7,12 @@ import { type Any } from "@/lib/dc";
 export function ClauseBand({ v }: { v: Any }) {
   return (
     <>
-    <section aria-labelledby="terms-h" style={{background: "#DDF0DC", padding: "clamp(48px,6vw,72px) 0", overflow: "hidden"}}>
-      <div style={{maxWidth: "1200px", margin: "0 auto clamp(24px,3vw,36px)", padding: "0 clamp(20px,5vw,80px)", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-end", gap: "16px 48px"}}>
-        <h2 id="terms-h" style={{margin: "0", fontFamily: "var(--font-display), 'Iowan Old Style', Georgia, serif", fontWeight: "400", fontSize: "clamp(30px,3vw,42px)", lineHeight: "1.12", letterSpacing: "-0.01em", color: "#0F4A3A", maxWidth: "18ch"}}>
+    <section aria-labelledby="terms-h" style={{background: "#DDF0DC", padding: "clamp(56px,7vw,96px) 0", overflow: "hidden"}}>
+      <div style={{maxWidth: "1200px", margin: "0 auto clamp(28px,3vw,40px)", padding: "0 clamp(20px,5vw,80px)", display: "flex", flexDirection: "column", gap: "16px"}}>
+        <h2 id="terms-h" style={{margin: "0", fontFamily: "var(--font-display), 'Iowan Old Style', Georgia, serif", fontWeight: "400", fontSize: "clamp(34px,3.6vw,52px)", lineHeight: "1.08", letterSpacing: "-0.015em", color: "#0F4A3A", maxWidth: "20ch", textWrap: "balance"}}>
           {"Every clause that decides your bill."}
         </h2>
-        <p style={{margin: "0", fontSize: "clamp(17px,1.35vw,19px)", lineHeight: "1.6", maxWidth: "44ch", color: "#1A3034"}}>
+        <p style={{margin: "0", fontSize: "clamp(19px,1.46vw,21px)", lineHeight: "1.5", maxWidth: "44ch", color: "#1A3034"}}>
           {"Built only for health cover. We explain each of these in plain words, with the page it sits on."}
         </p>
       </div>

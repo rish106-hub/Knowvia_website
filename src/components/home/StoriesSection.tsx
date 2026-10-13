@@ -14,7 +14,7 @@ export function StoriesSection({ v }: { v: Any }) {
             {"Four details hid in plain sight."}
           </h2>
           <p style={{margin: "0", fontSize: "clamp(19px,1.46vw,21px)", lineHeight: "1.5", maxWidth: "40ch"}}>
-            {"Each one was in a health policy the family already had."}
+            {"We spoke with more than 50 people across Tier 1, 2 and 3 cities. Each of these was in a health policy the family already had."}
           </p>
         </div>
         <div style={{display: "flex", flexWrap: "wrap", gap: "24px"}}>
