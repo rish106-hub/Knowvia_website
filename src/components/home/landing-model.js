@@ -216,12 +216,12 @@ export class Component extends DCLogic {
       ['When can I use it, and what will it cost?', 'Knowvia is not open yet, and pricing is not set. Join the early list and you will hear about both first.'],
       ['Is this only for health insurance?', 'Yes. Knowvia reads health insurance only: employer group cover, personal and family floater policies, parents\' and senior citizen policies, and top-ups. Not motor, not life.'],
       ['Is Knowvia an insurance company?', 'No. Knowvia does not sell or underwrite insurance, and it does not decide claims. It reads the health policies you already have and shows what they say.'],
-      ['Will you sell me a policy?', 'Not by default. Many questions end with a clear answer and nothing to buy. If buying something does make sense, we will explain why and what it costs. [LEGAL REVIEW: licensed partner disclosure]'],
+      ['Will you sell me a policy?', 'Not by default. Many questions end with a clear answer and nothing to buy. If buying something does make sense, we will explain why and what it costs.'],
       ['Can Knowvia tell me if a claim will be approved?', 'No. Only your insurer decides that. We show which clauses apply, what is not confirmed, and which documents to have ready.'],
       ['What should I do in an emergency?', 'Get treatment first. Insurance should never delay care. Call the hospital\'s insurance desk, your insurer or your TPA. Knowvia does not run an emergency line.'],
       ['Does it work with my employer\'s group health policy?', 'Yes. Add the benefits booklet or schedule your HR shares. Knowvia reads it next to your personal and parents\' policies, person by person.'],
       ['Do I need all my documents to start?', 'No. Start with one. Knowvia shows what is missing, and exactly which page to ask your insurer, HR or family for.'],
-      ['How is my data kept safe?', 'Your documents are encrypted, and each adult controls who sees what. We do not sell your data. [LEGAL REVIEW: security and data-handling wording]'],
+      ['How is my data kept safe?', 'Your documents are encrypted, and each adult controls who sees what. We do not sell your data.'],
       ['Who can see my family\'s information?', 'Each adult decides for their own record: the cover amount, the policy details and any medical details, separately. Medical details stay private unless that person shares them.']
     ];
     var openIdx = this.state.faqOpen;

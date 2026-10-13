@@ -49,9 +49,9 @@ export function SiteFooter() {
             <p style={{margin: "0 0 4px", fontSize: "15px", fontWeight: "600", color: "#FFFFFF"}}>
               {"Contact"}
             </p>
-            <span>
-              {""}{site.contactEmail}{""}
-            </span>
+            <a className="kv-foot-link" href={`mailto:${site.contactEmail}`}>
+              {"Write to us"}
+            </a>
           </div>
           <nav aria-label="Legal" style={{flex: "1 1 160px", display: "flex", flexDirection: "column", gap: "12px", fontSize: "16px"}}>
             <p style={{margin: "0 0 4px", fontSize: "15px", fontWeight: "600", color: "#FFFFFF"}}>
@@ -77,7 +77,7 @@ export function SiteFooter() {
             {"Knowvia is not an insurer, broker or TPA, and does not decide claims."}
           </p>
           <p style={{margin: "0"}}>
-            {"Where our numbers come from: recorded conversations with seven family members and one hospital insurance-desk executive, 5 to 8 September 2026. They took place in Kolkata, Bengaluru, Pune, Mumbai and Delhi NCR. Names are withheld. Figures are what people told us and what their documents showed. They are examples, not averages."}
+            {"Where our numbers come from: more than 50 recorded conversations with people in Delhi, Mumbai, Bengaluru, Chennai and many other Tier 1, 2 and 3 cities across India. Names are withheld. Figures are what people told us and what their documents showed. They are examples, not averages."}
           </p>
           <p style={{margin: "0"}}>
             {"© 2026 Knowvia"}
