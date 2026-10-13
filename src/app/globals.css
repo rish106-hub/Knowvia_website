@@ -1,3 +1,4 @@
+/* Styles for pages outside the approved canvas (legal, partners, 404) and the consent banner. The canvas pages use design.css and inline styles. */
 :root {
   --tide: #163f42;
   --tide-deep: #0b383b;
@@ -23,17 +24,18 @@
   --content: 1200px;
 }
 
-* { box-sizing: border-box; }
+.legacy, .legacy *, .consent-banner, .consent-banner * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-body { margin: 0; background: var(--mist); color: var(--ink); font-family: var(--font-body), sans-serif; font-size: 18px; line-height: 1.55; }
-a { color: inherit; }
-button, input { font: inherit; }
+body { margin: 0; background: var(--mist); color: var(--ink); font-family: var(--font-body), sans-serif; }
+.legacy, .consent-banner { font-size: 18px; line-height: 1.55; }
+.legacy a { color: inherit; }
+.legacy button, .legacy input, .consent-banner button { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
-img { max-width: 100%; }
-h1, h2 { font-family: var(--font-display), Georgia, serif; font-weight: 400; color: var(--tide); letter-spacing: -0.02em; line-height: 1.04; text-wrap: balance; }
-h1 { font-size: clamp(3rem, 5.4vw, 4.875rem); }
-h2 { font-size: clamp(2.3rem, 4vw, 3.75rem); }
-p { margin: 0; }
+.legacy img { max-width: 100%; }
+.legacy h1, .legacy h2 { font-family: var(--font-display), Georgia, serif; font-weight: 400; color: var(--tide); letter-spacing: -0.02em; line-height: 1.04; text-wrap: balance; }
+.legacy h1 { font-size: clamp(3rem, 5.4vw, 4.875rem); }
+.legacy h2 { font-size: clamp(2.3rem, 4vw, 3.75rem); }
+.legacy p { margin: 0; }
 :focus-visible { outline: 2px solid var(--tide); outline-offset: 2px; box-shadow: 0 0 0 5px var(--gold) !important; }
 .skip-link { position: fixed; left: -999px; top: 16px; z-index: 100; padding: 10px 16px; border-radius: 10px; background: white; }
 .skip-link:focus { left: 16px; }
@@ -232,3 +234,5 @@ p { margin: 0; }
   .consent-banner { align-items: stretch; flex-direction: column; }.consent-banner > div { justify-content: space-between; }
   .matrix-grid, .partner-model { grid-template-columns: 1fr; }.matrix-heading { margin-top: 44px; }
 }
+.legacy a.button { color: white; }
+.legacy a.button-light { color: var(--harbour); }
