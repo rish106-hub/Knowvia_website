@@ -1,0 +1,25 @@
+src/app/privacy/page.tsx
+  s_35ef668df0a2e9::t_1347338ffcaafc 4-108,110-119,121,123-177,179-202,204-225
+  s_35ef668df0a2e9::t_57c1c42f3eb026 109,120,122,178,203
+src/app/globals.css
+  s_35ef668df0a2e9::t_1cd6b9feeb92b9 207-211
+src/app/terms/page.tsx
+  s_35ef668df0a2e9::t_57c1c42f3eb026 66,117,119,165,172,215-216
+  s_35ef668df0a2e9::t_9d40ee785323dd 2,5-65,67-116,118,120-164,166-171,173-214,217-254
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f0166f553a7b76eb4bf4ec7a28a1ab4111fe0758",
+  "prompts": {},
+  "sessions": {
+    "s_35ef668df0a2e9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1355f-c22b-7bd2-b903-ff57f53d7667",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
