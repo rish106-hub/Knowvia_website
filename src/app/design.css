@@ -1,0 +1,75 @@
+/* Generated from the approved Claude Design artboard Main.dc.html (helmet styles). */
+body{margin:0;background:#F3F7F6}
+a{color:#176F69}a:hover{color:#125A55}
+:focus-visible{outline:2px solid #163F42;outline-offset:2px;box-shadow:0 0 0 5px #E0A02B !important}
+.kv-skip{position:absolute;left:-9999px;top:0}
+.kv-skip:focus{left:16px;top:16px;z-index:40;background:#FFFFFF;color:#163F42;padding:12px 16px;border-radius:10px;font-weight:600}
+.kv-nav{position:sticky;top:0;z-index:30;background:rgba(243,247,246,0.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.kv-nav-link{position:relative;color:#1A3034;text-decoration:none;padding:6px 0}
+.kv-nav-link::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:2px;background:#163F42;transform:scaleX(0);transform-origin:left;transition:transform 240ms cubic-bezier(0.165,0.84,0.44,1)}
+.kv-nav-link:hover{color:#163F42}.kv-nav-link:hover::after{transform:scaleX(1)}
+.kv-btn{transition:background-color 180ms ease-out,transform 180ms ease-out,box-shadow 180ms ease-out}
+.kv-btn:hover{background:#125A55 !important;transform:translateY(-1px);box-shadow:0 10px 24px rgba(18,90,85,0.24)}
+.kv-btn:active{transform:translateY(1px);box-shadow:none}
+.kv-out{transition:background-color 180ms ease-out}
+.kv-out:hover{background:#E3F0EE !important}
+.kv-light{transition:background-color 180ms ease-out,transform 180ms ease-out,box-shadow 180ms ease-out}
+.kv-light:hover{background:#E3F0EE !important;transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,0.22)}
+.kv-light-link:hover{color:#C8E6A0 !important}
+.kv-chip-opt{transition:background-color 180ms ease-out,border-color 180ms ease-out}
+.kv-chip-opt:hover{border-color:#176F69 !important}
+.kv-rec::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid #176F69;animation:kvPulse 1.6s ease-out infinite}
+@keyframes kvBar{0%,100%{transform:scaleY(0.3)}50%{transform:scaleY(1)}}
+.kv-foot-link{position:relative;color:#C9DDD9;text-decoration:none;align-self:flex-start}
+.kv-foot-link::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:1px;background:#FFFFFF;transform:scaleX(0);transform-origin:left;transition:transform 240ms cubic-bezier(0.165,0.84,0.44,1)}
+.kv-foot-link:hover{color:#FFFFFF}.kv-foot-link:hover::after{transform:scaleX(1)}
+.kv-tile{transition:transform 240ms cubic-bezier(0.165,0.84,0.44,1),box-shadow 240ms ease-out}
+.kv-tile:hover{transform:translateY(-4px);box-shadow:0 18px 50px rgba(22,62,54,0.12)}
+.kv-march{background-image:linear-gradient(90deg,#7A5207 50%,transparent 0),linear-gradient(90deg,#7A5207 50%,transparent 0),linear-gradient(0deg,#7A5207 50%,transparent 0),linear-gradient(0deg,#7A5207 50%,transparent 0);background-repeat:repeat-x,repeat-x,repeat-y,repeat-y;background-size:14px 2px,14px 2px,2px 14px,2px 14px;background-position:0 0,0 100%,0 0,100% 0}
+.kv-march:hover{animation:kvMarch 900ms linear infinite}
+.kv-marquee{display:flex;gap:0;width:max-content;animation:kvScroll 26s linear infinite;will-change:transform}
+.kv-hscroll{scrollbar-width:none}.kv-hscroll::-webkit-scrollbar{display:none}
+.kv-src{display:block;transition:transform 180ms ease-out,box-shadow 180ms ease-out}
+.kv-src:hover{transform:translateY(-2px);box-shadow:0 0 0 2px #C8E6A0}
+.kv-overhang{margin-bottom:-64px}
+.kv-strike{background-image:linear-gradient(#2E6B4A,#2E6B4A);background-repeat:no-repeat;background-position:0 58%;background-size:100% 0.07em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.kv-refuse{transition:padding-left 300ms cubic-bezier(0.165,0.84,0.44,1)}
+.kv-refuse:hover{padding-left:12px}
+.kv-refuse:hover .kv-strike-text{color:#163F42}
+.kv-pulse{position:relative}
+.kv-pulse::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid #176F69;animation:kvPulse 2.4s ease-out infinite}
+@keyframes kvIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes kvFade{from{opacity:0}to{opacity:1}}
+@keyframes kvLine{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes kvDrop{from{opacity:0;transform:scale(0.4)}to{opacity:1;transform:scale(1)}}
+@keyframes kvLoad{to{background-position:-200% 0}}
+@keyframes kvPage{from{opacity:0;transform:translate(24px,16px) rotate(0deg)}to{opacity:1;transform:rotate(3deg)}}
+@keyframes kvHighlight{from{background-size:0% 100%}to{background-size:100% 100%}}
+@keyframes kvScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes kvMarch{to{background-position:14px 0,-14px 100%,0 -14px,100% 14px}}
+@keyframes kvPulse{from{opacity:0.8;transform:scale(0.6)}to{opacity:0;transform:scale(1.8)}}
+@keyframes kvGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes kvSlideL{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
+@keyframes kvSlideR{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+@keyframes kvRedact{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes kvUnlock{0%{transform:none}60%{transform:translateY(-4px) rotate(-28deg)}100%{transform:translateY(-3px) rotate(-24deg)}}
+@keyframes kvReveal{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes kvShake{0%,100%{transform:none}25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
+@keyframes kvStrike{from{background-size:0% 0.07em}to{background-size:100% 0.07em}}
+@keyframes kvMark{from{background-size:0% 0.26em}to{background-size:100% 0.26em}}
+@keyframes kvPop{from{opacity:0;transform:scale(0.6)}to{opacity:1;transform:scale(1)}}
+@keyframes kvRise{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+@supports (animation-timeline: view()){
+.kv-strike{animation:kvStrike linear both;animation-timeline:view();animation-range:entry 30% cover 45%}
+.kv-grow{transform-origin:left;animation:kvGrow linear both;animation-timeline:view();animation-range:entry 10% cover 35%}
+.kv-rise{animation:kvRise linear both;animation-timeline:view();animation-range:entry 0% entry 60%}
+}
+@supports (animation-timeline: scroll()){
+.kv-nav{animation:kvNavSolid linear both;animation-timeline:scroll(root);animation-range:0 160px}
+@keyframes kvNavSolid{from{background:rgba(243,247,246,0.6);box-shadow:none}to{background:rgba(255,255,255,0.9);box-shadow:0 1px 0 #CFDCDA,0 12px 30px rgba(22,62,54,0.08)}}
+}
+.kv-mobile{display:none}
+@media (max-width:760px){.kv-desktop{display:none !important}.kv-mobile{display:block}.kv-overhang{margin-bottom:0}.kv-hero-btn{flex:1 1 100% !important;height:56px !important}.kv-hero-art{min-height:600px !important}.kv-win{top:0 !important;margin-top:12px}.kv-srclogo{height:32px !important}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none !important;animation:none !important}.kv-marquee{flex-wrap:wrap;width:auto}.kv-dup{display:none !important}}
+.kv-only-mobile{display:none}
+@media (max-width:760px){.kv-only-mobile{display:block}.kv-only-desktop{display:none}}

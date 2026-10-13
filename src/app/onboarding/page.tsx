@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
-import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
+import { OnboardingStart } from "@/components/onboarding/OnboardingStart";
 
-export const metadata: Metadata = { title: "Add your health cover", description: "See how Knowvia reads your family’s health policies." };
-export default function OnboardingPage() { return <OnboardingFlow />; }
+export const metadata: Metadata = { title: "Start with your own cover | Onboarding preview", robots: { index: false, follow: false } };
+
+export default function Page() {
+  return <OnboardingStart />;
+}

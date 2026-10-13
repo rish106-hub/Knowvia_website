@@ -3,8 +3,9 @@ import { Newsreader, Source_Sans_3 } from "next/font/google";
 import { ConsentAnalytics } from "@/components/analytics/ConsentAnalytics";
 import { site } from "@/lib/site";
 import "./globals.css";
+import "./design.css";
 
-const newsreader = Newsreader({ subsets: ["latin"], variable: "--font-display", display: "swap" });
+const newsreader = Newsreader({ subsets: ["latin"], style: ["normal", "italic"], axes: ["opsz"], variable: "--font-display", display: "swap" });
 const sourceSans = Source_Sans_3({ subsets: ["latin"], variable: "--font-body", display: "swap" });
 
 export const metadata: Metadata = {

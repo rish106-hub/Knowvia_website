@@ -4,7 +4,9 @@ import { z } from "zod";
 
 const waitlistSchema = z.object({
   email: z.email().max(320),
-  events: z.union([z.string(), z.array(z.string())]).optional(),
+  name: z.string().trim().max(80).optional(),
+  events: z.union([z.string(), z.array(z.string().max(80)).max(10)]).optional(),
+  policies: z.union([z.string(), z.array(z.string().max(80)).max(10)]).optional(),
   location: z.enum(["hero", "closing"]),
   company_website: z.string().max(0).optional().default(""),
   utm_source: z.string().max(120).optional(),
@@ -51,12 +53,15 @@ async function saveLead(input: WaitlistInput) {
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   )`);
-  const events = input.events ? (Array.isArray(input.events) ? input.events : [input.events]) : [];
+  await pool.query(`ALTER TABLE knowvia_waitlist ADD COLUMN IF NOT EXISTS first_name TEXT, ADD COLUMN IF NOT EXISTS policies TEXT[] NOT NULL DEFAULT '{}'`);
+  const asList = (value: string | string[] | undefined) => (value ? (Array.isArray(value) ? value : [value]) : []);
+  const events = asList(input.events);
+  const policies = asList(input.policies);
   const attribution = { utm_source: input.utm_source, utm_medium: input.utm_medium, utm_campaign: input.utm_campaign, utm_content: input.utm_content, utm_term: input.utm_term, gclid: input.gclid, fbclid: input.fbclid };
-  await pool.query(`INSERT INTO knowvia_waitlist (email, events, signup_location, attribution)
-    VALUES ($1, $2, $3, $4)
-    ON CONFLICT (email) DO UPDATE SET events = EXCLUDED.events, signup_location = EXCLUDED.signup_location, attribution = EXCLUDED.attribution, updated_at = NOW()`,
-    [input.email.toLowerCase(), events, input.location, JSON.stringify(attribution)]);
+  await pool.query(`INSERT INTO knowvia_waitlist (email, first_name, events, policies, signup_location, attribution)
+    VALUES ($1, $2, $3, $4, $5, $6)
+    ON CONFLICT (email) DO UPDATE SET first_name = COALESCE(EXCLUDED.first_name, knowvia_waitlist.first_name), events = EXCLUDED.events, policies = EXCLUDED.policies, signup_location = EXCLUDED.signup_location, attribution = EXCLUDED.attribution, updated_at = NOW()`,
+    [input.email.toLowerCase(), input.name || null, events, policies, input.location, JSON.stringify(attribution)]);
 }
 
 export async function POST(request: Request) {
