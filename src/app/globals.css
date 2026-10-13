@@ -204,6 +204,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
 /* Supporting pages */
 .partner-page { padding: 0 max(20px,calc((100vw - var(--content))/2)) 100px; }.partner-page > section:first-child { max-width: 850px; padding: 110px 0 80px; }.partner-page h1 { max-width: 12ch; margin: 12px 0 24px; }.partner-page > section:first-child p { max-width: 58ch; margin-bottom: 28px; font-size: 21px; }.partner-model { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }.partner-model article { padding: 30px; border-radius: 20px; background: white; }.partner-model span { color: var(--harbour); font-family: var(--font-display); font-size: 28px; }.partner-model h2 { font-family: var(--font-body); font-size: 23px; font-weight: 700; letter-spacing: 0; }.partner-page aside { margin: 24px 0 40px; padding: 30px; border-radius: 20px; background: var(--tide); color: white; }.partner-page aside strong { color: var(--lime); }.partner-page .text-link { color: var(--harbour); font-weight: 700; }.legal-page { padding: 80px 20px 120px; }.legal-page > header, .legal-page > article { max-width: 760px; margin: auto; }.legal-page > header { padding-bottom: 32px; border-bottom: 1px solid var(--fog); }.legal-page h1 { margin: 12px 0; }.legal-page header p { color: var(--slate); }.legal-page article h2 { margin: 48px 0 12px; font-family: var(--font-body); font-size: 24px; font-weight: 700; letter-spacing: 0; }.legal-page article p { line-height: 1.7; }.not-found { min-height: 100vh; display: grid; place-content: center; justify-items: start; padding: 30px; }.not-found > span { color: var(--harbour); font-weight: 800; }.not-found h1 { max-width: 9ch; margin: 10px 0 18px; }.not-found p { margin-bottom: 25px; color: var(--slate); }
 
+.legal-page article h3 { margin: 28px 0 8px; font-size: 18px; }
+.legal-page article li { line-height: 1.7; }
+.legal-page article ul { padding-left: 24px; }
+.legal-page article li + li { margin-top: 8px; }
+
 @keyframes mark { from { background-size: 0 .26em; } }
 @keyframes rise { from { opacity: 0; transform: translateY(24px); } }
 @keyframes page-in { from { opacity: 0; transform: rotate(1deg) translateY(-18px); } }
