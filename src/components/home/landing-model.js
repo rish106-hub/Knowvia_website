@@ -5,7 +5,7 @@ import { DCLogic } from "@/lib/dc-logic";
 export class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { faqOpen: 0, events: {}, policies: {} };
+    this.state = { faqOpen: 0, policies: {}, msOpen: false };
     this.timers = {};
     this.raf = {};
     this.done = {};
@@ -69,7 +69,6 @@ export class Component extends DCLogic {
     var reset = {};
     if (prev.heroFormState !== this.props.heroFormState) reset.heroState = null;
     if (prev.closingFormState !== this.props.closingFormState) reset.closeState = null;
-    if (prev.privacyViewer !== this.props.privacyViewer) reset.viewer = null;
     if (prev.mobileMenuOpen !== this.props.mobileMenuOpen) reset.menu = null;
     if (prev.closingMode !== this.props.closingMode) reset.mode = null;
     if (prev.closingVoiceState !== this.props.closingVoiceState) { reset.voice = null; reset.voiceSecs = null; }
@@ -133,11 +132,8 @@ export class Component extends DCLogic {
     var payload = { email: email, location: key === 'hero' ? 'hero' : 'closing', company_website: '' };
     ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'fbclid'].forEach(function (k) { var q = query.get(k); if (q) payload[k] = q; });
     if (key === 'close') {
-      var evLabels = ['A renewal', 'Planned treatment', 'A job change', 'Parents\' cover', 'Nothing yet, just getting organised'];
       var polLabels = ['Employer group cover', 'Family floater', 'Parents\' policy', 'Super top-up', 'Not sure'];
-      payload.events = evLabels.filter(function (l, i) { return !!self.state.events[i]; });
       payload.policies = polLabels.filter(function (l, i) { return !!self.state.policies[i]; });
-      if (self.state.closeName) payload.name = self.state.closeName;
     }
     var done = function (state, extra) { var d = {}; d[key + 'State'] = state; Object.assign(d, extra || {}); self.setState(d); };
     fetch('/api/waitlist', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) })
@@ -162,13 +158,19 @@ export class Component extends DCLogic {
   }
   renderVals() {
     var self = this;
-    var viewer = this.state.viewer || this.props.privacyViewer || 'family';
     var menuOpen = this.state.menu != null ? this.state.menu : !!this.props.mobileMenuOpen;
-    var seg = 'flex:1 1 0;min-height:44px;border:0;border-radius:9px;font:inherit;font-size:16px;font-weight:600;cursor:pointer;';
-    var on = seg + 'background:#FFFFFF;color:#163F42;box-shadow:inset 0 0 0 2px #163F42;';
-    var off = seg + 'background:transparent;color:#55696D;';
     var terms = ['Room rent limit', 'Co-pay', 'Waiting period', 'Sub-limit', 'Deductible', 'Network hospital', 'Pre-existing disease', 'Cashless claim', 'Portability', 'Restoration benefit', 'No-claim bonus', 'Day-care procedure'];
-    var termsLoop = terms.concat(terms).map(function (t, i) { return { label: t, hidden: i >= terms.length ? 'true' : 'false', cls: i >= terms.length ? 'kv-dup' : '' }; });
+    var tones = [['#0F4A3A', '#FFFFFF', '#0F4A3A'], ['#C8E6A0', '#0F4A3A', '#C8E6A0'], ['#FFFFFF', '#163F42', '#163F42'], ['#163F42', '#FFFFFF', '#163F42'], ['#CDEBE5', '#163F42', '#CDEBE5'], ['#A8DCCB', '#0F4A3A', '#A8DCCB']];
+    var tilts = [-2.5, 1.5, -1, 2.5, -1.5, 1, 2, -2, 0.5, -2.5, 1.5, -1];
+    var clauses = terms.map(function (t, i) {
+      var tone = tones[i % tones.length];
+      return {
+        label: t,
+        style: 'display:inline-flex;align-items:center;gap:12px;padding:12px 24px 13px 20px;border-radius:999px;font-family:var(--font-display,Newsreader),\'Iowan Old Style\',Georgia,serif;font-size:clamp(21px,2.1vw,30px);line-height:1.15;white-space:nowrap;' +
+          'background:' + tone[0] + ';color:' + tone[1] + ';border:1.5px solid ' + tone[2] + ';rotate:' + tilts[i] + 'deg;animation-range:entry ' + (4 + i * 2) + '% entry ' + (70 + i * 2) + '%',
+        markStyle: 'flex:0 0 auto;width:9px;height:9px;transform:rotate(45deg);background:currentColor;opacity:0.55'
+      };
+    });
     var oldWay = [
       ['Room rent', 'You learn the room limit when the bill arrives.'],
       ['Who is covered', 'You are not sure who is still on the family policy.'],
@@ -183,12 +185,13 @@ export class Component extends DCLogic {
       ['Leaving a job', 'The deadline to keep your cover is already on your page.'],
       ['Buying more', 'You see what the top-up adds, and what it does not.']
     ].map(function (r) { return { moment: r[0], text: r[1] }; });
+    var ways = oldWay.map(function (r, i) { return { moment: r.moment, old: r.text, new: newWay[i].text }; });
     var days = [];
     for (var d = 1; d <= 17; d++) {
       var last = d === 17;
       days.push({
         label: last ? '17' : '',
-        style: 'width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;' + (last ? 'background:#FBF1DD;border:2px dashed #7A5207;color:#7A5207;box-sizing:border-box;' : 'background:#163F42;opacity:' + (0.35 + d * 0.035).toFixed(2) + ';')
+        style: 'width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;' + (last ? 'background:#FBF1DD;border:2px dashed #7A5207;color:#7A5207;box-sizing:border-box;' : 'background:#163F42;opacity:' + (0.35 + d * 0.035).toFixed(2) + ';')
       });
     }
     var docs = [];
@@ -199,7 +202,7 @@ export class Component extends DCLogic {
     var people = [];
     for (var q = 0; q < 10; q++) {
       var hit = q < 4;
-      people.push({ fill: hit ? '#C8E6A0' : 'rgba(168,220,203,0.35)', style: 'animation:kvPop 360ms cubic-bezier(0.165,0.84,0.44,1) ' + (q * 60) + 'ms both' });
+      people.push({ fill: hit ? '#C8E6A0' : 'rgba(168,220,203,0.35)', style: 'flex:1 1 0;min-width:0;max-width:28px;height:auto;animation:kvPop 360ms cubic-bezier(0.165,0.84,0.44,1) ' + (q * 60) + 'ms both' });
     }
     var grid = [];
     for (var gi = 0; gi < 100; gi++) {
@@ -234,25 +237,28 @@ export class Component extends DCLogic {
         toggle: function () { self.setState({ faqOpen: open ? -1 : i }); }
       };
     });
-    var evLabels = ['A renewal', 'Planned treatment', 'A job change', 'Parents\' cover', 'Nothing yet, just getting organised'];
-    var chipBase = 'display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border-radius:999px;font:inherit;font-size:16px;font-weight:600;cursor:pointer;';
-    var events = evLabels.map(function (label, i) {
-      var isOn = !!self.state.events[i];
-      return {
-        label: label, isOn: isOn, on: isOn ? 'true' : 'false',
-        style: chipBase + (isOn ? 'background:#E3F0EE;border:2px solid #176F69;color:#163F42;' : 'background:#FFFFFF;border:1px solid #7B918E;color:#1A3034;'),
-        toggle: function () { var ev = Object.assign({}, self.state.events); ev[i] = !ev[i]; self.setState({ events: ev }); }
-      };
-    });
+    var optBase = 'display:flex;align-items:center;gap:12px;min-height:48px;padding:0 12px;border:0;border-radius:8px;background:transparent;text-align:left;font:inherit;font-size:17px;color:#1A3034;cursor:pointer;';
+    var boxBase = 'flex:0 0 auto;width:22px;height:22px;border-radius:6px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;';
     var polLabels = ['Employer group cover', 'Family floater', 'Parents\' policy', 'Super top-up', 'Not sure'];
     var policies = polLabels.map(function (label, i) {
       var isOn = !!self.state.policies[i];
       return {
         label: label, isOn: isOn, on: isOn ? 'true' : 'false',
-        style: chipBase + (isOn ? 'background:#E3F0EE;border:2px solid #176F69;color:#163F42;' : 'background:#FFFFFF;border:1px solid #7B918E;color:#1A3034;'),
+        style: optBase + (isOn ? 'font-weight:600;color:#163F42;' : ''),
+        boxStyle: boxBase + (isOn ? 'background:#176F69;border:2px solid #176F69;color:#FFFFFF;' : 'background:#FFFFFF;border:2px solid #7B918E;'),
         toggle: function () { var pp = Object.assign({}, self.state.policies); pp[i] = !pp[i]; self.setState({ policies: pp }); }
       };
     });
+    var chosen = polLabels.filter(function (l, i) { return !!self.state.policies[i]; });
+    var msOpen = !!this.state.msOpen;
+    var ms = {
+      open: msOpen, openStr: msOpen ? 'true' : 'false',
+      summary: chosen.length === 0 ? 'Choose any that apply' : chosen.length <= 2 ? chosen.join(', ') : chosen.length + ' policies chosen',
+      buttonStyle: 'display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;height:52px;box-sizing:border-box;padding:0 14px 0 16px;border-radius:12px;background:#FFFFFF;font:inherit;font-size:17px;text-align:left;cursor:pointer;' + (msOpen ? 'border:2px solid #163F42;' : 'border:1px solid #7B918E;'),
+      valueStyle: 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;' + (chosen.length ? 'color:#1A3034;font-weight:600;' : 'color:#55696D;'),
+      chevronStyle: 'flex:0 0 auto;color:#163F42;transition:transform 200ms ease-out;transform:rotate(' + (msOpen ? 180 : 0) + 'deg)',
+      toggle: function () { self.setState({ msOpen: !msOpen }); }
+    };
     var mode = this.props.voiceEnabled ? (this.state.mode || this.props.closingMode || 'write') : 'write';
     var closeModel = this.formModel('close', this.props.closingFormState);
     var tab = 'flex:1 1 0;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border:0;border-radius:9px;font:inherit;font-size:16px;font-weight:600;cursor:pointer;';
@@ -338,18 +344,16 @@ export class Component extends DCLogic {
       writeStyle: tab + (mode === 'write' ? 'background:#FFFFFF;color:#163F42;box-shadow:0 1px 2px rgba(22,62,54,0.12),inset 0 0 0 2px #163F42;' : 'background:transparent;color:#55696D;'),
       voiceStyle: tab + (mode === 'voice' ? 'background:#FFFFFF;color:#163F42;box-shadow:0 1px 2px rgba(22,62,54,0.12),inset 0 0 0 2px #163F42;' : 'background:transparent;color:#55696D;'),
       showTabs: !!this.props.voiceEnabled,
-      setName: function (e) { self.setState({ closeName: e.target.value }); },
       setWrite: function () { self.setState({ mode: 'write' }); },
       setVoice: function () { self.setState({ mode: 'voice' }); },
       emailStyle: 'height:52px;box-sizing:border-box;padding:0 16px;border-radius:12px;background:#FFFFFF;font:inherit;font-size:17px;color:#1A3034;' + (emailInvalid ? 'border:2px solid #A74335;' : 'border:1px solid #7B918E;'),
       buttonLabel: closeModel.busy ? 'Joining' : (mode === 'voice' && voice === 'recorded' ? 'Send voice note and join' : closeModel.buttonLabel),
       successExtra: mode === 'voice' && voice === 'recorded' ? (this.state.voiceSaved === false ? 'Your voice note did not upload, but your email is saved.' : 'We have your voice note too.') : ''
     };
-    var isYou = viewer === 'you';
     var pi = this.state.pInd != null ? this.state.pInd : 1;
     var ps = this.state.pSto != null ? this.state.pSto : 1;
     var inr = function (v) { return Math.round(v).toLocaleString('en-IN'); };
-    var n = { claims: Math.round(44 * pi) + '%', crore: '\u20b9' + inr(26037 * pi) + ' cr', hours: Math.round(48 * pi) + ' hours', oop: '\u20b9' + Math.round(43 * pi) + ' of \u20b9100' };
+    var n = { claims: Math.round(44 * pi) + '%', crore: '\u20b9' + inr(26037 * pi) + ' cr', hours: Math.round(48 * pi) + ' hours', oop: Math.round(43 * pi) + '%' };
     var st = { a: '\u20b9' + inr(80000 * ps), b: '\u20b9' + inr(200000 * ps), c: Math.round(7 * ps) + ' hours', d: Math.round(17 * ps) + ' days', e: Math.round(7 * ps) + ' of 19' };
     var pos = this.state.statPos || 0;
     return {
@@ -363,30 +367,20 @@ export class Component extends DCLogic {
       cm: cm,
       vn: vn,
       policies: policies,
+      ms: ms,
+      clauses: clauses,
       menuOpen: menuOpen,
       menuOpenStr: menuOpen ? 'true' : 'false',
       toggleMenu: function () { self.setState({ menu: !menuOpen }); },
-      termsLoop: termsLoop,
       people: people,
       grid: grid,
       oldWay: oldWay,
       newWay: newWay,
+      ways: ways,
       days: days,
       docs: docs,
       promises: promises,
-      isYou: isYou,
-      isFamily: !isYou,
-      isYouStr: isYou ? 'true' : 'false',
-      isFamilyStr: isYou ? 'false' : 'true',
-      segYouStyle: isYou ? on : off,
-      segFamilyStyle: isYou ? off : on,
-      panelTitle: isYou ? 'What you see' : 'What your brother sees',
-      medValue: isYou ? 'Declared conditions, as on your proposal form' : 'Not shared',
-      medColor: isYou ? '#1A3034' : '#55696D',
-      viewYou: function () { self.setState({ viewer: 'you' }); },
-      viewFamily: function () { self.setState({ viewer: 'family' }); },
-      faqs: faqs,
-      events: events
+      faqs: faqs
     };
   }
 }

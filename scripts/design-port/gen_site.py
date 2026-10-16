@@ -43,8 +43,6 @@ def imports(ctx, extra='', jsx=''):
 main_src = read('Main.dc.html')
 body = body_of(main_src)
 # design-level edits for production wiring
-body = body.replace('<input id="close-name" name="given-name" type="text" autocomplete="given-name" style=',
-                    '<input id="close-name" name="given-name" type="text" autocomplete="given-name" onChange="{{ cm.setName }}" style=')
 tab_start = body.index('<div role="group" aria-label="How do you want to tell us?"')
 tab_end = body.index('</div>', body.index('Say it</button>', tab_start)) + 6
 body = body[:tab_start] + '<sc-if value="{{ cm.showTabs }}" hint-placeholder-val="{{ true }}">' + body[tab_start:tab_end] + '</sc-if>' + body[tab_end:]
@@ -148,11 +146,8 @@ rep("""  renderVals() {""", """  sendSignup(key, email) {
     var payload = { email: email, location: key === 'hero' ? 'hero' : 'closing', company_website: '' };
     ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'fbclid'].forEach(function (k) { var q = query.get(k); if (q) payload[k] = q; });
     if (key === 'close') {
-      var evLabels = ['A renewal', 'Planned treatment', 'A job change', 'Parents\\' cover', 'Nothing yet, just getting organised'];
       var polLabels = ['Employer group cover', 'Family floater', 'Parents\\' policy', 'Super top-up', 'Not sure'];
-      payload.events = evLabels.filter(function (l, i) { return !!self.state.events[i]; });
       payload.policies = polLabels.filter(function (l, i) { return !!self.state.policies[i]; });
-      if (self.state.closeName) payload.name = self.state.closeName;
     }
     var done = function (state, extra) { var d = {}; d[key + 'State'] = state; Object.assign(d, extra || {}); self.setState(d); };
     fetch('/api/waitlist', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) })
@@ -261,7 +256,6 @@ rep("""      status: voice === 'idle' ? (consent ? 'Tap to record' : 'Tick the b
 
 rep("""      setWrite: function () { self.setState({ mode: 'write' }); },""",
     """      showTabs: !!this.props.voiceEnabled,
-      setName: function (e) { self.setState({ closeName: e.target.value }); },
       setWrite: function () { self.setState({ mode: 'write' }); },""")
 
 rep("""      successExtra: mode === 'voice' && voice === 'recorded' ? 'We have your voice note too.' : ''""",
