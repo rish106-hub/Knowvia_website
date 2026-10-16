@@ -18,14 +18,11 @@ export function EarlyListSection({ v }: { v: Any }) {
       {" "}
       <div style={{position: "relative", maxWidth: "1200px", margin: "0 auto", display: "flex", flexWrap: "wrap", gap: "40px 72px", alignItems: "flex-start"}}>
         <div style={{flex: "1 1 360px", display: "flex", flexDirection: "column", gap: "18px", maxWidth: "460px"}}>
-          <p style={{margin: "0", fontSize: "15px", fontWeight: "600", letterSpacing: "0.01em", color: "#C8E6A0"}}>
-            {"The early list"}
-          </p>
           <h2 id="close-h" style={{margin: "0", fontFamily: "var(--font-display), 'Iowan Old Style', Georgia, serif", fontWeight: "400", fontSize: "clamp(36px,4vw,56px)", lineHeight: "1.05", letterSpacing: "-0.015em", color: "#FFFFFF", maxWidth: "12ch"}}>
             {"Know your cover. Before you need it."}
           </h2>
           <p style={{margin: "0", fontSize: "clamp(17px,1.35vw,19px)", lineHeight: "1.55", color: "#C9DDD9", maxWidth: "38ch"}}>
-            {"Tell us a little about your family's health cover, in writing or in your own voice. It helps us decide what Knowvia reads first for you."}
+            {"Only your email is required. Tell us which policies your family has, and Knowvia reads those first for you."}
           </p>
           <ul style={{listStyle: "none", margin: "8px 0 0", padding: "0", display: "flex", flexDirection: "column", gap: "12px"}}>
             <li style={{display: "flex", gap: "12px", alignItems: "center", fontSize: "17px", color: "#FFFFFF"}}>
@@ -78,84 +75,64 @@ export function EarlyListSection({ v }: { v: Any }) {
                 </div>
                 </>
               )}
-              <div style={{display: "flex", flexWrap: "wrap", gap: "14px"}}>
-                <div style={{flex: "1 1 180px", display: "flex", flexDirection: "column", gap: "8px"}}>
-                  <label htmlFor="close-name" style={{fontSize: "15px", fontWeight: "600", letterSpacing: "0.01em"}}>
-                    {"First name "}
-                    <span style={{fontWeight: "400", color: "#55696D"}}>
-                      {"(optional)"}
-                    </span>
-                  </label>
-                  <input id="close-name" name="given-name" type="text" autoComplete="given-name" onChange={v.cm.setName} style={{height: "52px", boxSizing: "border-box", padding: "0 16px", borderRadius: "12px", border: "1px solid #7B918E", background: "#FFFFFF", font: "inherit", fontSize: "17px", color: "#1A3034"}} />
-                </div>
-                <div style={{flex: "1.4 1 240px", display: "flex", flexDirection: "column", gap: "8px"}}>
-                  <label htmlFor="close-email" style={{fontSize: "15px", fontWeight: "600", letterSpacing: "0.01em"}}>
-                    {"Email"}
-                  </label>
-                  <input id="close-email" name="email" type="email" autoComplete="email" onChange={v.close.setEmail} aria-invalid={v.close.invalid} aria-describedby="close-error close-consent" style={css(v.cm.emailStyle)} />
-                </div>
+              <div style={{display: "flex", flexDirection: "column", gap: "8px"}}>
+                <label htmlFor="close-email" style={{display: "flex", alignItems: "center", gap: "10px", fontSize: "15px", fontWeight: "600", letterSpacing: "0.01em"}}>
+                  {"Email "}
+                  <span style={{display: "inline-flex", alignItems: "center", height: "22px", padding: "0 8px", borderRadius: "6px", background: "#E3F0EE", color: "#163F42", fontSize: "13px", fontWeight: "700"}}>
+                    {"Required"}
+                  </span>
+                </label>
+                <input id="close-email" name="email" type="email" autoComplete="email" required onChange={v.close.setEmail} aria-invalid={v.close.invalid} aria-describedby="close-error close-consent" style={css(v.cm.emailStyle)} />
+                <p id="close-error" role="alert" style={{margin: "0", color: "#A74335", fontSize: "16px", lineHeight: "1.45", fontWeight: "600"}}>
+                  {v.close.error}
+                </p>
               </div>
-              <p id="close-error" role="alert" style={{margin: "-8px 0 0", color: "#A74335", fontSize: "16px", lineHeight: "1.45", fontWeight: "600"}}>
-                {v.close.error}
-              </p>
               {truthy(v.cm.isWrite) && (
                 <>
-                <div style={{display: "flex", flexDirection: "column", gap: "18px", animation: "kvIn 320ms cubic-bezier(0.165,0.84,0.44,1) both"}}>
-                  <fieldset style={{margin: "0", padding: "0", border: "0", display: "flex", flexDirection: "column", gap: "10px"}}>
-                    <legend style={{padding: "0", marginBottom: "6px", fontSize: "15px", fontWeight: "600", letterSpacing: "0.01em"}}>
-                      {"Which health policies does your family have? "}
-                      <span style={{fontWeight: "400", color: "#55696D"}}>
-                        {"(optional)"}
-                      </span>
-                    </legend>
-                    <div style={{display: "flex", flexWrap: "wrap", gap: "8px"}}>
-                      {(v.policies ?? []).map((pc: Any, i1: number) => (
-                        <Fragment key={i1}>
-                          <button className="kv-chip-opt" type="button" onClick={pc.toggle} aria-pressed={pc.on} style={css(pc.style)}>
-                            {truthy(pc.isOn) && (
-                              <>
-                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                                <polyline points="5 12.5 10 17 19 7"></polyline>
-                              </svg>
-                              </>
-                            )}
-                            <span>
-                              {pc.label}
-                            </span>
-                          </button>
-                        </Fragment>
-                      ))}
-                    </div>
-                  </fieldset>
-                  <fieldset aria-describedby="events-purpose" style={{margin: "0", padding: "0", border: "0", display: "flex", flexDirection: "column", gap: "10px"}}>
-                    <legend style={{padding: "0", marginBottom: "6px", fontSize: "15px", fontWeight: "600", letterSpacing: "0.01em"}}>
-                      {"What is coming up? "}
-                      <span style={{fontWeight: "400", color: "#55696D"}}>
-                        {"(optional)"}
-                      </span>
-                    </legend>
-                    <div style={{display: "flex", flexWrap: "wrap", gap: "8px"}}>
-                      {(v.events ?? []).map((ev: Any, i2: number) => (
-                        <Fragment key={i2}>
-                          <button className="kv-chip-opt" type="button" onClick={ev.toggle} aria-pressed={ev.on} style={css(ev.style)}>
-                            {truthy(ev.isOn) && (
-                              <>
-                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                                <polyline points="5 12.5 10 17 19 7"></polyline>
-                              </svg>
-                              </>
-                            )}
-                            <span>
-                              {ev.label}
-                            </span>
-                          </button>
-                        </Fragment>
-                      ))}
-                    </div>
-                    <p id="events-purpose" style={{margin: "0", fontSize: "15px", lineHeight: "1.5", color: "#55696D"}}>
-                      {"We use your answers only to decide what Knowvia reads first for you."}
-                    </p>
-                  </fieldset>
+                <div style={{display: "flex", flexDirection: "column", gap: "8px", animation: "kvIn 320ms cubic-bezier(0.165,0.84,0.44,1) both"}}>
+                  <span id="pol-label" style={{fontSize: "15px", fontWeight: "600", letterSpacing: "0.01em"}}>
+                    {"Which health policies does your family have?"}
+                  </span>
+                  <button type="button" onClick={v.ms.toggle} aria-expanded={v.ms.openStr} aria-controls="pol-list" aria-labelledby="pol-label pol-value" style={css(v.ms.buttonStyle)}>
+                    <span id="pol-value" style={css(v.ms.valueStyle)}>
+                      {v.ms.summary}
+                    </span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={css(v.ms.chevronStyle)}>
+                      <path d="M6 9l6 6 6-6"></path>
+                    </svg>
+                  </button>
+                  <div id="pol-list">
+                    {truthy(v.ms.open) && (
+                      <>
+                      <div role="group" aria-labelledby="pol-label" style={{display: "flex", flexDirection: "column", padding: "6px", borderRadius: "12px", border: "1px solid #7B918E", boxShadow: "0 12px 30px rgba(22,62,54,0.10)", animation: "kvIn 200ms cubic-bezier(0.165,0.84,0.44,1) both"}}>
+                        {(v.policies ?? []).map((pc: Any, i1: number) => (
+                          <Fragment key={i1}>
+                            <button className="kv-opt" type="button" onClick={pc.toggle} aria-pressed={pc.on} style={css(pc.style)}>
+                              <span aria-hidden="true" style={css(pc.boxStyle)}>
+                                {truthy(pc.isOn) && (
+                                  <>
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="5 12.5 10 17 19 7"></polyline>
+                                  </svg>
+                                  </>
+                                )}
+                              </span>
+                              <span>
+                                {pc.label}
+                              </span>
+                            </button>
+                          </Fragment>
+                        ))}
+                        <button type="button" onClick={v.ms.toggle} style={{alignSelf: "flex-end", minHeight: "44px", padding: "0 16px", border: "0", background: "transparent", font: "inherit", fontSize: "16px", fontWeight: "600", color: "#176F69", cursor: "pointer"}}>
+                          {"Done"}
+                        </button>
+                      </div>
+                      </>
+                    )}
+                  </div>
+                  <p style={{margin: "0", fontSize: "15px", lineHeight: "1.5", color: "#55696D"}}>
+                    {"Choose any. We use this only to decide what Knowvia reads first for you."}
+                  </p>
                 </div>
                 </>
               )}
@@ -206,8 +183,8 @@ export function EarlyListSection({ v }: { v: Any }) {
                       )}
                       <div style={{flex: "1 1 auto", minWidth: "0", display: "flex", flexDirection: "column", gap: "8px"}}>
                         <div aria-hidden="true" style={{display: "flex", alignItems: "center", gap: "3px", height: "36px"}}>
-                          {(v.vn.bars ?? []).map((b: Any, i3: number) => (
-                            <Fragment key={i3}>
+                          {(v.vn.bars ?? []).map((b: Any, i2: number) => (
+                            <Fragment key={i2}>
                               <span style={css(b.style)}></span>
                             </Fragment>
                           ))}

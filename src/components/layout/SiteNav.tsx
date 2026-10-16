@@ -33,7 +33,7 @@ export function SiteNav() {
             {"Privacy"}
           </Link>
           <Link className="kv-nav-link" href="/#partners">
-            {"For partners"}
+            {"For business"}
           </Link>
           <Link className="kv-nav-link" href="/#questions">
             {"Questions"}
@@ -63,7 +63,7 @@ export function SiteNav() {
               {"Privacy"}
             </Link>
             <Link href="/#partners" style={{minHeight: "52px", display: "flex", alignItems: "center", borderBottom: "1px solid #CFDCDA", color: "#1A3034", textDecoration: "none"}}>
-              {"For partners"}
+              {"For business"}
             </Link>
             <Link href="/#questions" style={{minHeight: "52px", display: "flex", alignItems: "center", borderBottom: "1px solid #CFDCDA", color: "#1A3034", textDecoration: "none"}}>
               {"Questions"}

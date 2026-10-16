@@ -11,7 +11,7 @@ export function QuestionsSection({ v }: { v: Any }) {
     <section id="questions" aria-labelledby="faq-h" style={{padding: "clamp(72px,9vw,128px) clamp(20px,5vw,80px)"}}>
       <div style={{maxWidth: "1200px", margin: "0 auto", display: "flex", flexWrap: "wrap", gap: "32px 72px"}}>
         <div style={{flex: "1 1 280px", display: "flex", flexDirection: "column", gap: "28px", alignSelf: "flex-start"}}>
-          <h2 id="faq-h" style={{margin: "0", fontFamily: "var(--font-display), 'Iowan Old Style', Georgia, serif", fontWeight: "400", fontSize: "clamp(34px,3.6vw,52px)", lineHeight: "1.08", letterSpacing: "-0.015em", color: "#163F42", maxWidth: "10ch"}}>
+          <h2 id="faq-h" style={{margin: "0", fontFamily: "var(--font-display), 'Iowan Old Style', Georgia, serif", fontWeight: "400", fontSize: "clamp(34px,3.6vw,52px)", lineHeight: "1.08", letterSpacing: "-0.015em", color: "#163F42", maxWidth: "12ch"}}>
             {"Questions families ask us"}
           </h2>
           <div id="ask" style={{background: "#0F4A3A", color: "#FFFFFF", borderRadius: "20px", padding: "24px", display: "flex", flexDirection: "column", gap: "12px", maxWidth: "340px", scrollMarginTop: "96px"}}>

@@ -10,13 +10,10 @@ export function LimitsSection({ v }: { v: Any }) {
     <section id="promises" aria-labelledby="not-h" style={{background: "#FFFFFF", padding: "clamp(72px,8vw,112px) clamp(20px,5vw,80px)"}}>
       <div style={{maxWidth: "1200px", margin: "0 auto", display: "flex", flexWrap: "wrap", gap: "40px 80px", alignItems: "flex-start"}}>
         <div style={{flex: "1 1 300px", display: "flex", flexDirection: "column", gap: "16px", maxWidth: "400px"}}>
-          <p style={{margin: "0", fontSize: "15px", fontWeight: "600", letterSpacing: "0.01em", color: "#2E6B4A"}}>
-            {"Our limits"}
-          </p>
           <h2 id="not-h" style={{margin: "0", fontFamily: "var(--font-display), 'Iowan Old Style', Georgia, serif", fontWeight: "400", fontSize: "clamp(34px,3.6vw,52px)", lineHeight: "1.08", letterSpacing: "-0.015em", color: "#163F42", maxWidth: "11ch"}}>
             {"What we will not do"}
           </h2>
-          <p style={{margin: "0", fontSize: "clamp(17px,1.35vw,19px)", lineHeight: "1.55", color: "#1A3034", maxWidth: "32ch"}}>
+          <p style={{margin: "0", fontSize: "clamp(17px,1.35vw,19px)", lineHeight: "1.55", color: "#55696D", maxWidth: "32ch"}}>
             {"Five lines we will not cross. Hold us to them."}
           </p>
           <p style={{margin: "12px 0 0", paddingTop: "20px", borderTop: "1px solid #CFDCDA", fontFamily: "var(--font-display), 'Iowan Old Style', Georgia, serif", fontStyle: "italic", fontSize: "clamp(20px,1.7vw,24px)", lineHeight: "1.3", color: "#0F4A3A", maxWidth: "26ch"}}>

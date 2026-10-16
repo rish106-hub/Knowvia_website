@@ -43,12 +43,12 @@ export function LandingPage() {
         <ClauseBand v={v} />
         <ContrastSection v={v} />
         <HowItWorksSection />
-        <FamilyQuote />
         <StoriesSection v={v} />
-        <HouseholdControl v={v} />
-        <PartnersSection />
-        <QuestionsSection v={v} />
+        <HouseholdControl />
         <LimitsSection v={v} />
+        <FamilyQuote />
+        <QuestionsSection v={v} />
+        <PartnersSection />
         <EarlyListSection v={v} />
       </main>
       <SiteFooter />

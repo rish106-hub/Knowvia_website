@@ -6,7 +6,7 @@ import { site } from "@/lib/site";
 export function SiteFooter() {
   return (
     <>
-    <footer style={{position: "relative", overflow: "hidden", background: "#0B383B", color: "#C9DDD9", padding: "clamp(56px,6vw,88px) clamp(20px,5vw,80px) 0"}}>
+    <footer style={{position: "relative", background: "#0B383B", color: "#C9DDD9", padding: "clamp(56px,6vw,88px) clamp(20px,5vw,80px) clamp(36px,4vw,48px)"}}>
       <div style={{position: "relative", maxWidth: "1200px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "48px"}}>
         <div style={{display: "flex", flexWrap: "wrap", gap: "40px 72px"}}>
           <div style={{flex: "2 1 300px", display: "flex", flexDirection: "column", gap: "14px"}}>
@@ -39,7 +39,7 @@ export function SiteFooter() {
               {"Privacy"}
             </Link>
             <Link className="kv-foot-link" href="/#partners">
-              {"For partners"}
+              {"For business"}
             </Link>
             <Link className="kv-foot-link" href="/#questions">
               {"Questions"}
@@ -72,22 +72,20 @@ export function SiteFooter() {
             </Link>
           </nav>
         </div>
-        <div style={{borderTop: "1px solid rgba(255,255,255,0.16)", paddingTop: "24px", display: "flex", flexDirection: "column", gap: "12px", fontSize: "15px", lineHeight: "1.5", maxWidth: "880px"}}>
-          <p style={{margin: "0"}}>
-            {"Knowvia is not an insurer, broker or TPA, and does not decide claims."}
-          </p>
-          <p style={{margin: "0"}}>
-            {"Where our numbers come from: more than 50 recorded conversations with people in Delhi, Mumbai, Bengaluru, Chennai and many other Tier 1, 2 and 3 cities across India. Names are withheld. Figures are what people told us and what their documents showed. They are examples, not averages."}
-          </p>
-          <p style={{margin: "0"}}>
+        <div style={{borderTop: "1px solid rgba(255,255,255,0.16)", paddingTop: "24px", display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: "12px 48px", fontSize: "15px", lineHeight: "1.5"}}>
+          <div style={{flex: "1 1 520px", display: "flex", flexDirection: "column", gap: "12px", maxWidth: "880px"}}>
+            <p style={{margin: "0"}}>
+              {"Knowvia is not an insurer, broker or TPA, and does not decide claims."}
+            </p>
+            <p style={{margin: "0"}}>
+              {"Where our numbers come from: more than 50 recorded conversations with people in Delhi, Mumbai, Bengaluru, Chennai and many other Tier 1, 2 and 3 cities across India. Names are withheld. Figures are what people told us and what their documents showed. They are examples, not averages."}
+            </p>
+          </div>
+          <p style={{margin: "0", alignSelf: "flex-end"}}>
             {"© 2026 Knowvia"}
           </p>
         </div>
       </div>
-      {" "}
-      <p aria-hidden="true" style={{margin: "32px 0 0", fontFamily: "var(--font-display), 'Iowan Old Style', Georgia, serif", fontWeight: "400", fontSize: "clamp(110px,22vw,340px)", lineHeight: "0.78", letterSpacing: "-0.04em", color: "#1E4F52", textAlign: "center", whiteSpace: "nowrap", transform: "translateY(12%)"}}>
-        {"Knowvia"}
-      </p>
     </footer>
     </>
   );

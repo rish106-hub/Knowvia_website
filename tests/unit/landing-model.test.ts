@@ -8,17 +8,19 @@ describe("landing model ported from the approved design", () => {
     expect(view.faqs).toHaveLength(10);
     expect(view.promises).toHaveLength(5);
     expect(view.promises[0].num).toBe("01");
-    expect(view.termsLoop).toHaveLength(24);
+    expect(view.clauses).toHaveLength(12);
     expect(view.oldWay).toHaveLength(5);
     expect(view.newWay).toHaveLength(5);
     expect(view.policies).toHaveLength(5);
-    expect(view.events).toHaveLength(5);
+    expect(view.ways).toHaveLength(5);
+    expect(view.ways[0]).toMatchObject({ moment: "Room rent" });
   });
 
   it("shows final industry numbers before any animation runs", () => {
     const view = new LandingModel({}).renderVals();
     expect(view.n.claims).toBe("44%");
     expect(view.n.crore).toBe("₹26,037 cr");
+    expect(view.n.oop).toBe("43%");
   });
 
   it("hides the voice tab unless voice notes are enabled", () => {
@@ -27,6 +29,15 @@ describe("landing model ported from the approved design", () => {
     const voice = new LandingModel({ voiceEnabled: true, closingMode: "voice", closingVoiceState: "recorded" }).renderVals();
     expect(voice.cm.showTabs).toBe(true);
     expect(voice.cm.buttonLabel).toBe("Send voice note and join");
+  });
+
+  it("summarises the policy multiselect", () => {
+    const model: Any = new LandingModel({});
+    expect(model.renderVals().ms.summary).toBe("Choose any that apply");
+    model.state.policies = { 0: true, 1: true, 2: true };
+    expect(model.renderVals().ms.summary).toBe("3 policies chosen");
+    model.state.policies = { 1: true };
+    expect(model.renderVals().ms.summary).toBe("Family floater");
   });
 
   it("validates the email before calling the API", () => {
