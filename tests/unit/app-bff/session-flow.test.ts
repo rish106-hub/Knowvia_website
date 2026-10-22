@@ -167,7 +167,8 @@ describe("session creation, secrecy and logout", () => {
     expect(replacement.response.headers.getSetCookie()).toHaveLength(0);
     const revokes = ctx.backend.calls.filter((call) => call.path === "/api/v1/sessions/current/revoke");
     expect(revokes).toHaveLength(2);
-    expect(revokes[1].headers.authorization).toBe(`Bearer ${FAKE_BACKEND_TOKEN}`);
+    expect(revokes[0].headers.authorization).toBe(`Bearer ${FAKE_BACKEND_TOKEN}`);
+    expect(revokes[1].headers.authorization).toBe("Bearer fake-backend-session-token-00000002");
   });
 
   it("logout revokes on the backend and then clears both cookies", async () => {
@@ -183,6 +184,40 @@ describe("session creation, secrecy and logout", () => {
     // The old token no longer works.
     const stale = await ctx.app.dispatch("overview.get", request("/api/app/overview"));
     expect(stale.status).toBe(401);
+  });
+
+  it("isolates two distinct sessions across logout, preserves the other household, and makes repeat logout safe", async () => {
+    const ctx = makeApp();
+    const a = await signIn(ctx);
+    const b = await signIn(ctx);
+    expect(a.response.status).toBe(201);
+    expect(b.response.status).toBe(201);
+    const overviewA = await ctx.app.dispatch("overview.get", request("/api/app/overview", { jar: a.jar }));
+    const overviewB = await ctx.app.dispatch("overview.get", request("/api/app/overview", { jar: b.jar }));
+    expect(overviewA.status).toBe(200);
+    expect(overviewB.status).toBe(200);
+    expect((await overviewA.json()).household.id).toBe("household-1");
+    expect((await overviewB.json()).household.id).toBe("household-2");
+    const tokenHeaders = ctx.backend.calls.filter((call) => call.path === "/api/v1/households/household-1" || call.path === "/api/v1/households/household-2");
+    expect(tokenHeaders.map((call) => call.headers.authorization)).toEqual([
+      "Bearer fake-backend-session-token-ZZZZZZZZZZZZZZZZZZZZ",
+      "Bearer fake-backend-session-token-00000002",
+    ]);
+
+    const logoutA = await ctx.app.dispatch("session.delete", request("/api/app/session", { method: "DELETE", jar: a.jar }));
+    expect((await logoutA.json()).backendRevoked).toBe(true);
+    applyCookies(a.jar, logoutA);
+    expect(a.jar.size).toBe(0);
+    expect((await ctx.app.dispatch("overview.get", request("/api/app/overview", { jar: a.jar }))).status).toBe(401);
+    expect((await ctx.app.dispatch("overview.get", request("/api/app/overview", { jar: b.jar }))).status).toBe(200);
+
+    const logoutB = await ctx.app.dispatch("session.delete", request("/api/app/session", { method: "DELETE", jar: b.jar }));
+    expect((await logoutB.json()).backendRevoked).toBe(true);
+    applyCookies(b.jar, logoutB);
+    expect((await ctx.app.dispatch("overview.get", request("/api/app/overview", { jar: b.jar }))).status).toBe(401);
+    const repeatedLogout = await ctx.app.dispatch("session.delete", request("/api/app/session", { method: "DELETE", jar: b.jar }));
+    expect(await repeatedLogout.json()).toEqual({ signedOut: true, backendRevoked: false });
+    expect(repeatedLogout.headers.getSetCookie()).toHaveLength(2);
   });
 
   it("logout still clears cookies when the backend is unreachable and reports backendRevoked=false", async () => {

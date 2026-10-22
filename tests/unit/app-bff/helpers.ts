@@ -38,7 +38,10 @@ export function createFakeBackend() {
   const jobs = new Map<string, { id: string; documentId: string; status: string; errorCode: string | null; pageCount: number | null }>();
   const revoked = new Set<string>();
   const grants = new Map<string, unknown>();
+  const sessions = new Map<string, { householdId: string; adultId: string; memberId: string }>();
+  sessions.set(FAKE_BACKEND_TOKEN, { householdId: "household-1", adultId: "adult-1", memberId: "member-1" });
   let seq = 0;
+  let sessionSeq = 0;
   const control = {
     /** Next matching call fails with this response (consumed once). */
     failNext: [] as Array<{ match: RegExp; respond: () => Response | Error }>,
@@ -72,22 +75,30 @@ export function createFakeBackend() {
     if (method === "POST" && path === "/api/v1/households") {
       if (authHeader !== `Bearer ${FAKE_BOOTSTRAP}`) return json(401, { error: { code: "AUTHENTICATION_REQUIRED", message: "Valid authentication is required." } });
       const owner = (body as { owner: { displayName: string } }).owner;
+      sessionSeq += 1;
+      const principal = { householdId: `household-${sessionSeq}`, adultId: `adult-${sessionSeq}`, memberId: `member-${sessionSeq}` };
+      const token = sessionSeq === 1 ? FAKE_BACKEND_TOKEN : `fake-backend-session-token-${String(sessionSeq).padStart(8, "0")}`;
+      sessions.set(token, principal);
       return json(201, {
-        household: { id: "household-1", display_name: "H" },
-        owner: { id: "adult-1", display_name: owner.displayName },
-        ownerMember: { id: "member-1" },
-        session: { token: FAKE_BACKEND_TOKEN, sessionId: "session-1", adultUserId: "adult-1", expiresAt: new Date(Date.now() + 3600_000).toISOString() },
+        household: { id: principal.householdId, display_name: "H" },
+        owner: { id: principal.adultId, display_name: owner.displayName },
+        ownerMember: { id: principal.memberId },
+        session: { token, sessionId: `session-${sessionSeq}`, adultUserId: principal.adultId, expiresAt: new Date(Date.now() + 3600_000).toISOString() },
       });
     }
-    if (authHeader !== `Bearer ${FAKE_BACKEND_TOKEN}` || control.expireTokens || revoked.has(FAKE_BACKEND_TOKEN)) {
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice("Bearer ".length) : "";
+    const principal = sessions.get(token);
+    if (!principal || control.expireTokens || revoked.has(token)) {
       return json(401, { error: { code: "AUTHENTICATION_REQUIRED", message: "Valid authentication is required." } });
     }
     if (method === "POST" && path === "/api/v1/sessions/current/revoke") {
-      revoked.add(FAKE_BACKEND_TOKEN);
+      revoked.add(token);
       return json(200, { status: "revoked" });
     }
-    if (method === "GET" && path === "/api/v1/households/household-1") {
-      return json(200, { household: { id: "household-1" }, viewerRole: "owner", members: [{ id: "member-1", displayName: "Owner Synthetic", memberKind: "adult", relationshipLabel: null, policiesFound: 0 }] });
+    const householdMatch = path.match(/^\/api\/v1\/households\/([^/]+)$/);
+    if (method === "GET" && householdMatch) {
+      if (householdMatch[1] !== principal.householdId) return json(404, { error: { code: "HOUSEHOLD_NOT_FOUND", message: "Household not found." } });
+      return json(200, { household: { id: principal.householdId }, viewerRole: "owner", members: [{ id: principal.memberId, displayName: "Owner Synthetic", memberKind: "adult", relationshipLabel: null, policiesFound: 0 }] });
     }
     if (method === "POST" && path === "/api/v1/cases") return json(201, { id: "case-1" });
     if (method === "POST" && path === "/api/v1/consents") {
