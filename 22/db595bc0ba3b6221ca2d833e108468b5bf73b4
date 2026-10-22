@@ -1,0 +1,21 @@
+tests/e2e/s2/visual.spec.ts
+  s_8d3aebb313e171::t_2c61b56810cd52 1-60
+tests/e2e/s34/visual.spec.ts
+  s_8d3aebb313e171::t_868c1809aeaa18 1-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "22db595bc0ba3b6221ca2d833e108468b5bf73b4",
+  "prompts": {},
+  "sessions": {
+    "s_8d3aebb313e171": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1620a-9786-73e0-a167-77d2da35196a",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
