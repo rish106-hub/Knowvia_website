@@ -1,0 +1,113 @@
+src/server/app/handler.ts
+  s_8d3aebb313e171::t_d79f06a79b6eb6 1-249,252-712
+  s_8d3aebb313e171::t_10e5138e3a8543 250-251
+.env.example
+  s_8d3aebb313e171::t_2d5d69e5187601 16-33
+tsconfig.json
+  s_8d3aebb313e171::t_d83671028a296e 37
+tests/unit/app-bff/session-flow.test.ts
+  s_8d3aebb313e171::t_d7668f92309ca8 1-167,171-230
+  s_8d3aebb313e171::t_ca74316a6e1df5 168-170
+scripts/check-no-secrets-in-client.mjs
+  s_8d3aebb313e171::t_76b92924452e40 1-50
+src/app/api/app/[...rest]/route.ts
+  s_8d3aebb313e171::t_3a3a6d842c26ca 1-4
+src/app/api/app/cases/[caseId]/answers/[answerId]/route.ts
+  s_8d3aebb313e171::t_bf723db6d272bc 1-3
+src/app/api/app/cases/[caseId]/catalogue-reviews/route.ts
+  s_8d3aebb313e171::t_67a6bf7b9ca1ac 1-3
+src/app/api/app/cases/[caseId]/decision-catalogue/route.ts
+  s_8d3aebb313e171::t_18a86172f1a9f6 1-3
+src/app/api/app/cases/[caseId]/deletion-inventory/route.ts
+  s_8d3aebb313e171::t_63f82787923156 1-3
+src/app/api/app/cases/[caseId]/documents/route.ts
+  s_8d3aebb313e171::t_95ea1587a4d66b 1-3
+src/app/api/app/cases/[caseId]/questions/route.ts
+  s_8d3aebb313e171::t_1b04531d695c75 1-3
+src/app/api/app/cases/[caseId]/source-pack/route.ts
+  s_8d3aebb313e171::t_1b81234863f7a1 1-3
+src/app/api/app/cases/route.ts
+  s_8d3aebb313e171::t_9d5a5e8cc3754b 1-3
+src/app/api/app/catalogue-confirmers/route.ts
+  s_8d3aebb313e171::t_fe2457283b7d1b 1-3
+src/app/api/app/consents/notices/route.ts
+  s_8d3aebb313e171::t_119f9018ef8302 1-4
+src/app/api/app/consents/revoke/route.ts
+  s_8d3aebb313e171::t_c556bd887e2570 1-3
+src/app/api/app/consents/route.ts
+  s_8d3aebb313e171::t_123939fcdc6f3d 1-3
+src/app/api/app/coverage-preview/route.ts
+  s_8d3aebb313e171::t_4c3970f768b3fa 1-3
+src/app/api/app/documents/[documentId]/ocr/refresh/route.ts
+  s_8d3aebb313e171::t_c1cf10b22dc8c6 1-3
+src/app/api/app/documents/[documentId]/ocr/route.ts
+  s_8d3aebb313e171::t_b0e591adeb0ee8 1-3
+src/app/api/app/documents/[documentId]/route.ts
+  s_8d3aebb313e171::t_038d9b6785ea24 1-3
+src/app/api/app/integrations/route.ts
+  s_8d3aebb313e171::t_69c32f0a4d15a7 1-3
+src/app/api/app/overview/route.ts
+  s_8d3aebb313e171::t_645b9fce6c19a7 1-3
+src/app/api/app/session/route.ts
+  s_8d3aebb313e171::t_e8a443932abc76 1-4
+src/lib/app-client.ts
+  s_8d3aebb313e171::t_f364d88ea23cd5 1-72
+src/lib/app-contract.ts
+  s_8d3aebb313e171::t_405aa978e05fa5 1-24
+src/server/app/backend-client.ts
+  s_8d3aebb313e171::t_947b6b5d71412d 1-327
+src/server/app/consent-scopes.ts
+  s_8d3aebb313e171::t_18c85aca7fccfd 1-78
+src/server/app/contract.ts
+  s_8d3aebb313e171::t_e62c1087c378c3 1-198
+src/server/app/cookie-crypto.ts
+  s_8d3aebb313e171::t_60d959394cc3c0 1-59
+src/server/app/csrf.ts
+  s_8d3aebb313e171::t_42b3c14cf75c7d 1-12
+src/server/app/document-view.ts
+  s_8d3aebb313e171::t_bc147886037a68 1-86
+src/server/app/env.ts
+  s_8d3aebb313e171::t_f76e8b05ed1766 1-95
+src/server/app/errors.ts
+  s_8d3aebb313e171::t_ca4199dbbba8f7 1-137
+src/server/app/identity.ts
+  s_8d3aebb313e171::t_c436b7bc383fa1 1-56
+src/server/app/rate-limit.ts
+  s_8d3aebb313e171::t_8e99db1d13b27b 1-52
+src/server/app/runtime.ts
+  s_8d3aebb313e171::t_db63e823d5b4fe 1-47
+src/server/app/session.ts
+  s_8d3aebb313e171::t_33e18e13b5b85a 1-152
+src/server/app/upload.ts
+  s_8d3aebb313e171::t_9bace8d6f038e6 1-90
+tests/unit/app-bff/cookie-crypto.test.ts
+  s_8d3aebb313e171::t_d2476497a4c39c 1-84
+tests/unit/app-bff/errors-and-client.test.ts
+  s_8d3aebb313e171::t_e6b0a768e877af 1-98
+tests/unit/app-bff/flow.test.ts
+  s_8d3aebb313e171::t_c8da9a7eb164f0 1-187
+tests/unit/app-bff/helpers.ts
+  s_8d3aebb313e171::t_7d1b0eb056cf1d 1-220
+tests/unit/app-bff/no-client-import.test.ts
+  s_8d3aebb313e171::t_25b982145eed9c 1-66
+tests/unit/app-bff/real-backend-regressions.test.ts
+  s_8d3aebb313e171::t_745fc9830dc106 1-349
+tests/unit/app-bff/upload.test.ts
+  s_8d3aebb313e171::t_9664125bcea0e1 1-150
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bcf16fab37025d50104a36a5c943f8ee6c4f6556",
+  "prompts": {},
+  "sessions": {
+    "s_8d3aebb313e171": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1620a-9786-73e0-a167-77d2da35196a",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
