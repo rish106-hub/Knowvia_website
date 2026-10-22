@@ -32,15 +32,15 @@ export function OnboardingAddPolicies() {
             <path d="M12 17v-6M9.5 13.5L12 11l2.5 2.5"></path>
           </svg>
           <p style={{margin: "0", fontSize: "17px", lineHeight: "1.4", fontWeight: "600", color: "#163F42"}}>
-            {"Drop a PDF or photo here, or choose a file"}
+            {"Drop a PDF here, or choose a file"}
           </p>
           <p style={{margin: "0", fontSize: "15px", color: "#55696D"}}>
-            {"PDF, JPG or PNG, up to 15 MB each"}
+            {"PDF, up to 15 MB each"}
           </p>
           <label className="kv-file" htmlFor="o5-file" style={{display: "inline-flex", alignItems: "center", height: "44px", padding: "0 20px", borderRadius: "999px", border: "2px solid #176F69", color: "#176F69", fontSize: "16px", fontWeight: "600", cursor: "pointer"}}>
             {"Choose a file"}
           </label>
-          <input id="o5-file" type="file" accept=".pdf,.jpg,.jpeg,.png" multiple style={{position: "absolute", width: "1px", height: "1px", opacity: "0"}} />
+          <input id="o5-file" type="file" accept=".pdf,application/pdf" multiple style={{position: "absolute", width: "1px", height: "1px", opacity: "0"}} />
         </div>
         <div style={{display: "flex", flexWrap: "wrap", gap: "6px"}} aria-label="Documents that help">
           <span style={{display: "inline-flex", alignItems: "center", height: "30px", padding: "0 12px", borderRadius: "999px", background: "#E6EFEC", fontSize: "15px", fontWeight: "600", color: "#163F42"}}>
@@ -105,20 +105,20 @@ export function OnboardingAddPolicies() {
               </svg>
               <div style={{flex: "1 1 auto", display: "flex", flexDirection: "column", minWidth: "0"}}>
                 <span style={{fontSize: "16px", fontWeight: "600", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"}}>
-                  {"Papa renewal photos.png"}
+                  {"Papa renewal scan.pdf"}
                 </span>
                 <span style={{fontSize: "15px", color: "#55696D"}}>
                   {"18.4 MB"}
                 </span>
               </div>
-              <button type="button" aria-label="Remove Papa renewal photos.png" style={{width: "44px", height: "44px", border: "0", background: "transparent", color: "#55696D", cursor: "pointer"}}>
+              <button type="button" aria-label="Remove Papa renewal scan.pdf" style={{width: "44px", height: "44px", border: "0", background: "transparent", color: "#55696D", cursor: "pointer"}}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                   <path d="M6 6l12 12M18 6L6 18"></path>
                 </svg>
               </button>
             </div>
             <p role="alert" style={{margin: "0 0 0 32px", fontSize: "17px", lineHeight: "1.4", fontWeight: "600", color: "#A74335"}}>
-              {"This file is over 15 MB. Try a PDF instead of photos."}
+              {"This file is over 15 MB. Try a smaller PDF."}
             </p>
           </li>
         </ul>
@@ -128,12 +128,8 @@ export function OnboardingAddPolicies() {
           </Link>
           {" We will tell you exactly what to ask for."}
         </p>
-        <p style={{margin: "0", fontSize: "15px", lineHeight: "1.45", color: "#55696D", display: "flex", gap: "6px", alignItems: "flex-start"}}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{flex: "0 0 auto", marginTop: "2px"}}>
-            <rect x="5" y="11" width="14" height="9" rx="2"></rect>
-            <path d="M8 11V8a4 4 0 0 1 8 0v3"></path>
-          </svg>
-          {"Files are encrypted. Only people you allow can see them."}
+        <p style={{margin: "0", fontSize: "15px", lineHeight: "1.45", color: "#55696D"}}>
+          {"Only add documents you are allowed to share."}
         </p>
       </div>
       <div style={{padding: "10px 20px 20px"}}>

@@ -132,8 +132,11 @@ export class Component extends DCLogic {
     var payload = { email: email, location: key === 'hero' ? 'hero' : 'closing', company_website: '' };
     ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'fbclid'].forEach(function (k) { var q = query.get(k); if (q) payload[k] = q; });
     if (key === 'close') {
+      var evLabels = ['A renewal', 'Planned treatment', 'A job change', 'Parents\' cover', 'Nothing yet, just getting organised'];
       var polLabels = ['Employer group cover', 'Family floater', 'Parents\' policy', 'Super top-up', 'Not sure'];
+      payload.events = evLabels.filter(function (l, i) { return !!self.state.events[i]; });
       payload.policies = polLabels.filter(function (l, i) { return !!self.state.policies[i]; });
+      if (self.state.closeName) payload.name = self.state.closeName;
     }
     var done = function (state, extra) { var d = {}; d[key + 'State'] = state; Object.assign(d, extra || {}); self.setState(d); };
     fetch('/api/waitlist', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) })
@@ -344,6 +347,7 @@ export class Component extends DCLogic {
       writeStyle: tab + (mode === 'write' ? 'background:#FFFFFF;color:#163F42;box-shadow:0 1px 2px rgba(22,62,54,0.12),inset 0 0 0 2px #163F42;' : 'background:transparent;color:#55696D;'),
       voiceStyle: tab + (mode === 'voice' ? 'background:#FFFFFF;color:#163F42;box-shadow:0 1px 2px rgba(22,62,54,0.12),inset 0 0 0 2px #163F42;' : 'background:transparent;color:#55696D;'),
       showTabs: !!this.props.voiceEnabled,
+      setName: function (e) { self.setState({ closeName: e.target.value }); },
       setWrite: function () { self.setState({ mode: 'write' }); },
       setVoice: function () { self.setState({ mode: 'voice' }); },
       emailStyle: 'height:52px;box-sizing:border-box;padding:0 16px;border-radius:12px;background:#FFFFFF;font:inherit;font-size:17px;color:#1A3034;' + (emailInvalid ? 'border:2px solid #A74335;' : 'border:1px solid #7B918E;'),

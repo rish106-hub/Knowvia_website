@@ -1,0 +1,41 @@
+/*
+ * Brand tokens for future /app screens. Hand-written, NOT generated.
+ * Values are the ones already used by the approved artboards (see docs/block5/token-inventory.md).
+ * Import this from the /app layout only; do not import it into generated files (design.css, design-onboarding.css).
+ */
+:root {
+  --kv-tide: #163f42;
+  --kv-harbour: #176f69;
+  --kv-forest: #0f4a3a;
+  --kv-mist: #f3f7f6;
+  --kv-lime: #c8e6a0;
+  --kv-gold: #e0a02b;
+  --kv-ink: #1a3034;
+  --kv-muted: #55696d;
+  --kv-border: #cfdcda;
+
+  /* Supporting colours that already exist in the repo (globals.css, artboards). */
+  --kv-paper: #ffffff;
+  --kv-mist-deep: #e6efec;
+  --kv-soft: #ddf0dc;
+  --kv-gold-ink: #7a5207;
+  --kv-gold-tint: #fbf1dd;
+  --kv-brick: #a74335;
+
+  /* next/font sets --font-display (Newsreader) and --font-body (Source Sans 3) on <html> in src/app/layout.tsx. */
+  --kv-font-display: var(--font-display), "Iowan Old Style", Georgia, serif;
+  --kv-font-body: var(--font-body), system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+  /*
+   * Evidence states. Colour is one of three cues: pair every state with its own border shape and wording
+   * (confirmed: solid + check, unknown: dashed + question mark, conflict: thick solid + alert, pending: dotted + clock).
+   */
+  --state-confirmed: var(--kv-forest);
+  --state-confirmed-bg: var(--kv-soft);
+  --state-unknown: var(--kv-gold-ink);
+  --state-unknown-bg: var(--kv-gold-tint);
+  --state-conflict: var(--kv-brick);
+  --state-conflict-bg: var(--kv-paper);
+  --state-pending: var(--kv-muted);
+  --state-pending-bg: var(--kv-mist-deep);
+}

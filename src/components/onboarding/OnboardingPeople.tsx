@@ -101,7 +101,7 @@ export function OnboardingPeople() {
           {"Add a person"}
         </button>
         <p style={{margin: "0", fontSize: "15px", lineHeight: "1.45", color: "#55696D"}}>
-          {"Adults you add get an invite to confirm what they share."}
+          {"Each adult chooses what they share about themselves."}
         </p>
       </div>
       <div style={{padding: "20px"}}>

@@ -100,10 +100,10 @@ export function OnboardingSharing() {
         </div>
         <div style={{background: "transparent", border: "1.5px dashed #7B918E", borderRadius: "16px", padding: "12px 16px", display: "flex", flexDirection: "column", gap: "4px"}}>
           <span style={{fontSize: "17px", fontWeight: "600", color: "#163F42"}}>
-            {"Maa, Papa and your sister decide for themselves"}
+            {"Maa, Papa and your brother decide for themselves"}
           </span>
           <span style={{fontSize: "17px", lineHeight: "1.45", color: "#55696D"}}>
-            {"Invites sent. Until they confirm, we suggest: cover amount shared, medical details private."}
+            {"Nothing is shared with them until each adult agrees. We suggest: cover amount shared, medical details private."}
           </span>
         </div>
       </div>
