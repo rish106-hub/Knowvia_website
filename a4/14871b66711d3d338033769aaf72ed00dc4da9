@@ -1,0 +1,171 @@
+src/app/app/cover/page.tsx
+  s_8d3aebb313e171::t_42996c28f6c239 1-8
+src/app/app/cover/preview/page.tsx
+  s_8d3aebb313e171::t_1216c7c59ea129 1-8
+src/app/app/documents/page.tsx
+  s_8d3aebb313e171::t_a1d2d95897394d 1-8
+src/app/app/layout.tsx
+  s_8d3aebb313e171::t_1e3e80becff773 1-19
+src/app/app/page.tsx
+  s_8d3aebb313e171::t_fa455a8a525abf 1-8
+src/app/app/sign-in/page.tsx
+  s_8d3aebb313e171::t_dbfcb7f6ddc6ad 1-11
+src/components/app/consent/ConsentNoticeCard.tsx
+  s_8d3aebb313e171::t_da66b865455fe6 1-62
+src/components/app/consent/PermissionsPanel.tsx
+  s_8d3aebb313e171::t_d50cb2309d35d8 1-109
+src/components/app/consent/consent-copy.ts
+  s_8d3aebb313e171::t_ad43b5d85c6e29 1-35
+src/components/app/consent/useConsentNotices.ts
+  s_8d3aebb313e171::t_31bce865f56d7e 1-47
+src/components/app/documents/DocumentRow.tsx
+  s_8d3aebb313e171::t_3be53cec4664f2 1-230
+src/components/app/documents/DocumentsScreen.tsx
+  s_8d3aebb313e171::t_ff48971a9690c8 1-63
+src/components/app/documents/PermissionWithdrawnNotice.tsx
+  s_8d3aebb313e171::t_2ebffb40b65dd0 1-14
+src/components/app/documents/UploadPanel.tsx
+  s_8d3aebb313e171::t_8af855f054bac9 1-269
+src/components/app/documents/format.ts
+  s_8d3aebb313e171::t_eb6f735a657504 1-15
+src/components/app/documents/polling.ts
+  s_8d3aebb313e171::t_601602961506a3 1-39
+src/components/app/documents/precheck.ts
+  s_8d3aebb313e171::t_2e931389ffd424 1-22
+src/components/app/documents/stage.ts
+  s_8d3aebb313e171::t_757987917c15c2 1-102
+src/components/app/documents/useStagePolling.ts
+  s_8d3aebb313e171::t_d682ff297edf16 1-120
+src/components/app/evidence/ConsentGate.tsx
+  s_8d3aebb313e171::t_71985f4e53e18a 1-59
+src/components/app/evidence/EvidenceScreen.tsx
+  s_8d3aebb313e171::t_d260e4adedf645 1-193
+src/components/app/evidence/FactCardView.tsx
+  s_8d3aebb313e171::t_5a74a4bfc4a059 1-83
+src/components/app/evidence/Waiting.tsx
+  s_8d3aebb313e171::t_7d6cbb248263cb 1-32
+src/components/app/evidence/evidence.module.css
+  s_8d3aebb313e171::t_b52f96c70d6126 1-104
+src/components/app/evidence/icons.tsx
+  s_8d3aebb313e171::t_00f558f251bf7b 1-68
+src/components/app/evidence/index.ts
+  s_8d3aebb313e171::t_ba20cace515380 1
+src/components/app/evidence/primitives.tsx
+  s_8d3aebb313e171::t_6a2b1470041e55 1-134
+src/components/app/evidence/useCoverFlow.ts
+  s_8d3aebb313e171::t_2d88e1b27e209b 1-233
+src/components/app/preview/PreviewScreen.tsx
+  s_8d3aebb313e171::t_8ce1d4474f1d41 1-250
+src/components/app/preview/QuestionPanel.tsx
+  s_8d3aebb313e171::t_100a6d1a75daa2 1-89
+src/components/app/preview/index.ts
+  s_8d3aebb313e171::t_03c1344c1d87d8 1
+src/components/app/preview/usePreviewFlow.ts
+  s_8d3aebb313e171::t_0345ae627f980d 1-130
+src/components/app/shell/AppShell.tsx
+  s_8d3aebb313e171::t_228b429151694c 1-103
+src/components/app/shell/HomeScreen.tsx
+  s_8d3aebb313e171::t_f5667b81c26cc4 1-63
+src/components/app/shell/RequireSession.tsx
+  s_8d3aebb313e171::t_4f21d548dcd790 1-54
+src/components/app/shell/SignInScreen.tsx
+  s_8d3aebb313e171::t_dd8b382ea2ca2a 1-117
+src/components/app/shell/error-copy.ts
+  s_8d3aebb313e171::t_12f85ec46f62af 1-105
+src/components/app/shell/overview-utils.ts
+  s_8d3aebb313e171::t_b3389e90e28576 1-22
+src/components/app/shell/session-context.tsx
+  s_8d3aebb313e171::t_86dafbdfc3671e 1-123
+src/components/app/ui/Button.tsx
+  s_8d3aebb313e171::t_d9101c7910c4ca 1-53
+src/components/app/ui/ConfirmDialog.tsx
+  s_8d3aebb313e171::t_256217392a46a6 1-51
+src/components/app/ui/Dialog.tsx
+  s_8d3aebb313e171::t_7db872a33fbb8f 1-85
+src/components/app/ui/DraftMark.tsx
+  s_8d3aebb313e171::t_45c954545c2898 1-15
+src/components/app/ui/Field.tsx
+  s_8d3aebb313e171::t_e28fea090f81a9 1-41
+src/components/app/ui/Notice.tsx
+  s_8d3aebb313e171::t_17d6879bf7fbf9 1-39
+src/components/app/ui/StatusBadge.tsx
+  s_8d3aebb313e171::t_e5446cd8553a80 1-28
+src/components/app/ui/VisuallyHidden.tsx
+  s_8d3aebb313e171::t_4d964c4509ef19 1-6
+src/components/app/ui/app.css
+  s_8d3aebb313e171::t_4526d5d7d8ec56 1-172
+src/components/app/ui/index.ts
+  s_8d3aebb313e171::t_ea12d2686d955c 1-12
+src/lib/app-evidence/api.ts
+  s_8d3aebb313e171::t_acd4a7662d61a5 1-68
+src/lib/app-evidence/errors.ts
+  s_8d3aebb313e171::t_e24ca2cac2fd37 1-78
+src/lib/app-evidence/evidence-view.ts
+  s_8d3aebb313e171::t_298c96413bc4b5 1-369
+src/lib/app-evidence/format.ts
+  s_8d3aebb313e171::t_92cdd6e12aa6fb 1-111
+src/lib/app-evidence/idempotency.ts
+  s_8d3aebb313e171::t_6272f9aa2d284b 1-29
+src/lib/app-evidence/index.ts
+  s_8d3aebb313e171::t_7d47636b503611 1-12
+src/lib/app-evidence/labels.ts
+  s_8d3aebb313e171::t_363fee59902275 1-135
+src/lib/app-evidence/preview-view.ts
+  s_8d3aebb313e171::t_05d82c10d84ce7 1-260
+src/lib/app-evidence/scenario.ts
+  s_8d3aebb313e171::t_2f056c63a61c40 1-177
+src/lib/app-evidence/schemas.ts
+  s_8d3aebb313e171::t_bc670012bb6133 1-554
+src/lib/app-evidence/storage.ts
+  s_8d3aebb313e171::t_990bcfa2408765 1-75
+tests/e2e/s2/documents.spec.ts
+  s_8d3aebb313e171::t_17546af7e9cad8 1-557
+tests/e2e/s2/fake-bff.ts
+  s_8d3aebb313e171::t_7f548beece5247 1-224
+tests/e2e/s2/screenshot.css
+  s_8d3aebb313e171::t_17af82deecb744 1-2
+tests/e2e/s2/session.spec.ts
+  s_8d3aebb313e171::t_42bad518a076ca 1-126
+tests/e2e/s34/evidence.spec.ts
+  s_8d3aebb313e171::t_c6dcbd0cb51780 1-317
+tests/e2e/s34/fake-cover.ts
+  s_8d3aebb313e171::t_6cdad6a4310788 1-146
+tests/e2e/s34/preview.spec.ts
+  s_8d3aebb313e171::t_a68c30a5712956 1-246
+tests/e2e/s34/screenshot.css
+  s_8d3aebb313e171::t_b80214cd19de7a 1-2
+tests/unit/app-evidence/evidence-view.test.ts
+  s_8d3aebb313e171::t_5a38cbf86a26fe 1-184
+tests/unit/app-evidence/fixtures.ts
+  s_8d3aebb313e171::t_8b316239f81783 1-230
+tests/unit/app-evidence/misc.test.ts
+  s_8d3aebb313e171::t_7b98411e8a1d00 1-76
+tests/unit/app-evidence/preview-view.test.ts
+  s_8d3aebb313e171::t_358dd3f839b5c5 1-129
+tests/unit/app-evidence/scenario.test.ts
+  s_8d3aebb313e171::t_988e016049a50b 1-68
+tests/unit/app-evidence/schemas.test.ts
+  s_8d3aebb313e171::t_b2890f94a0ed25 1-41
+tests/unit/app-ui/error-copy.test.ts
+  s_8d3aebb313e171::t_3e79d32e2e4f96 1-102
+tests/unit/app-ui/polling.test.ts
+  s_8d3aebb313e171::t_0cc781ad2a6ba1 1-68
+tests/unit/app-ui/stage.test.ts
+  s_8d3aebb313e171::t_d7effd8584dd13 1-119
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a414871b66711d3d338033769aaf72ed00dc4da9",
+  "prompts": {},
+  "sessions": {
+    "s_8d3aebb313e171": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1620a-9786-73e0-a167-77d2da35196a",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
