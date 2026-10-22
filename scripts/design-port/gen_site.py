@@ -17,6 +17,30 @@ BLOBS = {'d5cb06c8c8e1fc0a0e15b59c7d9848d3': 'lightspeed.png', '93aa25bc57d9a125
          '9a2b8696a1d51206c59a50d670254089': 'lok-sabha.png', 'edbf1335c75fd8e4d5f7d7f0630ae2d5': 'ministry-of-finance.png',
          'f9a6c8a2c18175956a0442f5c421f7aa': 'ministry-of-health.png'}
 
+def split_css(css):
+    """Split a stylesheet into top-level rules: (prelude, body) pairs. Comments are dropped."""
+    css = re.sub(r'/\*.*?\*/', '', css, flags=re.S)
+    out, depth, start, cur = [], 0, 0, 0
+    for i, ch in enumerate(css):
+        if ch == '{':
+            if depth == 0: cur = i
+            depth += 1
+        elif ch == '}':
+            depth -= 1
+            if depth == 0:
+                out.append((css[start:cur].strip(), css[cur + 1:i].strip())); start = i + 1
+    return out
+
+def flat_css(css):
+    """Flatten rules to (context, selector, declarations) so identical rules compare equal wherever they were written."""
+    flat = []
+    for pre, body in split_css(css):
+        if pre.startswith('@media') or pre.startswith('@supports'):
+            flat += [(pre, p, b) for p, b in split_css(body)]
+        else:
+            flat.append(('', pre, body))
+    return flat
+
 def body_of(src):
     a = src.index('<x-dc>') + 6; b = src.index('</x-dc>')
     s = src[a:b]
@@ -43,6 +67,8 @@ def imports(ctx, extra='', jsx=''):
 main_src = read('Main.dc.html')
 body = body_of(main_src)
 # design-level edits for production wiring
+body = body.replace('<input id="close-name" name="given-name" type="text" autocomplete="given-name" style=',
+                    '<input id="close-name" name="given-name" type="text" autocomplete="given-name" onChange="{{ cm.setName }}" style=')
 tab_start = body.index('<div role="group" aria-label="How do you want to tell us?"')
 tab_end = body.index('</div>', body.index('Say it</button>', tab_start)) + 6
 body = body[:tab_start] + '<sc-if value="{{ cm.showTabs }}" hint-placeholder-val="{{ true }}">' + body[tab_start:tab_end] + '</sc-if>' + body[tab_end:]
@@ -100,9 +126,39 @@ LINKS = {'O1-Start.dc.html': '/onboarding', 'O2-Event.dc.html': '/onboarding/com
          'O4-Sharing.dc.html': '/onboarding/sharing', 'O5-Upload.dc.html': '/onboarding/add-policies', 'O6-Reading.dc.html': '/onboarding/reading',
          'O7-Matrix-Mobile.dc.html': '/onboarding/your-cover', 'O7-Matrix-Desktop.dc.html': '/onboarding/your-cover', 'Extra-States.dc.html': '/onboarding/your-cover',
          '#terms': '/terms', '#privacy': '/privacy'}
+if not os.path.exists(os.path.join(PROJ, 'Extra-States.dc.html')):
+    print('WARNING: Extra-States.dc.html is not in the artboard folder; links to it are still mapped to /onboarding/your-cover (placeholder target).', file=sys.stderr)
+
+MAIN_RULES = set(flat_css(re.search(r'<style>(.*?)</style>', main_src, re.S).group(1)))
+def decls(body): return {d.strip() for d in body.split(';') if d.strip()}
+MAIN_DECLS = {}
+for _c, _p, _d in MAIN_RULES: MAIN_DECLS.setdefault((_c, _p), set()).update(decls(_d))
+def covered(pre, bod):   # same selector in design.css already carries every declaration
+    return decls(bod) <= MAIN_DECLS.get(('', pre), set())
+MAIN_KEYFRAMES = {pre.split(None, 1)[1].strip(): body for pre, body in split_css(re.search(r'<style>(.*?)</style>', main_src, re.S).group(1)) if pre.startswith('@keyframes')}
+ONB_CSS, ONB_KEYFRAMES = [], {}   # artboard-only rules, emitted to design-onboarding.css
 for f, name, route, title in ONB:
     src = read(f + '.dc.html')
     b = re.sub(r'<!--.*?-->', '', body_of(src), flags=re.S)
+    # artboard <style> blocks: keep only rules that the shared stylesheet does not already have.
+    # A keyframes name that exists elsewhere with a different body is renamed for this artboard so the landing page is never changed.
+    slug = f.split('-')[0].lower()
+    for sm in re.finditer(r'<style>(.*?)</style>', src, re.S):
+        for pre, bod in split_css(sm.group(1)):
+            if pre.startswith('@keyframes'):
+                kname = pre.split(None, 1)[1].strip()
+                if MAIN_KEYFRAMES.get(kname) == bod or ONB_KEYFRAMES.get(kname) == bod: continue
+                if kname in MAIN_KEYFRAMES or kname in ONB_KEYFRAMES:
+                    new = kname + '-' + slug
+                    b = re.sub(r'(?<![\w-])' + re.escape(kname) + r'(?![\w-])', new, b)
+                    kname, pre = new, '@keyframes ' + new
+                ONB_KEYFRAMES[kname] = bod
+                ONB_CSS.append(f'{pre}{{{bod}}}')
+            elif pre.startswith('@media') or pre.startswith('@supports'):
+                inner = [(pre, p, d) for p, d in split_css(bod) if (pre, p, d) not in MAIN_RULES]
+                if inner: ONB_CSS.append(pre + '{' + ''.join(f'{p}{{{d}}}' for _, p, d in inner) + '}')
+            elif ('', pre, bod) not in MAIN_RULES and not covered(pre, bod):
+                ONB_CSS.append(f'{pre}{{{bod}}}')
     desktop = 'Desktop' in f
     root_style = ({'width': '100%', 'minHeight': '100dvh', 'height': 'auto'} if desktop else {'width': '100%', 'maxWidth': '480px', 'minHeight': '100dvh', 'height': 'auto', 'margin': '0 auto'}); root_style.update({'fontSize': '16px', 'lineHeight': 'normal'})
     ctx = Ctx(link_map=LINKS, root_style=root_style)
@@ -124,6 +180,10 @@ style = re.search(r'<style>(.*?)</style>', main_src, re.S).group(1)
 style = re.sub(r"font-family:\s*Newsreader[^;}]*", "font-family:var(--font-display),'Iowan Old Style',Georgia,serif", style)
 write('src/app/design.css', '/* Generated from the approved Claude Design artboard Main.dc.html (helmet styles). */\n' + style.strip() +
       '\n.kv-only-mobile{display:none}\n@media (max-width:760px){.kv-only-mobile{display:block}.kv-only-desktop{display:none}}\n')
+seen, uniq = set(), []
+for r in ONB_CSS:
+    if r not in seen: seen.add(r); uniq.append(r)
+write('src/app/design-onboarding.css', '/* Generated from the per-artboard <style> blocks of O1-O7 (rules not already in design.css). Imported by src/app/onboarding/layout.tsx only. */\n' + '\n'.join(uniq) + '\n')
 print('generated')
 
 # ---------- production wiring of the landing model ----------
@@ -146,8 +206,11 @@ rep("""  renderVals() {""", """  sendSignup(key, email) {
     var payload = { email: email, location: key === 'hero' ? 'hero' : 'closing', company_website: '' };
     ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'fbclid'].forEach(function (k) { var q = query.get(k); if (q) payload[k] = q; });
     if (key === 'close') {
+      var evLabels = ['A renewal', 'Planned treatment', 'A job change', 'Parents\\' cover', 'Nothing yet, just getting organised'];
       var polLabels = ['Employer group cover', 'Family floater', 'Parents\\' policy', 'Super top-up', 'Not sure'];
+      payload.events = evLabels.filter(function (l, i) { return !!self.state.events[i]; });
       payload.policies = polLabels.filter(function (l, i) { return !!self.state.policies[i]; });
+      if (self.state.closeName) payload.name = self.state.closeName;
     }
     var done = function (state, extra) { var d = {}; d[key + 'State'] = state; Object.assign(d, extra || {}); self.setState(d); };
     fetch('/api/waitlist', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) })
@@ -256,6 +319,7 @@ rep("""      status: voice === 'idle' ? (consent ? 'Tap to record' : 'Tick the b
 
 rep("""      setWrite: function () { self.setState({ mode: 'write' }); },""",
     """      showTabs: !!this.props.voiceEnabled,
+      setName: function (e) { self.setState({ closeName: e.target.value }); },
       setWrite: function () { self.setState({ mode: 'write' }); },""")
 
 rep("""      successExtra: mode === 'voice' && voice === 'recorded' ? 'We have your voice note too.' : ''""",

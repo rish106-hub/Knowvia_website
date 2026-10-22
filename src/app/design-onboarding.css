@@ -1,0 +1,4 @@
+/* Generated from the per-artboard <style> blocks of O1-O7 (rules not already in design.css). Imported by src/app/onboarding/layout.tsx only. */
+.kv-file:focus-within{outline:2px solid #163F42;outline-offset:2px;box-shadow:0 0 0 5px #E0A02B}
+@keyframes kvIn-o6{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes kvOut{from{opacity:1}to{opacity:0}}
