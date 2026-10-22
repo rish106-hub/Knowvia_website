@@ -16,6 +16,8 @@ const contentSecurityPolicy = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  // Parallel dev servers (e2e) need separate build dirs; unset in normal use.
+  ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
   output: "standalone",
   poweredByHeader: false,
   reactStrictMode: true,
