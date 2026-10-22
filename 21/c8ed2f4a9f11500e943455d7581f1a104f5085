@@ -1,0 +1,27 @@
+docs/block5/s34-ui.md
+  s_8d3aebb313e171::t_d44e235d277397 1-100
+docs/block5/bff.md
+  s_8d3aebb313e171::t_d44e235d277397 1-157
+docs/block5/s2-ui.md
+  s_8d3aebb313e171::t_d44e235d277397 1-112
+docs/block5/copy-changes.md
+  s_8d3aebb313e171::t_78508b3e8fd4cd 1-30
+docs/block5/token-inventory.md
+  s_8d3aebb313e171::t_16bd1e19a53b37 1-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "21c8ed2f4a9f11500e943455d7581f1a104f5085",
+  "prompts": {},
+  "sessions": {
+    "s_8d3aebb313e171": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1620a-9786-73e0-a167-77d2da35196a",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
