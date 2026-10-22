@@ -1,0 +1,27 @@
+tests/unit/app-bff/helpers.ts
+  s_8d3aebb313e171::t_e79ff2efb1ea71 42
+  s_8d3aebb313e171::t_56e2935ee375ad 41,44,78-81,83-86,89-91,95,98-101
+tests/unit/app-bff/session-flow.test.ts
+  s_8d3aebb313e171::t_fa1c3af319f8df 170-171,201
+  s_8d3aebb313e171::t_fc227ffa1f34f9 189-200,202-222
+docs/block5/security-closure.md
+  s_8d3aebb313e171::t_f9558f7ce44e99 1-65
+package-lock.json
+  s_8d3aebb313e171::t_925f3612a1d169 1376-1378,1416-1418,1434-1436,1452-1454,1470-1472,1488-1490,1506-1508,1524-1526,1545-1547,1566-1568,1587-1589,1608-1610,1629-1631,1650-1652,1668-1670,1686-1688,5432-5434,6212-6214,6219,6229-6243,7144-7146,7153-7154,7171,7237-7239,7258,7260
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7f6d91bb698241494ec3e61f8630ae34af5e5916",
+  "prompts": {},
+  "sessions": {
+    "s_8d3aebb313e171": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1620a-9786-73e0-a167-77d2da35196a",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
