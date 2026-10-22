@@ -1,0 +1,57 @@
+design/claude-design/O3-People.dc.html
+  s_b4c34ff84478b9::t_37e7845567e873 46
+design/claude-design/O4-Sharing.dc.html
+  s_b4c34ff84478b9::t_50fc4675fde9c6 53-54
+design/claude-design/O5-Upload.dc.html
+  s_b4c34ff84478b9::t_47014e8207648f 30-31,33,58-59,61,66
+design/claude-design/O6-Reading.dc.html
+  s_b4c34ff84478b9::t_e59fd13239383a 38
+scripts/design-port/README.md
+  s_b4c34ff84478b9::t_15045575f294a1 15-17,26,28-30
+scripts/design-port/check-regen.sh
+  s_b4c34ff84478b9::t_bae91d1364aa19 1-25
+scripts/design-port/gen_site.py
+  s_b4c34ff84478b9::t_3f10dd28fe1e25 20-43,70-71,129-139,143-161,183-186,209,211,213,322
+src/app/design-onboarding.css
+  s_8d3aebb313e171::t_c695bc341dc000 1-4
+src/app/onboarding/layout.tsx
+  s_b4c34ff84478b9::t_56276013bfc94a 1-6
+src/app/tokens.css
+  s_b4c34ff84478b9::t_442cb6da09b615 1-41
+src/components/home/landing-model.js
+  s_8d3aebb313e171::t_1e68f876858970 135,137,139,350
+src/components/onboarding/OnboardingAddPolicies.tsx
+  s_8d3aebb313e171::t_4bb101e9d49bce 35,38,43,108,114,121,131-132
+src/components/onboarding/OnboardingPeople.tsx
+  s_8d3aebb313e171::t_cd4e2795837601 104
+src/components/onboarding/OnboardingReading.tsx
+  s_8d3aebb313e171::t_74bb34898c5236 32,40,48,56,68,71
+src/components/onboarding/OnboardingSharing.tsx
+  s_8d3aebb313e171::t_1f2018792400ad 103,106
+tests/unit/design-port.test.ts
+  s_b4c34ff84478b9::t_d19ef41c85f253 1-87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1653c6f9a3b9e2eced2c72d61629bf56c57452c0",
+  "prompts": {},
+  "sessions": {
+    "s_8d3aebb313e171": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1620a-9786-73e0-a167-77d2da35196a",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    },
+    "s_b4c34ff84478b9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a1620a-9786-73e0-a167-77d2da35196a",
+        "model": "unknown"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
