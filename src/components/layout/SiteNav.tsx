@@ -25,15 +25,18 @@ export function SiteNav() {
             </span>
           </Link>
         </div>
-        <div className="kv-desktop" style={{display: "flex", alignItems: "center", gap: "32px", fontSize: "16px", fontWeight: "600"}}>
+        <div className="kv-desktop" style={{display: "flex", alignItems: "center", gap: "28px", fontSize: "16px", fontWeight: "600"}}>
+          <Link className="kv-nav-link" href="/#industry">
+            {"Why it matters"}
+          </Link>
           <Link className="kv-nav-link" href="/#how">
             {"How it works"}
           </Link>
+          <Link className="kv-nav-link" href="/#try">
+            {"Room test"}
+          </Link>
           <Link className="kv-nav-link" href="/#privacy">
             {"Privacy"}
-          </Link>
-          <Link className="kv-nav-link" href="/#partners">
-            {"For business"}
           </Link>
           <Link className="kv-nav-link" href="/#questions">
             {"Questions"}
@@ -56,14 +59,17 @@ export function SiteNav() {
         <>
         <div id="mobile-menu" className="kv-mobile" style={{padding: "8px 0 24px"}}>
           <div style={{display: "flex", flexDirection: "column", fontSize: "19px", fontWeight: "600"}}>
+            <Link href="/#industry" style={{minHeight: "52px", display: "flex", alignItems: "center", borderBottom: "1px solid #CFDCDA", color: "#1A3034", textDecoration: "none"}}>
+              {"Why it matters"}
+            </Link>
             <Link href="/#how" style={{minHeight: "52px", display: "flex", alignItems: "center", borderBottom: "1px solid #CFDCDA", color: "#1A3034", textDecoration: "none"}}>
               {"How it works"}
             </Link>
+            <Link href="/#try" style={{minHeight: "52px", display: "flex", alignItems: "center", borderBottom: "1px solid #CFDCDA", color: "#1A3034", textDecoration: "none"}}>
+              {"Room test"}
+            </Link>
             <Link href="/#privacy" style={{minHeight: "52px", display: "flex", alignItems: "center", borderBottom: "1px solid #CFDCDA", color: "#1A3034", textDecoration: "none"}}>
               {"Privacy"}
-            </Link>
-            <Link href="/#partners" style={{minHeight: "52px", display: "flex", alignItems: "center", borderBottom: "1px solid #CFDCDA", color: "#1A3034", textDecoration: "none"}}>
-              {"For business"}
             </Link>
             <Link href="/#questions" style={{minHeight: "52px", display: "flex", alignItems: "center", borderBottom: "1px solid #CFDCDA", color: "#1A3034", textDecoration: "none"}}>
               {"Questions"}

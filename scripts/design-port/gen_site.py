@@ -85,8 +85,8 @@ footer = re.sub(r'<!--.*?-->', '', footer, flags=re.S)
 chunks['12'] = chunks['12'].replace('</main>', '')
 
 SECTIONS = [('1', 'HeroSection'), ('2b', 'IndustrySection'), ('3', 'ClauseBand'), ('4', 'ContrastSection'), ('5', 'HowItWorksSection'),
-            ('6', 'FamilyQuote'), ('7', 'StoriesSection'), ('8', 'HouseholdControl'), ('10', 'PartnersSection'), ('11', 'QuestionsSection'),
-            ('11b', 'LimitsSection'), ('12', 'EarlyListSection')]
+            ('5b', 'RoomTestSection'), ('6', 'FamilyQuote'), ('7', 'StoriesSection'), ('8', 'HouseholdControl'), ('10', 'PartnersSection'),
+            ('11', 'QuestionsSection'), ('11b', 'LimitsSection'), ('12', 'EarlyListSection')]
 HOME_HREF = {'#privacy-notice': '/privacy', '#terms': '/terms', '#contact': '__MAILTO__'}
 for key, name in SECTIONS:
     html = re.sub(r'<!--.*?-->', '', chunks[key], flags=re.S)
@@ -95,7 +95,7 @@ for key, name in SECTIONS:
     write(f'src/components/home/{name}.tsx', HEADER.format(src='Main.dc.html') + imports(ctx, jsx=jsx) +
           (f'export function {name}({{ v }}: {{ v: Any }}) {{\n' if 'v.' in jsx else f'export function {name}() {{\n') + f'  return (\n    <>\n{jsx}    </>\n  );\n}}\n')
 
-ANCHORS = {f'#{a}': f'/#{a}' for a in ('how', 'privacy', 'partners', 'questions', 'early-list', 'top')}
+ANCHORS = {f'#{a}': f'/#{a}' for a in ('industry', 'how', 'try', 'privacy', 'partners', 'questions', 'early-list', 'top')}
 ANCHORS.update({'#privacy-notice': '/privacy', '#terms': '/terms', '#contact': '__MAILTO__'})
 ctx = Ctx(href_map=ANCHORS)
 jsx = convert(nav, ctx)
