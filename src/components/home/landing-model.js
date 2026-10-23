@@ -129,33 +129,13 @@ export class Component extends DCLogic {
   }
   sendSignup(key, email) {
     var self = this;
-    var query = new URLSearchParams(window.location.search);
-    var payload = { email: email, location: key === 'hero' ? 'hero' : 'closing', company_website: '' };
-    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'fbclid'].forEach(function (k) { var q = query.get(k); if (q) payload[k] = q; });
-    if (key === 'close') {
-      var evLabels = ['A renewal', 'Planned treatment', 'A job change', 'Parents\' cover', 'Nothing yet, just getting organised'];
-      var polLabels = ['Employer group cover', 'Family floater', 'Parents\' policy', 'Super top-up', 'Not sure'];
-      payload.events = evLabels.filter(function (l, i) { return !!self.state.events[i]; });
-      payload.policies = polLabels.filter(function (l, i) { return !!self.state.policies[i]; });
-      if (self.state.closeName) payload.name = self.state.closeName;
-    }
+    var payload = { email: email, location: key === 'hero' ? 'hero' : 'closing' };
     var done = function (state, extra) { var d = {}; d[key + 'State'] = state; Object.assign(d, extra || {}); self.setState(d); };
     fetch('/api/waitlist', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) })
       .then(function (res) {
         if (res.status === 400) { done('invalid'); return; }
         if (!res.ok) { done('server'); return; }
         window.dispatchEvent(new CustomEvent('knowvia:lead'));
-        var mode = self.state.mode || self.props.closingMode || 'write';
-        if (key === 'close' && mode === 'voice' && self.state.voice === 'recorded' && self.audioBlob) {
-          var form = new FormData();
-          form.append('email', email);
-          form.append('consent', 'yes');
-          form.append('duration', String(self.state.voiceSecs || 0));
-          form.append('audio', self.audioBlob, 'voice-note.webm');
-          return fetch('/api/voice-note', { method: 'POST', body: form })
-            .then(function (r) { done('success', { voiceSaved: r.ok }); })
-            .catch(function () { done('success', { voiceSaved: false }); });
-        }
         done('success');
       })
       .catch(function () { done('network'); });

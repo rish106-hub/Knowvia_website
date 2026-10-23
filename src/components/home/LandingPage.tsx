@@ -39,16 +39,16 @@ export function LandingPage() {
       <SiteNav />
       <main id="main">
         <HeroSection v={v} />
-        <IndustrySection v={v} />
-        <ClauseBand v={v} />
-        <ContrastSection v={v} />
+        <IndustrySection />
+        <ClauseBand />
+        <ContrastSection />
         <HowItWorksSection />
+        <LimitsSection v={v} />
         <FamilyQuote />
-        <StoriesSection v={v} />
-        <HouseholdControl v={v} />
+        <StoriesSection />
+        <HouseholdControl />
         <PartnersSection />
         <QuestionsSection v={v} />
-        <LimitsSection v={v} />
         <EarlyListSection v={v} />
       </main>
       <SiteFooter />

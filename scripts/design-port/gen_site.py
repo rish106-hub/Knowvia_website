@@ -27,13 +27,15 @@ def body_of(src):
 def script_of(src):
     return re.search(r'<script type="text/x-dc"[^>]*>(.*?)</script>', src, re.S).group(1)
 
+def uses_model(jsx): return re.search(r'\bv\.', jsx) is not None
+
 def imports(ctx, extra='', jsx=''):
     lines = ['"use client";', '']
     if '<img ' in jsx: lines.insert(1, "/* eslint-disable @next/next/no-img-element -- logos keep the design's fixed height with natural width */")
     react = [n for n in ('Fragment',) if n in ctx.uses]
     if react: lines.append(f'import {{ {", ".join(react)} }} from "react";')
     if 'Link' in ctx.uses: lines.append('import Link from "next/link";')
-    dc = (['type Any'] if ('v.' in jsx or ': Any' in jsx or 'Any =' in extra) else []) + [n for n in ('css', 'truthy') if n in ctx.uses]
+    dc = (['type Any'] if (uses_model(jsx) or ': Any' in jsx or 'Any =' in extra) else []) + [n for n in ('css', 'truthy') if n in ctx.uses]
     if dc: lines.append(f'import {{ {", ".join(dc)} }} from "@/lib/dc";')
     if 'site' in ctx.uses: lines.append('import { site } from "@/lib/site";')
     if extra: lines.append(extra)
@@ -45,9 +47,6 @@ body = body_of(main_src)
 # design-level edits for production wiring
 body = body.replace('<input id="close-name" name="given-name" type="text" autocomplete="given-name" style=',
                     '<input id="close-name" name="given-name" type="text" autocomplete="given-name" onChange="{{ cm.setName }}" style=')
-tab_start = body.index('<div role="group" aria-label="How do you want to tell us?"')
-tab_end = body.index('</div>', body.index('Say it</button>', tab_start)) + 6
-body = body[:tab_start] + '<sc-if value="{{ cm.showTabs }}" hint-placeholder-val="{{ true }}">' + body[tab_start:tab_end] + '</sc-if>' + body[tab_end:]
 
 marks = list(re.finditer(r'<!-- (\d+b?)\. ', body))
 chunks = {}
@@ -69,7 +68,7 @@ for key, name in SECTIONS:
     ctx = Ctx(href_map=HOME_HREF)
     jsx = convert(html, ctx)
     write(f'src/components/home/{name}.tsx', HEADER.format(src='Main.dc.html') + imports(ctx, jsx=jsx) +
-          (f'export function {name}({{ v }}: {{ v: Any }}) {{\n' if 'v.' in jsx else f'export function {name}() {{\n') + f'  return (\n    <>\n{jsx}    </>\n  );\n}}\n')
+          (f'export function {name}({{ v }}: {{ v: Any }}) {{\n' if uses_model(jsx) else f'export function {name}() {{\n') + f'  return (\n    <>\n{jsx}    </>\n  );\n}}\n')
 
 ANCHORS = {f'#{a}': f'/#{a}' for a in ('how', 'privacy', 'partners', 'questions', 'early-list', 'top')}
 ANCHORS.update({'#privacy-notice': '/privacy', '#terms': '/terms', '#contact': '__MAILTO__'})
@@ -111,7 +110,7 @@ for f, name, route, title in ONB:
     jsx = convert(b, ctx, root_style_first=True)
     write(f'src/components/onboarding/{f.lower()}-model.js', f'// Generated from {f}.dc.html.\n' + ('' if 'self = this' not in script_of(src) else '/* eslint-disable @typescript-eslint/no-this-alias -- ported canvas logic keeps its `var self = this` closures */\n') + f'import {{ DCLogic }} from "@/lib/dc-logic";\n\nexport ' + script_of(src).strip() + '\n')
     write(f'src/components/onboarding/{name}.tsx', HEADER.format(src=f + '.dc.html') + imports(ctx, jsx=jsx, extra=f'import {{ useDcModel }} from "@/lib/use-dc-model";\nimport {{ Component as Model }} from "./{f.lower()}-model";') +
-          (f'export function {name}() {{\n  const v: Any = useDcModel(Model, {{}});\n' if 'v.' in jsx else f'export function {name}() {{\n  useDcModel(Model, {{}});\n') + f'  return (\n    <>\n{jsx}    </>\n  );\n}}\n')
+          (f'export function {name}() {{\n  const v: Any = useDcModel(Model, {{}});\n' if uses_model(jsx) else f'export function {name}() {{\n  useDcModel(Model, {{}});\n') + f'  return (\n    <>\n{jsx}    </>\n  );\n}}\n')
     if route is not None:
         path = 'src/app/onboarding' + ('/' + route if route else '') + '/page.tsx'
         write(path, f'import type {{ Metadata }} from "next";\nimport {{ {name} }} from "@/components/onboarding/{name}";\n\n'
@@ -144,33 +143,13 @@ rep("""        s[key + 'State'] = 'submitting'; self.setState(s);
 
 rep("""  renderVals() {""", """  sendSignup(key, email) {
     var self = this;
-    var query = new URLSearchParams(window.location.search);
-    var payload = { email: email, location: key === 'hero' ? 'hero' : 'closing', company_website: '' };
-    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'fbclid'].forEach(function (k) { var q = query.get(k); if (q) payload[k] = q; });
-    if (key === 'close') {
-      var evLabels = ['A renewal', 'Planned treatment', 'A job change', 'Parents\\' cover', 'Nothing yet, just getting organised'];
-      var polLabels = ['Employer group cover', 'Family floater', 'Parents\\' policy', 'Super top-up', 'Not sure'];
-      payload.events = evLabels.filter(function (l, i) { return !!self.state.events[i]; });
-      payload.policies = polLabels.filter(function (l, i) { return !!self.state.policies[i]; });
-      if (self.state.closeName) payload.name = self.state.closeName;
-    }
+    var payload = { email: email, location: key === 'hero' ? 'hero' : 'closing' };
     var done = function (state, extra) { var d = {}; d[key + 'State'] = state; Object.assign(d, extra || {}); self.setState(d); };
     fetch('/api/waitlist', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) })
       .then(function (res) {
         if (res.status === 400) { done('invalid'); return; }
         if (!res.ok) { done('server'); return; }
         window.dispatchEvent(new CustomEvent('knowvia:lead'));
-        var mode = self.state.mode || self.props.closingMode || 'write';
-        if (key === 'close' && mode === 'voice' && self.state.voice === 'recorded' && self.audioBlob) {
-          var form = new FormData();
-          form.append('email', email);
-          form.append('consent', 'yes');
-          form.append('duration', String(self.state.voiceSecs || 0));
-          form.append('audio', self.audioBlob, 'voice-note.webm');
-          return fetch('/api/voice-note', { method: 'POST', body: form })
-            .then(function (r) { done('success', { voiceSaved: r.ok }); })
-            .catch(function () { done('success', { voiceSaved: false }); });
-        }
         done('success');
       })
       .catch(function () { done('network'); });

@@ -5,12 +5,14 @@ The public Knowvia site and onboarding prototype, rebuilt from the supplied Octo
 ## Run locally
 
 1. Copy `.env.example` to `.env.local`.
-2. Run `npm install`.
+2. Run `npm ci`.
 3. Run `npm run dev`.
 
 The site is available at `http://localhost:3000`.
 
 ## Production settings
+
+The site currently deploys to Vercel. Azure is a future target, not the current runtime.
 
 - `DATABASE_URL` stores waitlist signups in PostgreSQL. Production submissions fail closed when it is missing.
 - `NEXT_PUBLIC_GOOGLE_TAG_ID` enables Google Analytics after visitor consent.
@@ -33,6 +35,8 @@ The site is available at `http://localhost:3000`.
 ## Design source
 
 The home page, navigation, footer and onboarding screens are generated from the approved Claude Design artboards. See `scripts/design-port/README.md`.
+
+The small-site architecture, data boundaries, and known gaps are documented in [`docs/website.md`](docs/website.md).
 
 ## Checks
 

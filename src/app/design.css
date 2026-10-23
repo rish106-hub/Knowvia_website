@@ -59,17 +59,22 @@ a{color:#176F69}a:hover{color:#125A55}
 @keyframes kvMark{from{background-size:0% 0.26em}to{background-size:100% 0.26em}}
 @keyframes kvPop{from{opacity:0;transform:scale(0.6)}to{opacity:1;transform:scale(1)}}
 @keyframes kvRise{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+.kv-hero-copy{animation:kvIn 420ms cubic-bezier(0.165,0.84,0.44,1) both}
+.kv-proof-card{animation:kvIn 460ms cubic-bezier(0.165,0.84,0.44,1) 100ms both}
+.kv-proof-row{animation:kvIn 360ms cubic-bezier(0.165,0.84,0.44,1) both}
+.kv-proof-row:nth-child(2){animation-delay:180ms}.kv-proof-row:nth-child(3){animation-delay:260ms}.kv-proof-row:nth-child(4){animation-delay:340ms}
+@keyframes kvScan{0%,25%{transform:translateY(-130%);opacity:0}40%{opacity:.8}85%,100%{transform:translateY(520%);opacity:0}}
+.kv-policy-scan{position:relative;overflow:hidden}
+.kv-policy-scan::after{content:"";position:absolute;left:0;right:0;top:0;height:18%;pointer-events:none;background:linear-gradient(180deg,transparent,rgba(200,230,160,.5),transparent);animation:kvScan 1.5s ease-out 300ms both}
+@keyframes kvPrivacyRedact{from{background-size:0 100%}to{background-size:100% 100%}}
+.kv-redacted{padding:2px 5px;background-image:linear-gradient(#163F42,#163F42);background-repeat:no-repeat;color:#FFFFFF;animation:kvPrivacyRedact 520ms ease-out 450ms both}
 @supports (animation-timeline: view()){
-.kv-strike{animation:kvStrike linear both;animation-timeline:view();animation-range:entry 30% cover 45%}
-.kv-grow{transform-origin:left;animation:kvGrow linear both;animation-timeline:view();animation-range:entry 10% cover 35%}
-.kv-rise{animation:kvRise linear both;animation-timeline:view();animation-range:entry 0% entry 60%}
-}
-@supports (animation-timeline: scroll()){
-.kv-nav{animation:kvNavSolid linear both;animation-timeline:scroll(root);animation-range:0 160px}
-@keyframes kvNavSolid{from{background:rgba(243,247,246,0.6);box-shadow:none}to{background:rgba(255,255,255,0.9);box-shadow:0 1px 0 #CFDCDA,0 12px 30px rgba(22,62,54,0.08)}}
+.kv-evidence-visual{transform-origin:left;animation:kvGrow linear both;animation-timeline:view();animation-range:entry 10% cover 35%}
+.kv-policy-scan::after{animation-timeline:view();animation-range:entry 10% cover 55%}
+.kv-redacted{animation-timeline:view();animation-range:entry 15% cover 40%}
 }
 .kv-mobile{display:none}
-@media (max-width:760px){.kv-desktop{display:none !important}.kv-mobile{display:block}.kv-overhang{margin-bottom:0}.kv-hero-btn{flex:1 1 100% !important;height:56px !important}.kv-hero-art{min-height:600px !important}.kv-win{top:0 !important;margin-top:12px}.kv-srclogo{height:32px !important}}
+@media (max-width:760px){.kv-desktop{display:none !important}.kv-mobile{display:block}.kv-hero-btn{flex:1 1 100% !important;height:56px !important}.kv-evidence-grid,.kv-term-grid,.kv-research-grid,.kv-privacy-grid,.kv-story-grid{grid-template-columns:1fr !important}.kv-story-grid>div{border-left:0 !important;padding-left:0 !important}.kv-answer-row{grid-template-columns:1fr !important}.kv-compare>div{grid-template-columns:1fr !important}.kv-compare>div>*{border-left:0 !important}.kv-compare>div>h3+ h3{border-top:1px solid rgba(255,255,255,.2)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none !important;animation:none !important}.kv-marquee{flex-wrap:wrap;width:auto}.kv-dup{display:none !important}}
 .kv-only-mobile{display:none}
 @media (max-width:760px){.kv-only-mobile{display:block}.kv-only-desktop{display:none}}
