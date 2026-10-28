@@ -203,7 +203,9 @@ rep("""        s[key + 'State'] = 'submitting'; self.setState(s);
 rep("""  renderVals() {""", """  sendSignup(key, email) {
     var self = this;
     var query = new URLSearchParams(window.location.search);
-    var payload = { email: email, location: key === 'hero' ? 'hero' : 'closing', company_website: '' };
+    // consent: the user submits beside the notice shown under each form. That notice is draft wording
+    // (version draft-1, recorded by the server) and needs legal review before launch.
+    var payload = { email: email, consent: true, location: key === 'hero' ? 'hero' : 'closing', company_website: '' };
     ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'fbclid'].forEach(function (k) { var q = query.get(k); if (q) payload[k] = q; });
     if (key === 'close') {
       var evLabels = ['A renewal', 'Planned treatment', 'A job change', 'Parents\\' cover', 'Nothing yet, just getting organised'];

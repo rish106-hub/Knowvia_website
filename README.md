@@ -12,7 +12,7 @@ The site is available at `http://localhost:3000`.
 
 ## Production settings
 
-- `DATABASE_URL` stores waitlist signups in PostgreSQL. Production submissions fail closed when it is missing.
+- `DATABASE_URL` stores waitlist signups in PostgreSQL (schema `knowvia_web`). Production submissions fail closed when it is missing. Add `DATABASE_SSL_CA_PATH` or `DATABASE_SSL_CA` for the database CA; TLS is always verified. Run `node scripts/migrate.mjs` before deploying. See `docs/waitlist-storage.md`.
 - `NEXT_PUBLIC_GOOGLE_TAG_ID` enables Google Analytics after visitor consent.
 - `NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL` records a lead conversion after a successful signup.
 - `NEXT_PUBLIC_META_PIXEL_ID` enables the Meta Pixel after visitor consent.
