@@ -9,6 +9,7 @@ import {
   answerIsGone, bumpGeneration, clearStoredAnswer, deriveQuestionKey, deriveReviewKey, describeError, documentSetKey, hasConfirmerFlag, loadGeneration, loadStoredAnswer,
   saveConfirmerFlag, saveStoredAnswer, sessionStore, type DocumentLite, type ErrorView, type EvidenceAnswer, type Handoff,
 } from "@/lib/app-evidence";
+import { newIdempotencyKey } from "@/lib/app-client";
 import { askFirstQuestion, designateSelfConfirmer, getAnswer, getHandoff, getOverview, getQuestionNotice, grantQuestionConsent, recordReview } from "@/lib/app-evidence/api";
 import type { ConfirmState } from "./FactCardView";
 
@@ -53,6 +54,8 @@ export function useCoverFlow() {
   const [state, setState] = useState<CoverState>(initial);
   const run = useRef(0);
   const ctx = useRef<Ctx | null>(null);
+  // Kept until the grant succeeds, so every retry of one "allow" action sends the same key.
+  const consentKey = useRef<string | null>(null);
   const patch = useCallback((p: Partial<CoverState>) => setState((prev) => ({ ...prev, ...p })), []);
 
   useEffect(() => () => void (run.current += 1), []);
@@ -169,7 +172,9 @@ export function useCoverFlow() {
     const token = run.current;
     patch({ granting: true, grantError: null });
     try {
-      await grantQuestionConsent(c.documentIds);
+      consentKey.current ??= newIdempotencyKey();
+      await grantQuestionConsent(c.documentIds, consentKey.current);
+      consentKey.current = null;
     } catch (e) {
       if (run.current === token) patch({ granting: false, grantError: describeError(e, "consent") });
       return;

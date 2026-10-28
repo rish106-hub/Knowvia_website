@@ -2,7 +2,7 @@
 
 import { ArrowClockwise, CircleNotch, FilePdf, Trash } from "@phosphor-icons/react";
 import { useRef, useState } from "react";
-import { AppApiError, appFetch } from "@/lib/app-client";
+import { AppApiError, appFetch, newIdempotencyKey } from "@/lib/app-client";
 import type { DocumentView } from "@/lib/app-contract";
 import { ConsentNoticeCard } from "../consent/ConsentNoticeCard";
 import { useConsentNotices } from "../consent/useConsentNotices";
@@ -37,6 +37,8 @@ export function DocumentRow({ doc, localName, stalled, onRestartPolling }: Props
   const [dialogError, setDialogError] = useState<{ title: string; message: string } | null>(null);
   const notices = useConsentNotices(dialog === "ocr_consent");
   const rowRef = useRef<HTMLLIElement>(null);
+  // Kept until the grant succeeds, so every retry of one "allow" action sends the same key.
+  const consentKey = useRef<string | null>(null);
 
   function fail(caught: unknown, retry?: () => void): ErrorCopy | null {
     if (handleError(caught)) return null;
@@ -63,7 +65,13 @@ export function DocumentRow({ doc, localName, stalled, onRestartPolling }: Props
     setBusy("ocr");
     setDialogError(null);
     try {
-      await appFetch("/consents", { method: "POST", json: { scope: "ocr_sarvam", documentId: doc.id } });
+      consentKey.current ??= newIdempotencyKey();
+      await appFetch("/consents", {
+        method: "POST",
+        json: { scope: "ocr_sarvam", documentId: doc.id },
+        headers: { "Idempotency-Key": consentKey.current },
+      });
+      consentKey.current = null;
     } catch (caught) {
       setBusy(null);
       if (!handleError(caught)) {

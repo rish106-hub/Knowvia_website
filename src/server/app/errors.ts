@@ -39,6 +39,7 @@ const MESSAGES: Record<string, string> = {
   UPLOAD_CAPACITY_REACHED: "Too many documents are waiting to be checked.",
   DOCUMENT_DELETE_FORBIDDEN: "You cannot delete this document.",
   IDEMPOTENCY_CONFLICT: "That request key was already used for something different.",
+  IDEMPOTENCY_IN_PROGRESS: "That request is still being worked on. Try again shortly.",
   OCR_JOB_NOT_STARTED: "Reading has not been started for this document.",
   OCR_PROVIDER_DISABLED: "Reading documents is not available yet.",
   OCR_PROVIDER_NOT_CONFIGURED: "Reading documents is not available yet.",

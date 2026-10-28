@@ -26,8 +26,14 @@ export async function getQuestionNotice(signal?: AbortSignal): Promise<ConsentNo
   return notice && typeof notice.title === "string" && typeof notice.body === "string" ? notice : null;
 }
 
-export const grantQuestionConsent = (documentIds: string[], signal?: AbortSignal) =>
-  appFetch<{ consent: ConsentView; reused: boolean }>("/consents", { method: "POST", json: { scope: "question_gemini", documentIds }, signal });
+// One key per user action: a repeat after an ambiguous timeout gets the same grant back instead of a second, unrecorded one.
+export const grantQuestionConsent = (documentIds: string[], idempotencyKey: string, signal?: AbortSignal) =>
+  appFetch<{ consent: ConsentView; reused: boolean }>("/consents", {
+    method: "POST",
+    json: { scope: "question_gemini", documentIds },
+    headers: { "Idempotency-Key": idempotencyKey },
+    signal,
+  });
 
 export async function askFirstQuestion(caseId: string, documentIds: string[], idempotencyKey: string, signal?: AbortSignal): Promise<AnswerEnvelope> {
   const raw = await appFetch<unknown>(`/cases/${enc(caseId)}/questions`, {

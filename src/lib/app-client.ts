@@ -40,7 +40,8 @@ export async function appFetch<T>(path: string, options: RequestOptions = {}): P
     headers["Content-Type"] = "application/json";
     body = JSON.stringify(options.json);
   }
-  if (method !== "GET") headers["X-Knowvia-App"] = "1";
+  // Every request carries the marker: writes need it, and the GETs that poll the OCR provider need it too.
+  headers["X-Knowvia-App"] = "1";
 
   let response: Response;
   try {

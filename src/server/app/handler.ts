@@ -76,7 +76,8 @@ type Ctx = {
   issued: SessionData | null;
 };
 
-type Route = { auth: boolean; run: (ctx: Ctx) => Promise<Result> };
+/** `markerOnGet`: the route has a backend side effect on GET (an OCR refresh), so it needs X-Knowvia-App like a write. */
+type Route = { auth: boolean; markerOnGet?: boolean; run: (ctx: Ctx) => Promise<Result> };
 
 // ---------- helpers ----------
 
@@ -127,6 +128,11 @@ function idempotencyKey(request: Request): string {
   const key = request.headers.get("idempotency-key")?.trim() ?? "";
   if (key.length < 8 || key.length > 200) throw appError(400, "IDEMPOTENCY_KEY_REQUIRED", { fields: ["Idempotency-Key"] });
   return key;
+}
+
+/** The key is optional where a repeat is harmless without it: a malformed one is refused, an absent one is not invented. */
+function optionalIdempotencyKey(request: Request): string | undefined {
+  return request.headers.get("idempotency-key") === null ? undefined : idempotencyKey(request);
 }
 
 const PATH_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
@@ -264,6 +270,7 @@ const ROUTES = {
   },
   "overview.get": {
     auth: true,
+    markerOnGet: true,
     async run(ctx) {
       const { session, state } = ctx;
       const parsedMatrix = householdMatrix.safeParse(await ctx.backend.getHousehold(session.token, session.householdId));
@@ -317,6 +324,7 @@ const ROUTES = {
   "consents.grant": {
     auth: true,
     async run(ctx) {
+      const key = optionalIdempotencyKey(ctx.request);
       const body = await readJson(ctx.request, grantConsentRequestSchema);
       const { session, state } = ctx;
       const docs = body.scope === "ocr_sarvam" ? [body.documentId as string] : body.scope === "question_gemini" ? [...new Set(body.documentIds as string[])].sort() : [];
@@ -327,7 +335,7 @@ const ROUTES = {
       let caseId: string | null = null;
       if (body.scope === "collect") caseId = (await ensureCase(ctx, "planned_care")).caseId;
       const grant = buildConsentGrant(body.scope, { adultId: session.adultId, householdId: session.householdId, caseId, documentId: body.documentId, documentIds: docs });
-      const created = await ctx.backend.grantConsent(session.token, grant);
+      const created = await ctx.backend.grantConsent(session.token, grant, key);
       const consent: StateConsent = { id: created.id, scope: body.scope, docs, at: new Date(ctx.nowMs).toISOString() };
       addConsent(ctx, consent);
       return { status: 201, body: { consent: toConsentView(consent), reused: false } };
@@ -360,6 +368,7 @@ const ROUTES = {
   // --- documents ---
   "documents.list": {
     auth: true,
+    markerOnGet: true,
     async run(ctx) {
       const loaded = await loadDocumentViews(ctx, pathId(ctx, "caseId"));
       return { status: 200, body: { caseId: pathId(ctx, "caseId"), documents: loaded.documents, documentsAccess: loaded.restricted ? "permission_withdrawn" : "full" } };
@@ -390,6 +399,7 @@ const ROUTES = {
   },
   "documents.get": {
     auth: true,
+    markerOnGet: true,
     async run(ctx) {
       const documentId = pathId(ctx, "documentId");
       let document;
@@ -587,7 +597,7 @@ export function createApp(deps: AppDeps) {
     const clearAll = () => [clearCookie(names.session, production), clearCookie(names.state, production)];
 
     try {
-      assertCsrf(request, config.allowedOrigins);
+      assertCsrf(request, config.allowedOrigins, { markerOnGet: route.markerOnGet });
       if (route.auth) loaded = loadSession(request.headers.get("cookie"), { secret: config.sessionSecret, production, nowMs });
 
       const backend = createBackendClient({ baseUrl: config.apiUrl, bootstrapToken: config.bootstrapToken, fetch: deps.fetch });
@@ -616,20 +626,19 @@ export function createApp(deps: AppDeps) {
       }
       return jsonResponse(result.status, result.body, cookies);
     } catch (error) {
-      if (error instanceof AppError) {
-        if (error.clearSession) return errorResponse(error, clearAll());
-        // Keep what was already created on the backend (a case, a started OCR job) recorded, so it is never orphaned.
-        let kept: string[] = [];
-        try {
-          if (dirty && loaded) kept = [stateCookie(loaded.state, loaded.session, config.sessionSecret, production, nowMs)];
-        } catch {
-          kept = [];
-        }
-        return errorResponse(error, kept);
+      if (error instanceof AppError && error.clearSession) return errorResponse(error, clearAll());
+      // Keep what was already created on the backend (a case, a started OCR job) recorded, so it is never orphaned.
+      // This holds for an unexpected failure too: a later step may throw after a backend side effect.
+      let kept: string[] = [];
+      try {
+        if (dirty && loaded) kept = [stateCookie(loaded.state, loaded.session, config.sessionSecret, production, nowMs)];
+      } catch {
+        kept = [];
       }
+      if (error instanceof AppError) return errorResponse(error, kept);
       // Unknown failure: log the error name only. Never the message, which could carry a body fragment.
       console.error("app-bff: unexpected failure", error instanceof Error ? error.name : "unknown");
-      return errorResponse(appError(500, "INTERNAL", { retryable: false }));
+      return errorResponse(appError(500, "INTERNAL", { retryable: false }), kept);
     }
   }
 
