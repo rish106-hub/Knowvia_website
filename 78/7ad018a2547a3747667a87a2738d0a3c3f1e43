@@ -1,0 +1,57 @@
+src/app/api/waitlist/route.ts
+  s_692c874d7b8ff3::t_0054131ff4354b 1-11
+src/lib/server/db.mjs
+  s_692c874d7b8ff3::t_60b6c7ed53ae67 1-85,88-108
+  s_692c874d7b8ff3::t_01f13649a25e6f 86-87
+tests/unit/waitlist/fake-pool.ts
+  s_692c874d7b8ff3::t_72eafcde8e9653 1-20
+scripts/design-port/gen_site.py
+  s_692c874d7b8ff3::t_23e46e2d2bb6c1 206-208
+src/lib/server/voice-note-handler.ts
+  s_692c874d7b8ff3::t_22b9dd72d37967 1-67
+tests/unit/waitlist/voice-note-route.test.ts
+  s_692c874d7b8ff3::t_891cdf3631b0cf 1-61
+tests/unit/waitlist/waitlist-pg.integration.test.ts
+  s_692c874d7b8ff3::t_c506a820f08fec 1-72
+src/lib/server/waitlist-store.mjs
+  s_692c874d7b8ff3::t_d3511f9cc1bf70 1-108
+scripts/migrate.mjs
+  s_692c874d7b8ff3::t_0d69281899c4e7 1-94
+src/components/home/landing-model.js
+  s_692c874d7b8ff3::t_cc54858fa03cef 229-231
+tests/unit/waitlist/waitlist-route.test.ts
+  s_692c874d7b8ff3::t_5e21d02e980537 102-103
+  s_692c874d7b8ff3::t_c93d31efae0b15 1-101,104-168
+tests/unit/waitlist/db-config.test.ts
+  s_692c874d7b8ff3::t_8079c8316e81e0 1-69
+docs/waitlist-storage.md
+  s_692c874d7b8ff3::t_fe418a5220385c 1-91
+scripts/erase-waitlist.mjs
+  s_692c874d7b8ff3::t_2f09b86561ad6c 1-26
+src/lib/server/request-guards.ts
+  s_692c874d7b8ff3::t_a94a94e8110285 1-37
+README.md
+  s_692c874d7b8ff3::t_435316def8d1ef 15
+db/migrations/001_waitlist.sql
+  s_692c874d7b8ff3::t_cf24373e418dc8 1-51
+src/lib/server/waitlist-handler.ts
+  s_692c874d7b8ff3::t_3e62a6c39a0518 1-98
+src/app/api/voice-note/route.ts
+  s_692c874d7b8ff3::t_b3515427377f0f 1-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "787ad018a2547a3747667a87a2738d0a3c3f1e43",
+  "prompts": {},
+  "sessions": {
+    "s_692c874d7b8ff3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6e449cbd-4219-4d37-bfc1-8574afc0a080",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
