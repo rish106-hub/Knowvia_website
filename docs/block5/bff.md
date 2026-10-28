@@ -51,7 +51,7 @@ Why a state cookie: the backend has no route to list cases, consent grants or OC
 
 ## Routes
 
-Auth: `session` means a valid `kv_session` is required (401 `SESSION_REQUIRED` / `SESSION_EXPIRED` otherwise). CSRF applies to every non-GET. Idempotency-Key is a client-supplied header (8 to 200 chars) that the BFF forwards **unchanged**; the backend client retries once on network failure/timeout/502-504 for keyed calls with the same key. Bodies below are JSON; "pass-through" means the backend body is returned unchanged.
+Auth: `session` means a valid `kv_session` is required (401 `SESSION_REQUIRED` / `SESSION_EXPIRED` otherwise). CSRF applies to every non-GET. Idempotency-Key is a client-supplied header (8 to 200 chars) that the BFF forwards **unchanged**; the backend client retries once on a refused connection or a 502/503/504 answer for keyed calls with the same key. It never retries after a client-side timeout (the first request may still be running and billing) or after any other status, including 500. Bodies below are JSON; "pass-through" means the backend body is returned unchanged.
 
 | Route | Method | Auth | Backend call | Request | Response | Notable errors |
 | --- | --- | --- | --- | --- | --- | --- |

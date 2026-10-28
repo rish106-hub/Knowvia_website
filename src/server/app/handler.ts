@@ -616,20 +616,19 @@ export function createApp(deps: AppDeps) {
       }
       return jsonResponse(result.status, result.body, cookies);
     } catch (error) {
-      if (error instanceof AppError) {
-        if (error.clearSession) return errorResponse(error, clearAll());
-        // Keep what was already created on the backend (a case, a started OCR job) recorded, so it is never orphaned.
-        let kept: string[] = [];
-        try {
-          if (dirty && loaded) kept = [stateCookie(loaded.state, loaded.session, config.sessionSecret, production, nowMs)];
-        } catch {
-          kept = [];
-        }
-        return errorResponse(error, kept);
+      if (error instanceof AppError && error.clearSession) return errorResponse(error, clearAll());
+      // Keep what was already created on the backend (a case, a started OCR job) recorded, so it is never orphaned.
+      // This holds for an unexpected failure too: a later step may throw after a backend side effect.
+      let kept: string[] = [];
+      try {
+        if (dirty && loaded) kept = [stateCookie(loaded.state, loaded.session, config.sessionSecret, production, nowMs)];
+      } catch {
+        kept = [];
       }
+      if (error instanceof AppError) return errorResponse(error, kept);
       // Unknown failure: log the error name only. Never the message, which could carry a body fragment.
       console.error("app-bff: unexpected failure", error instanceof Error ? error.name : "unknown");
-      return errorResponse(appError(500, "INTERNAL", { retryable: false }));
+      return errorResponse(appError(500, "INTERNAL", { retryable: false }), kept);
     }
   }
 

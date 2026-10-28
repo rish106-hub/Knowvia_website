@@ -96,3 +96,64 @@ describe("backend client transport failures", () => {
     expect(fake.calls.filter((c) => c.path === "/api/v1/cases")).toHaveLength(1);
   });
 });
+
+describe("backend client retry guard (security review)", () => {
+  const upload = {
+    bytes: new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d]),
+    idempotencyKey: "retry-key-12345678",
+    documentKind: "policy_schedule" as const,
+    consentGrantId: "consent-1",
+    filename: "a.pdf",
+  };
+  const ask = { question: "Is room rent capped?", consentGrantId: "consent-1" };
+  const uploadPath = /POST \/api\/v1\/cases\/case-1\/documents/;
+  const questionPath = /POST \/api\/v1\/cases\/case-1\/questions/;
+  const answerWith = (status: number) => () => new Response(JSON.stringify({ error: { code: "BACKEND_FAILURE", message: "x" } }), { status });
+
+  for (const status of [500, 501, 505, 507, 511]) {
+    it(`does not retry a backend ${status} on a paid question or an upload`, async () => {
+      const fake = createFakeBackend();
+      fake.control.failNext.push({ match: questionPath, respond: answerWith(status) }, { match: questionPath, respond: answerWith(status) });
+      const client = createBackendClient({ baseUrl: API, bootstrapToken: FAKE_BOOTSTRAP, fetch: fake.fetch });
+      const error = await client.askQuestion(FAKE_BACKEND_TOKEN, "case-1", ask, "ask-key-12345678").catch((e) => e as AppError);
+      expect(error).toMatchObject({ status });
+      expect(fake.calls.filter((c) => questionPath.test(`${c.method} ${c.path}`))).toHaveLength(1);
+
+      fake.control.failNext.push({ match: uploadPath, respond: answerWith(status) }, { match: uploadPath, respond: answerWith(status) });
+      await client.uploadDocument(FAKE_BACKEND_TOKEN, "case-1", upload).catch((e) => e as AppError);
+      expect(fake.calls.filter((c) => uploadPath.test(`${c.method} ${c.path}`))).toHaveLength(1);
+    });
+  }
+
+  it("still retries a backend 502, 503 or 504 once with the same key", async () => {
+    for (const status of [502, 503, 504]) {
+      const fake = createFakeBackend();
+      fake.control.failNext.push({ match: questionPath, respond: answerWith(status) });
+      const client = createBackendClient({ baseUrl: API, bootstrapToken: FAKE_BOOTSTRAP, fetch: fake.fetch });
+      await client.askQuestion(FAKE_BACKEND_TOKEN, "case-1", ask, "ask-key-12345678").catch(() => undefined);
+      const calls = fake.calls.filter((c) => questionPath.test(`${c.method} ${c.path}`));
+      expect(calls).toHaveLength(2);
+      expect(calls[1].headers["idempotency-key"]).toBe("ask-key-12345678");
+    }
+  });
+
+  it("does not retry after a client-side timeout: the first request may still be running and billing", async () => {
+    let attempts = 0;
+    const hang: Parameters<typeof createBackendClient>[0]["fetch"] = (_url, init) => {
+      attempts += 1;
+      return new Promise((_resolve, reject) => init?.signal?.addEventListener("abort", () => reject(Object.assign(new Error("aborted"), { name: "AbortError" }))));
+    };
+    const client = createBackendClient({ baseUrl: API, bootstrapToken: FAKE_BOOTSTRAP, fetch: hang, timeoutMs: 20, uploadTimeoutMs: 20 });
+    const asked = await client.askQuestion(FAKE_BACKEND_TOKEN, "case-1", ask, "ask-key-12345678").catch((e) => e as AppError);
+    expect(asked).toMatchObject({ status: 504, code: "BACKEND_TIMEOUT" });
+    const uploaded = await client.uploadDocument(FAKE_BACKEND_TOKEN, "case-1", upload).catch((e) => e as AppError);
+    expect(uploaded).toMatchObject({ status: 504, code: "BACKEND_TIMEOUT" });
+    expect(attempts).toBe(2);
+  });
+
+  it("refuses an oversized backend body instead of buffering it", async () => {
+    const big = async () => new Response(JSON.stringify({ pad: "x".repeat(3 * 1024 * 1024) }), { status: 200, headers: { "content-type": "application/json" } });
+    const error = await createBackendClient({ baseUrl: API, bootstrapToken: FAKE_BOOTSTRAP, fetch: big }).getIntegrations(FAKE_BACKEND_TOKEN).catch((e) => e as AppError);
+    expect(error).toMatchObject({ status: 502, code: "BACKEND_BAD_RESPONSE" });
+  });
+});

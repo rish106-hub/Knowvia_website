@@ -105,6 +105,35 @@ export type Json = unknown;
 
 export type BackendClient = ReturnType<typeof createBackendClient>;
 
+const MAX_BACKEND_BODY_BYTES = 2 * 1024 * 1024;
+
+class BodyTooLargeError extends Error {}
+
+/** Reads a response body with a running byte cap, so an oversized or endless upstream body is never buffered whole. */
+async function readBoundedBody(response: Response, maxBytes: number): Promise<string> {
+  if (Number(response.headers.get("content-length") ?? "0") > maxBytes) {
+    await response.body?.cancel().catch(() => undefined);
+    throw new BodyTooLargeError();
+  }
+  if (!response.body) return "";
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > maxBytes) throw new BodyTooLargeError();
+      chunks.push(value);
+    }
+  } catch (error) {
+    await reader.cancel().catch(() => undefined);
+    throw error;
+  }
+  return new TextDecoder().decode(Buffer.concat(chunks));
+}
+
 const bearer = (token: string) => ({ authorization: `Bearer ${token}` });
 
 export function createBackendClient(options: BackendClientOptions) {
@@ -153,11 +182,11 @@ export function createBackendClient(options: BackendClientOptions) {
     // The timer keeps running while the body is read, so a slow body cannot hold the request open.
     let parsed: unknown = null;
     try {
-      const text = await response.text();
+      const text = await readBoundedBody(response, MAX_BACKEND_BODY_BYTES);
       parsed = text ? JSON.parse(text) : null;
-    } catch {
+    } catch (error) {
       if (controller.signal.aborted) throw new AppError({ status: 504, code: "BACKEND_TIMEOUT", retryable: true });
-      if (response.ok) throw new AppError({ status: 502, code: "BACKEND_BAD_RESPONSE", retryable: false });
+      if (error instanceof BodyTooLargeError || response.ok) throw new AppError({ status: 502, code: "BACKEND_BAD_RESPONSE", retryable: false });
     } finally {
       clearTimeout(timer);
     }
@@ -166,27 +195,24 @@ export function createBackendClient(options: BackendClientOptions) {
 
   async function send(req: RequestOptions): Promise<unknown> {
     const authenticated = !req.bootstrap;
-    let lastError: AppError | null = null;
     const attempts = req.retryOnTransient ? 2 : 1;
-    for (let index = 0; index < attempts; index += 1) {
+    for (let index = 0; ; index += 1) {
+      let failure: AppError;
+      let repeatable: boolean;
       try {
         const { status, body } = await attempt(req);
         if (status >= 200 && status < 300) return body;
-        const failure = normalizeBackendFailure(status, body, { authenticated });
-        if (req.retryOnTransient && failure.retryable && [502, 503, 504].includes(status) && index + 1 < attempts) {
-          lastError = failure;
-          continue;
-        }
-        throw failure;
+        failure = normalizeBackendFailure(status, body, { authenticated });
+        // Only a gateway-style answer says the work did not happen. A 500 may follow a paid model call.
+        repeatable = failure.retryable && [502, 503, 504].includes(status);
       } catch (error) {
-        if (error instanceof AppError && error.retryable && req.retryOnTransient && error.status >= 500 && index + 1 < attempts) {
-          lastError = error;
-          continue;
-        }
-        throw error;
+        if (!(error instanceof AppError)) throw error;
+        failure = error;
+        // A refused connection never reached the backend. A timeout did: the first request may still be running, so it is not repeated.
+        repeatable = error.code === "BACKEND_UNREACHABLE";
       }
+      if (!(repeatable && index + 1 < attempts)) throw failure;
     }
-    throw lastError ?? new AppError({ status: 502, code: "BACKEND_BAD_RESPONSE", retryable: false });
   }
 
   function parse<T>(schema: z.ZodType<T>, value: unknown): T {
