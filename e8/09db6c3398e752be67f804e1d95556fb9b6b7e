@@ -1,0 +1,41 @@
+docs/block5/bff.md
+  s_692c874d7b8ff3::t_d6beaa839fcb03 48,66,151
+src/components/app/documents/DocumentRow.tsx
+  s_692c874d7b8ff3::t_85294eadb8147e 5,40-41,68-74
+src/components/app/documents/UploadPanel.tsx
+  s_692c874d7b8ff3::t_849660e74401f5 45,113-118
+src/components/app/evidence/useCoverFlow.ts
+  s_692c874d7b8ff3::t_a72de91d92a934 12,57-58,175-177
+src/lib/app-client.ts
+  s_692c874d7b8ff3::t_41c23d4f2a09ed 43-44
+src/lib/app-evidence/api.ts
+  s_692c874d7b8ff3::t_30470e0e1995d3 29-36
+src/server/app/backend-client.ts
+  s_692c874d7b8ff3::t_94db14b638d555 211,253-266
+src/server/app/csrf.ts
+  s_692c874d7b8ff3::t_e28cf4aa15b5f7 2-3,9-13
+src/server/app/errors.ts
+  s_692c874d7b8ff3::t_f3345002d5840b 42
+src/server/app/handler.ts
+  s_692c874d7b8ff3::t_808a717caacbfd 79-80,133-137,273,327,338,371,402,600
+tests/unit/app-bff/helpers.ts
+  s_692c874d7b8ff3::t_6245f028b8a5c9 200
+tests/unit/app-bff/real-backend-regressions.test.ts
+  s_692c874d7b8ff3::t_b42da5e7b6f706 350-423
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e809db6c3398e752be67f804e1d95556fb9b6b7e",
+  "prompts": {},
+  "sessions": {
+    "s_692c874d7b8ff3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6e449cbd-4219-4d37-bfc1-8574afc0a080",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
