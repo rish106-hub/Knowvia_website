@@ -1,0 +1,21 @@
+package-lock.json
+  s_692c874d7b8ff3::t_4f2458c4151bf8 13,17,26,1139-1141,1145-1147,1188-1190,1204-1206,1220-1222,1239-1241,1258-1260,1277-1279,1296-1298,1312-1314,3551-3553,3557,3563,3565,5473-5475,5478,5492-5500,7520-7522
+package.json
+  s_692c874d7b8ff3::t_ce1a8522719638 18,22,31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d4a6c4cd86e19ec9f8fd2084f2f3326ed33241a6",
+  "prompts": {},
+  "sessions": {
+    "s_692c874d7b8ff3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6e449cbd-4219-4d37-bfc1-8574afc0a080",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
