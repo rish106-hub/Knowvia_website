@@ -1,0 +1,27 @@
+docs/block5/bff.md
+  s_692c874d7b8ff3::t_1ea2297fffa0bc 54
+docs/block5/security-closure.md
+  s_692c874d7b8ff3::t_85a654206b0658 66-99
+src/server/app/backend-client.ts
+  s_692c874d7b8ff3::t_4fd2d16892068b 108-136,185,187,189,199-201,205-207,209-212,214
+src/server/app/handler.ts
+  s_692c874d7b8ff3::t_8b136ce7abeb7b 619-626,628,631
+tests/unit/app-bff/errors-and-client.test.ts
+  s_692c874d7b8ff3::t_c171741e63ab2a 99-159
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "02552e8c3bfad9124f18c5b2ac18cc7ae5934286",
+  "prompts": {},
+  "sessions": {
+    "s_692c874d7b8ff3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6e449cbd-4219-4d37-bfc1-8574afc0a080",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
