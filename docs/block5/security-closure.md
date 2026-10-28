@@ -97,3 +97,38 @@ State-cookie probes use 96-character ids against real ids of 36 to 44 characters
 | P3 | If both backend revokes fail on sign-out, the token stays live until expiry. | Server-side revocation (D2). |
 
 The earlier blockers (the `braces` chain, G4 timing, S8 log capture, D1, D2, D7) are unchanged by this review. The G4 timing test passed on 2026-10-28 in a full `npm run check` with nothing else running (1,459 tests, 0 failed), so it is still intermittent rather than fixed.
+
+## Follow-up to the 2026-10-28 review: fixes, second review, live evidence
+
+Same day, after the independent review above. Nothing here is committed. CoverSaath changes sit in its working tree on `codex/block5-session-isolation`.
+
+### Fixed
+
+| Finding | Fix | Evidence |
+| --- | --- | --- |
+| P2: `POST /consents` had no idempotency key, so a timeout after the commit orphaned a grant and a retry made a second one. | CoverSaath: optional `Idempotency-Key` derives the grant id from household, adult and key (`consent-<hex>`). The same request returns the same grant (200, `idempotentReplay`); a different request is `IDEMPOTENCY_CONFLICT`; a revoked or expired grant is `CONSENT_REVOKED` / `CONSENT_EXPIRED`; replays and refusals are audited with no scope or purpose. BFF forwards the client's key and retries a failed connection once only when a key was sent. The app sends one key per consent action (kept until the grant succeeds). | `tests/consent-idempotency-api.test.mjs` (8), BFF `real-backend-regressions.test.ts` (3) |
+| P2: CoverSaath `ask()` had no in-flight claim per idempotency key, so a duplicate while the first ran billed the model twice. | Per-process claim; a duplicate gets `409 IDEMPOTENCY_IN_PROGRESS` until the first settles, then replays. | `policy-evidence-document-versions.test.mjs` D5 (2) |
+| P3: GET routes that poll the OCR provider were reachable by cross-site navigation. | `overview`, a case's document list and a single document need `X-Knowvia-App: 1`. | `real-backend-regressions.test.ts` |
+| Second review, P3: expired/revoked replays, missing audit, test that released the wrong call, G4 had lost its wall-clock guard. | As above, plus a 2 s wall-clock backstop in G4. | tests above |
+
+### Dependencies (supersedes the audit table above)
+
+Run on 2026-10-28. The earlier `braces` chain no longer appears. Website: `next` 16.3.8 had three advisories (image-optimizer RCE with SVG, Server Actions DoS, `use cache` typed-array RCE) and `zod` one; the site does not use `next/image` or `use cache`, so exposure was low, but `next` is a production dependency. Pinned `next` 16.4.3, `zod` 4.6.7, `eslint-config-next` 16.4.3; `npm audit` and `npm audit --omit=dev` both report 0. CoverSaath: `undici` 7.30.1 and `zod` 4.6.7 by lockfile-only `npm audit fix`; 0 vulnerabilities.
+
+### G4 timing blocker
+
+Reproduced under CPU oversubscription (wall-clock 380 to 410 ms against the 200 ms bound). G4 and the round-4 bound test now measure process CPU time, take the best of up to three attempts, and keep the 200 ms bound plus a 2 s wall-clock backstop. Five full runs with PostgreSQL and clamd: the first G4 run failed at 216 ms CPU before best-of-three, a round-4 wall-clock failure (226 ms) appeared once and was fixed the same way, and the last four runs passed. G4 CPU peaked at 198 ms under that load, so it is mitigated, not immune. A mutation check that plants a backtracking regex was not run.
+
+### Live evidence (synthetic data only)
+
+- Sarvam Digitise: `npm run test:sarvam-live` passed (1 page, 3.2 s, 212 characters, about INR 0.5).
+- Real journey through the BFF against an isolated CoverSaath (real clamd, real Sarvam): sign-in, collect consent, upload, scan accepted, OCR refused without consent (403), OCR consent, OCR succeeded and stage `readable`, other household gets 404, OCR revoke returns the document to `grant_ocr_consent` with no OCR, delete, sign-out revokes the backend session and the old cookie gets 401. S8: the session token, bootstrap token and session secret appear in no response, header, URL or server log of that run. After revoke and delete the database holds a tombstone (`[deleted]` name, storage file gone, OCR text, result JSON and blocks null). Dev-mode server logs only; production logging is untested.
+- Gemini: not run. The key's prepayment credits were depleted (HTTP 402) on two attempts, so evidence answers and the coverage preview are still unverified against a real model.
+
+### Verification
+
+CoverSaath `npm run check` with PostgreSQL 17.11 and real clamd: 1469 tests, 1466 passed, 0 failed, 3 skipped (custom clamd, live Sarvam, Gemini negative control). `eval:safety` 28/28, `eval:household` pass, `eval:retrieval` recall 1.0 over 62 expected clauses, parse eval pass; the last two use the single real-policy golden under `.local/eval/` and say nothing about other insurers. Website `npm run check`: 247 tests; Playwright functional specs 90/90; bundle secret scan OK.
+
+### Still open
+
+D1, D2, D7, the Gemini-dependent journeys. The multi-instance gaps: the in-flight claim is per process, and the consent lookup and insert are not one transaction across processes (SQLite single-process runtime today; PostgreSQL needs a database claim). Concurrent mutations in two tabs still lose a grant (state lives in the cookie). `APP_TRUSTED_PROXY_HOPS=0` shares one sign-in bucket, and production is inferred from `NODE_ENV`; both depend on deployment topology (D2). If both backend revokes fail on sign-out the token stays live until expiry. These fixes had one independent review round (findings above, fixed); the second round of fixes was not re-reviewed.
