@@ -197,7 +197,7 @@ export const cookieHeader = (jar: Jar) => [...jar.entries()].map(([k, v]) => `${
 export function request(path: string, init: { method?: string; json?: unknown; jar?: Jar; headers?: Record<string, string>; body?: BodyInit; csrf?: boolean } = {}) {
   const method = init.method ?? "GET";
   const headers = new Headers(init.headers);
-  if (init.csrf !== false && method !== "GET") {
+  if (init.csrf !== false) {
     headers.set("origin", ORIGIN);
     headers.set("x-knowvia-app", "1");
   }

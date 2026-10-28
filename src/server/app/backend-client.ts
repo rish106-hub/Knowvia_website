@@ -208,7 +208,7 @@ export function createBackendClient(options: BackendClientOptions) {
       } catch (error) {
         if (!(error instanceof AppError)) throw error;
         failure = error;
-        // A refused connection never reached the backend. A timeout did: the first request may still be running, so it is not repeated.
+        // A failed connection usually never reached the backend (a reset after the body was sent can have). A timeout did: the first request may still be running, so it is not repeated.
         repeatable = error.code === "BACKEND_UNREACHABLE";
       }
       if (!(repeatable && index + 1 < attempts)) throw failure;
@@ -250,8 +250,20 @@ export function createBackendClient(options: BackendClientOptions) {
     getIntegrations: (token: string): Promise<Json> => send({ method: "GET", path: "/api/v1/integrations", token }),
 
     // --- consent ---
-    async grantConsent(token: string, body: ConsentGrantBody): Promise<{ id: string }> {
-      return parse(grantRecord, await send({ method: "POST", path: "/api/v1/consents", token, json: body }));
+    // With a key the backend returns the same grant for a repeat, so a failed connection may be retried (the request may
+    // have reached the backend, which is safe only because the backend honours the key) and a caller that timed out after
+    // the commit can send the same request again. Without a key nothing is retried.
+    async grantConsent(token: string, body: ConsentGrantBody, idempotencyKey?: string): Promise<{ id: string }> {
+      return parse(
+        grantRecord,
+        await send({
+          method: "POST",
+          path: "/api/v1/consents",
+          token,
+          json: body,
+          ...(idempotencyKey ? { headers: { "idempotency-key": idempotencyKey }, retryOnTransient: true } : {}),
+        }),
+      );
     },
     revokeConsent: async (token: string, grantId: string, reason?: string): Promise<void> => {
       await send({ method: "POST", path: `/api/v1/consents/${enc(grantId)}/revoke`, token, json: { reason: reason ?? null } });

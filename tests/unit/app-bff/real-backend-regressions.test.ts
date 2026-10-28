@@ -347,3 +347,77 @@ describe("backend client does not repeat a request the backend said is pointless
     expect(ctx.backend.calls.filter((call) => call.path.endsWith("/documents") && call.method === "POST").length - before).toBe(1);
   });
 });
+
+describe("review P2: a consent grant can be repeated safely after an ambiguous timeout", () => {
+  const consentCalls = (ctx: Ctx) => ctx.backend.calls.filter((call) => call.method === "POST" && call.path === "/api/v1/consents");
+  const grant = (ctx: Ctx, jar: Jar, headers: Record<string, string> = {}, scope = "collect") =>
+    ctx.app
+      .dispatch("consents.grant", request("/api/app/consents", { method: "POST", json: { scope }, jar, headers }))
+      .then((response) => {
+        applyCookies(jar, response);
+        return response;
+      });
+
+  it("forwards the client's Idempotency-Key to the backend unchanged", async () => {
+    const ctx = makeApp();
+    const { jar } = await signIn(ctx);
+    const response = await grant(ctx, jar, { "idempotency-key": "grant-key-12345678" });
+    expect(response.status).toBe(201);
+    expect(consentCalls(ctx)[0].headers["idempotency-key"]).toBe("grant-key-12345678");
+  });
+
+  it("sends no key when the client sent none, and refuses a malformed one", async () => {
+    const ctx = makeApp();
+    const { jar } = await signIn(ctx);
+    expect((await grant(ctx, jar)).status).toBe(201);
+    expect(consentCalls(ctx)[0].headers["idempotency-key"]).toBeUndefined();
+    const bad = await grant(ctx, jar, { "idempotency-key": "short" }, "ocr_sarvam");
+    expect(bad.status).toBe(400);
+    expect((await bad.json()).error.code).toBe("IDEMPOTENCY_KEY_REQUIRED");
+  });
+
+  it("retries a refused connection once with the same key, but only when a key was sent", async () => {
+    const keyed = makeApp();
+    const { jar: keyedJar } = await signIn(keyed);
+    keyed.backend.control.failNext.push({ match: /POST \/api\/v1\/consents$/, respond: () => new TypeError("fetch failed") });
+    const response = await grant(keyed, keyedJar, { "idempotency-key": "grant-key-12345678" });
+    expect(response.status).toBe(201);
+    const calls = consentCalls(keyed);
+    expect(calls).toHaveLength(2);
+    expect(calls[1].headers["idempotency-key"]).toBe("grant-key-12345678");
+
+    const unkeyed = makeApp();
+    const { jar: unkeyedJar } = await signIn(unkeyed);
+    unkeyed.backend.control.failNext.push({ match: /POST \/api\/v1\/consents$/, respond: () => new TypeError("fetch failed") });
+    const failed = await grant(unkeyed, unkeyedJar);
+    expect(failed.status).toBe(503);
+    expect(consentCalls(unkeyed)).toHaveLength(1);
+  });
+});
+
+describe("review P3: a GET that polls the OCR provider cannot be triggered cross-site", () => {
+  it("refuses overview, document list and document reads that lack X-Knowvia-App, and serves them with it", async () => {
+    const { ctx, jar, documentId } = await withDocument();
+    const cases: Array<[Parameters<Ctx["app"]["dispatch"]>[0], string, Record<string, string>]> = [
+      ["overview.get", "/api/app/overview", {}],
+      ["documents.list", "/api/app/cases/case-1/documents", { caseId: "case-1" }],
+      ["documents.get", `/api/app/documents/${documentId}`, { documentId }],
+    ];
+    for (const [name, path, params] of cases) {
+      const before = ctx.backend.calls.length;
+      const blocked = await ctx.app.dispatch(name, request(path, { jar, csrf: false }), params);
+      expect(blocked.status, `${name} without the marker`).toBe(403);
+      expect((await blocked.json()).error.code).toBe("CSRF_BLOCKED");
+      expect(ctx.backend.calls.length, `${name} reached the backend`).toBe(before);
+      const allowed = await ctx.app.dispatch(name, request(path, { jar }), params);
+      expect(allowed.status, `${name} with the marker`).toBe(200);
+    }
+  });
+
+  it("leaves pure reads that poll nothing reachable without the marker", async () => {
+    const ctx = makeApp();
+    const { jar } = await signIn(ctx);
+    const notices = await ctx.app.dispatch("consents.notices", request("/api/app/consents/notices", { jar, csrf: false }));
+    expect(notices.status).toBe(200);
+  });
+});

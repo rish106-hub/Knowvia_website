@@ -42,7 +42,7 @@ export function UploadPanel({ overview, onAdded }: { overview: Overview; onAdded
   const keyRef = useRef<string | null>(null);
   const running = useRef(false);
   // Setup that already succeeded (case, collect grant) is kept across retries so a retry only repeats what failed.
-  const setupRef = useRef<{ caseId?: string; grantId?: string }>({});
+  const setupRef = useRef<{ caseId?: string; grantId?: string; consentKey?: string }>({});
   const inputRef = useRef<HTMLInputElement>(null);
   const kindRef = useRef<HTMLFieldSetElement>(null);
 
@@ -110,7 +110,12 @@ export function UploadPanel({ overview, onAdded }: { overview: Overview; onAdded
       let grantId = grant?.grantId ?? setupRef.current.grantId;
       if (!grantId) {
         setPhase({ name: "working", step: "consent" });
-        const granted = await appFetch<{ consent: ConsentView }>("/consents", { method: "POST", json: { scope: "collect" } });
+        setupRef.current.consentKey ??= newIdempotencyKey();
+        const granted = await appFetch<{ consent: ConsentView }>("/consents", {
+          method: "POST",
+          json: { scope: "collect" },
+          headers: { "Idempotency-Key": setupRef.current.consentKey },
+        });
         grantId = granted.consent.grantId;
         setupRef.current.grantId = grantId;
       }
