@@ -1,5 +1,6 @@
 // Generated from the approved Claude Design artboard Main.dc.html. Edit the design, then regenerate with scripts/design-port.
 "use client";
+/* eslint-disable @next/next/no-img-element -- logos keep the design's fixed height with natural width */
 
 import { Fragment } from "react";
 import Link from "next/link";
@@ -8,50 +9,56 @@ import { type Any, css, truthy } from "@/lib/dc";
 export function EarlyListSection({ v }: { v: Any }) {
   return (
     <>
-    <section id="early-list" aria-labelledby="close-h" style={{position: "relative", overflow: "hidden", background: "#163F42", color: "#FFFFFF", padding: "clamp(72px,8vw,112px) clamp(20px,5vw,80px)"}}>
-      <svg aria-hidden="true" viewBox="0 0 800 800" style={{position: "absolute", left: "-260px", bottom: "-300px", width: "760px", height: "760px", opacity: "0.08"}}>
-        <circle cx="400" cy="400" r="290" fill="none" stroke="#C9DDD9" strokeWidth="3"></circle>
-        <circle cx="400" cy="400" r="240" fill="none" stroke="#C9DDD9" strokeWidth="3"></circle>
-        <path d="M258 194v412M265 404l274 210" fill="none" stroke="#C9DDD9" strokeWidth="34" strokeLinecap="round"></path>
-        <path d="M265 404l274-210" fill="none" stroke="#E0A02B" strokeWidth="34" strokeLinecap="round"></path>
-      </svg>
+    <section id="early-list" className="kv-bleed kv-close" aria-labelledby="close-h">
+      <div className="kv-L">
+        <svg className="kv-rings" aria-hidden="true" viewBox="0 0 800 800" style={{left: "-260px", bottom: "-300px", width: "760px", height: "760px", opacity: "0.1"}}>
+          <circle cx="400" cy="400" r="290" fill="none" stroke="#C8E6A0" strokeWidth="3"></circle>
+          <circle cx="400" cy="400" r="240" fill="none" stroke="#C8E6A0" strokeWidth="3"></circle>
+          <path d="M258 194v412M265 404l274 210" fill="none" stroke="#C9DDD9" strokeWidth="34" strokeLinecap="round"></path>
+          <path d="M265 404l274-210" fill="none" stroke="#E0A02B" strokeWidth="34" strokeLinecap="round"></path>
+        </svg>
+        {" "}
+        <h2 id="close-h" className="kv-h2 kv-reveal" style={{position: "relative", margin: "0", fontFamily: "var(--font-display), 'Iowan Old Style', Georgia, serif", fontWeight: "400", fontSize: "clamp(42px,5vw,76px)", lineHeight: "1.02", letterSpacing: "-0.02em", color: "#FFFFFF", maxWidth: "11ch"}}>
+          {"Know your cover. "}
+          <span style={{color: "#C8E6A0"}}>
+            {"Before you need it."}
+          </span>
+        </h2>
+        {" "}
+        <p style={{position: "relative", margin: "0", fontSize: "clamp(17px,1.35vw,19px)", lineHeight: "1.55", color: "#C9DDD9", maxWidth: "38ch"}}>
+          {"Only your email is required. Tell us which policies your family has, and Knowvia reads those first for you."}
+        </p>
+        {" "}
+        <ul style={{position: "relative", listStyle: "none", margin: "8px 0 0", padding: "0", display: "flex", flexDirection: "column", gap: "12px"}}>
+          <li style={{display: "flex", gap: "12px", alignItems: "center", fontSize: "17px", color: "#FFFFFF"}}>
+            <span aria-hidden="true" style={{flex: "0 0 auto", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "50%", background: "rgba(200,230,160,0.16)"}}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C8E6A0" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="5 12.5 10 17 19 7"></polyline>
+              </svg>
+            </span>
+            {"Not an insurer, and not selling you one."}
+          </li>
+          <li style={{display: "flex", gap: "12px", alignItems: "center", fontSize: "17px", color: "#FFFFFF"}}>
+            <span aria-hidden="true" style={{flex: "0 0 auto", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "50%", background: "rgba(200,230,160,0.16)"}}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C8E6A0" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="5 12.5 10 17 19 7"></polyline>
+              </svg>
+            </span>
+            {"Your answers are never sold or shared."}
+          </li>
+          <li style={{display: "flex", gap: "12px", alignItems: "center", fontSize: "17px", color: "#FFFFFF"}}>
+            <span aria-hidden="true" style={{flex: "0 0 auto", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "50%", background: "rgba(200,230,160,0.16)"}}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C8E6A0" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="5 12.5 10 17 19 7"></polyline>
+              </svg>
+            </span>
+            {"One email when we open. Nothing before."}
+          </li>
+        </ul>
+      </div>
       {" "}
-      <div style={{position: "relative", maxWidth: "1200px", margin: "0 auto", display: "flex", flexWrap: "wrap", gap: "40px 72px", alignItems: "flex-start"}}>
-        <div style={{flex: "1 1 360px", display: "flex", flexDirection: "column", gap: "18px", maxWidth: "460px"}}>
-          <h2 id="close-h" style={{margin: "0", fontFamily: "var(--font-display), 'Iowan Old Style', Georgia, serif", fontWeight: "400", fontSize: "clamp(36px,4vw,56px)", lineHeight: "1.05", letterSpacing: "-0.015em", color: "#FFFFFF", maxWidth: "12ch"}}>
-            {"Know your cover. Before you need it."}
-          </h2>
-          <p style={{margin: "0", fontSize: "clamp(17px,1.35vw,19px)", lineHeight: "1.55", color: "#C9DDD9", maxWidth: "38ch"}}>
-            {"Only your email is required. Tell us which policies your family has, and Knowvia reads those first for you."}
-          </p>
-          <ul style={{listStyle: "none", margin: "8px 0 0", padding: "0", display: "flex", flexDirection: "column", gap: "12px"}}>
-            <li style={{display: "flex", gap: "12px", alignItems: "center", fontSize: "17px", color: "#FFFFFF"}}>
-              <span aria-hidden="true" style={{flex: "0 0 auto", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "50%", background: "rgba(200,230,160,0.16)"}}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C8E6A0" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="5 12.5 10 17 19 7"></polyline>
-                </svg>
-              </span>
-              {"Not an insurer, and not selling you one."}
-            </li>
-            <li style={{display: "flex", gap: "12px", alignItems: "center", fontSize: "17px", color: "#FFFFFF"}}>
-              <span aria-hidden="true" style={{flex: "0 0 auto", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "50%", background: "rgba(200,230,160,0.16)"}}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C8E6A0" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="5 12.5 10 17 19 7"></polyline>
-                </svg>
-              </span>
-              {"Your answers are never sold or shared."}
-            </li>
-            <li style={{display: "flex", gap: "12px", alignItems: "center", fontSize: "17px", color: "#FFFFFF"}}>
-              <span aria-hidden="true" style={{flex: "0 0 auto", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "50%", background: "rgba(200,230,160,0.16)"}}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C8E6A0" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="5 12.5 10 17 19 7"></polyline>
-                </svg>
-              </span>
-              {"One email when we open. Nothing before."}
-            </li>
-          </ul>
-        </div>
-        <div style={{flex: "1.2 1 480px", maxWidth: "620px", background: "#FFFFFF", color: "#1A3034", borderRadius: "24px", padding: "clamp(22px,2.6vw,36px)", boxShadow: "0 30px 60px rgba(0,0,0,0.25)"}}>
+      <div className="kv-R">
+        <div style={{maxWidth: "560px"}}>
           {truthy(v.close.showForm) && (
             <>
             <form onSubmit={v.close.submit} noValidate style={{display: "flex", flexDirection: "column", gap: "20px"}}>
@@ -76,9 +83,9 @@ export function EarlyListSection({ v }: { v: Any }) {
                 </>
               )}
               <div style={{display: "flex", flexDirection: "column", gap: "8px"}}>
-                <label htmlFor="close-email" style={{display: "flex", alignItems: "center", gap: "10px", fontSize: "15px", fontWeight: "600", letterSpacing: "0.01em"}}>
+                <label htmlFor="close-email" style={{display: "flex", alignItems: "center", gap: "10px", fontSize: "15px", fontWeight: "700", letterSpacing: "0.01em", color: "#0F4A3A"}}>
                   {"Email "}
-                  <span style={{display: "inline-flex", alignItems: "center", height: "22px", padding: "0 8px", borderRadius: "6px", background: "#E3F0EE", color: "#163F42", fontSize: "13px", fontWeight: "700"}}>
+                  <span style={{display: "inline-flex", alignItems: "center", height: "22px", padding: "0 8px", borderRadius: "6px", background: "#FFFFFF", color: "#163F42", fontSize: "13px", fontWeight: "700"}}>
                     {"Required"}
                   </span>
                 </label>
@@ -90,7 +97,7 @@ export function EarlyListSection({ v }: { v: Any }) {
               {truthy(v.cm.isWrite) && (
                 <>
                 <div style={{display: "flex", flexDirection: "column", gap: "8px", animation: "kvIn 320ms cubic-bezier(0.165,0.84,0.44,1) both"}}>
-                  <span id="pol-label" style={{fontSize: "15px", fontWeight: "600", letterSpacing: "0.01em"}}>
+                  <span id="pol-label" style={{fontSize: "15px", fontWeight: "700", letterSpacing: "0.01em", color: "#0F4A3A"}}>
                     {"Which health policies does your family have?"}
                   </span>
                   <button type="button" onClick={v.ms.toggle} aria-expanded={v.ms.openStr} aria-controls="pol-list" aria-labelledby="pol-label pol-value" style={css(v.ms.buttonStyle)}>
@@ -104,7 +111,7 @@ export function EarlyListSection({ v }: { v: Any }) {
                   <div id="pol-list">
                     {truthy(v.ms.open) && (
                       <>
-                      <div role="group" aria-labelledby="pol-label" style={{display: "flex", flexDirection: "column", padding: "6px", borderRadius: "12px", border: "1px solid #7B918E", boxShadow: "0 12px 30px rgba(22,62,54,0.10)", animation: "kvIn 200ms cubic-bezier(0.165,0.84,0.44,1) both"}}>
+                      <div role="group" aria-labelledby="pol-label" style={{display: "flex", flexDirection: "column", padding: "6px", borderRadius: "12px", border: "1px solid #7B918E", background: "#FFFFFF", boxShadow: "0 12px 30px rgba(22,62,54,0.10)", animation: "kvIn 200ms cubic-bezier(0.165,0.84,0.44,1) both"}}>
                         {(v.policies ?? []).map((pc: Any, i1: number) => (
                           <Fragment key={i1}>
                             <button className="kv-opt" type="button" onClick={pc.toggle} aria-pressed={pc.on} style={css(pc.style)}>
@@ -130,7 +137,7 @@ export function EarlyListSection({ v }: { v: Any }) {
                       </>
                     )}
                   </div>
-                  <p style={{margin: "0", fontSize: "15px", lineHeight: "1.5", color: "#55696D"}}>
+                  <p style={{margin: "0", fontSize: "15px", lineHeight: "1.5", color: "#2E6B4A"}}>
                     {"Choose any. We use this only to decide what Knowvia reads first for you."}
                   </p>
                 </div>
@@ -139,7 +146,7 @@ export function EarlyListSection({ v }: { v: Any }) {
               {truthy(v.cm.isVoice) && (
                 <>
                 <div style={{display: "flex", flexDirection: "column", gap: "14px", animation: "kvIn 320ms cubic-bezier(0.165,0.84,0.44,1) both"}}>
-                  <div style={{display: "flex", flexDirection: "column", gap: "14px", padding: "18px", borderRadius: "16px", background: "#F3F7F6", border: "1px solid #CFDCDA"}}>
+                  <div style={{display: "flex", flexDirection: "column", gap: "14px", padding: "18px", borderRadius: "16px", background: "#FFFFFF", border: "1px solid #CFDCDA"}}>
                     <div style={{display: "flex", alignItems: "center", gap: "16px"}}>
                       {truthy(v.vn.isIdle) && (
                         <>
@@ -229,7 +236,7 @@ export function EarlyListSection({ v }: { v: Any }) {
                 </>
               )}
               <div style={{display: "flex", flexDirection: "column", gap: "10px"}}>
-                <button className="kv-btn" type="submit" aria-disabled={v.close.busyStr} style={{width: "100%", height: "56px", border: "0", borderRadius: "999px", background: "#176F69", color: "#FFFFFF", font: "inherit", fontSize: "17px", fontWeight: "600", letterSpacing: "0.005em", cursor: "pointer"}}>
+                <button className="kv-btn" type="submit" aria-disabled={v.close.busyStr} style={{width: "100%", height: "56px", border: "0", borderRadius: "999px", background: "#0F4A3A", color: "#FFFFFF", font: "inherit", fontSize: "17px", fontWeight: "600", letterSpacing: "0.005em", cursor: "pointer"}}>
                   {v.cm.buttonLabel}
                 </button>
                 {truthy(v.close.busy) && (
@@ -238,9 +245,9 @@ export function EarlyListSection({ v }: { v: Any }) {
                   </>
                 )}
               </div>
-              <p id="close-consent" style={{margin: "0", fontSize: "15px", lineHeight: "1.5", color: "#55696D"}}>
+              <p id="close-consent" style={{margin: "0", fontSize: "15px", lineHeight: "1.5", color: "#2E6B4A"}}>
                 {"We use your email only to tell you when Knowvia opens. Read the "}
-                <Link href="/privacy">
+                <Link href="/privacy" style={{color: "#0F4A3A"}}>
                   {"privacy notice"}
                 </Link>
                 {"."}
@@ -252,12 +259,12 @@ export function EarlyListSection({ v }: { v: Any }) {
           {truthy(v.close.showSuccess) && (
             <>
             <div role="status" style={{display: "flex", flexDirection: "column", gap: "10px", animation: "kvIn 420ms cubic-bezier(0.165,0.84,0.44,1) both"}}>
-              <span aria-hidden="true" style={{display: "inline-flex", alignItems: "center", justifyContent: "center", width: "48px", height: "48px", borderRadius: "50%", background: "#E3F0EE"}}>
+              <span aria-hidden="true" style={{display: "inline-flex", alignItems: "center", justifyContent: "center", width: "48px", height: "48px", borderRadius: "50%", background: "#FFFFFF"}}>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#176F69" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="5 12.5 10 17 19 7"></polyline>
                 </svg>
               </span>
-              <p style={{margin: "0", fontSize: "22px", fontWeight: "600", lineHeight: "1.3", color: "#163F42"}}>
+              <p style={{margin: "0", fontSize: "22px", fontWeight: "600", lineHeight: "1.3", color: "#0F4A3A"}}>
                 {"You are on the list."}
               </p>
               <p style={{margin: "0", fontSize: "17px", lineHeight: "1.6"}}>
@@ -266,6 +273,18 @@ export function EarlyListSection({ v }: { v: Any }) {
             </div>
             </>
           )}
+          {" "}
+          <div className="kv-backers" style={{marginTop: "28px", paddingTop: "20px", borderTop: "1px solid rgba(15,74,58,0.25)"}}>
+            <span style={{fontSize: "15px", fontWeight: "600", color: "#0F4A3A"}}>
+              {"Supported by"}
+            </span>
+            {" "}
+            <img src="/logos/lightspeed.png" alt="Lightspeed" style={{height: "24px", width: "auto", display: "block"}} />
+            {" "}
+            <span aria-hidden="true" style={{width: "1px", height: "28px", background: "rgba(15,74,58,0.3)"}}></span>
+            {" "}
+            <img src="/logos/insurance-samadhan.png" alt="Insurance Samadhan" style={{height: "30px", width: "auto", display: "block"}} />
+          </div>
         </div>
       </div>
     </section>

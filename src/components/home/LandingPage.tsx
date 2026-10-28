@@ -1,6 +1,8 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import Lenis from "lenis";
+import "lenis/dist/lenis.css";
+import { type CSSProperties, useEffect } from "react";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteNav } from "@/components/layout/SiteNav";
 import type { Any } from "@/lib/dc";
@@ -16,6 +18,7 @@ import { IndustrySection } from "./IndustrySection";
 import { LimitsSection } from "./LimitsSection";
 import { PartnersSection } from "./PartnersSection";
 import { QuestionsSection } from "./QuestionsSection";
+import { RoomTestSection } from "./RoomTestSection";
 import { StoriesSection } from "./StoriesSection";
 import { Component as LandingModel } from "./landing-model";
 
@@ -25,30 +28,57 @@ export const designRoot: CSSProperties = {
   color: "#1A3034",
   background: "#F3F7F6",
   WebkitFontSmoothing: "antialiased",
+  overflowX: "clip",
   fontSize: "16px",
   lineHeight: "normal",
 };
 
 const modelProps = { voiceEnabled: process.env.NEXT_PUBLIC_VOICE_NOTES_ENABLED === "true" };
 
+/** Smooth scroll for the landing page, off when the visitor prefers reduced motion. It pauses while the dock panel locks the page. */
+function useSmoothScroll() {
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const lenis = new Lenis({ autoRaf: true, anchors: true });
+    const root = document.documentElement;
+    let locked = false;
+    const lock = new MutationObserver(() => {
+      const next = root.classList.contains("kv-lock");
+      if (next === locked) return;
+      locked = next;
+      if (locked) lenis.stop();
+      else lenis.start();
+    });
+    lock.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => {
+      lock.disconnect();
+      lenis.destroy();
+    };
+  }, []);
+}
+
 export function LandingPage() {
   const v: Any = useDcModel(LandingModel, modelProps);
+  useSmoothScroll();
   return (
     <div style={designRoot}>
       <a className="kv-skip" href="#main">Skip to main content</a>
       <SiteNav />
       <main id="main">
-        <HeroSection v={v} />
-        <IndustrySection v={v} />
+        <div className="kv-curtain">
+          <HeroSection v={v} />
+          <IndustrySection v={v} />
+        </div>
         <ClauseBand v={v} />
         <ContrastSection v={v} />
-        <HowItWorksSection />
+        <HowItWorksSection v={v} />
+        <RoomTestSection v={v} />
         <StoriesSection v={v} />
-        <HouseholdControl />
+        <HouseholdControl v={v} />
         <LimitsSection v={v} />
         <FamilyQuote />
         <QuestionsSection v={v} />
-        <PartnersSection />
+        <PartnersSection v={v} />
         <EarlyListSection v={v} />
       </main>
       <SiteFooter />

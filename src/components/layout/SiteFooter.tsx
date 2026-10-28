@@ -1,4 +1,5 @@
 // Generated from the approved Claude Design artboard Main.dc.html. Edit the design, then regenerate with scripts/design-port.
+/* eslint-disable @next/next/no-img-element -- logos keep the design's fixed height with natural width */
 
 import Link from "next/link";
 import { site } from "@/lib/site";
@@ -25,8 +26,16 @@ export function SiteFooter() {
               {"Know your cover. Before you need it."}
             </p>
             <p style={{margin: "0", fontSize: "15px", lineHeight: "1.5"}}>
-              {"Health insurance only. Supported by Lightspeed India and Insurance Samadhan."}
+              {"Health insurance only."}
             </p>
+            <div style={{display: "flex", flexWrap: "wrap", alignItems: "center", gap: "12px 20px"}}>
+              <span style={{fontSize: "14px", fontWeight: "600"}}>
+                {"Supported by"}
+              </span>
+              <img src="/logos/lightspeed.png" alt="Lightspeed India" style={{height: "20px", width: "auto", display: "block", filter: "brightness(0) invert(1)", opacity: "0.9"}} />
+              <span aria-hidden="true" style={{width: "1px", height: "24px", background: "rgba(255,255,255,0.25)"}}></span>
+              <img src="/logos/insurance-samadhan.png" alt="Insurance Samadhan" style={{height: "26px", width: "auto", display: "block", filter: "brightness(0) invert(1)", opacity: "0.9"}} />
+            </div>
           </div>
           <nav aria-label="Knowvia" style={{flex: "1 1 160px", display: "flex", flexDirection: "column", gap: "12px", fontSize: "16px"}}>
             <p style={{margin: "0 0 4px", fontSize: "15px", fontWeight: "600", color: "#FFFFFF"}}>

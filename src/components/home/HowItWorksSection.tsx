@@ -1,174 +1,225 @@
 // Generated from the approved Claude Design artboard Main.dc.html. Edit the design, then regenerate with scripts/design-port.
 "use client";
 
+import { Fragment } from "react";
+import { type Any, css, truthy } from "@/lib/dc";
 
-export function HowItWorksSection() {
+export function HowItWorksSection({ v }: { v: Any }) {
   return (
     <>
-    <section id="how" aria-labelledby="how-h" style={{padding: "clamp(72px,9vw,128px) clamp(20px,5vw,80px)"}}>
-      <div style={{maxWidth: "1200px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "48px"}}>
-        <div style={{display: "flex", flexDirection: "column", gap: "16px", maxWidth: "720px"}}>
-          <h2 id="how-h" style={{margin: "0", fontFamily: "var(--font-display), 'Iowan Old Style', Georgia, serif", fontWeight: "400", fontSize: "clamp(34px,3.6vw,52px)", lineHeight: "1.08", letterSpacing: "-0.015em", color: "#163F42", maxWidth: "16ch", textWrap: "balance"}}>
-            {"See three answers for every person."}
-          </h2>
-          <p style={{margin: "0", fontSize: "clamp(18px,1.45vw,21px)", lineHeight: "1.5", maxWidth: "46ch", color: "#55696D"}}>
-            {"When Knowvia opens, add the health policies you already have. It reads them person by person, and shows its working."}
-          </p>
-        </div>
-        <div style={{display: "flex", flexWrap: "wrap", gap: "32px 48px", alignItems: "center"}}>
-          <article className="kv-rise" aria-label="Example: a family floater policy schedule, read by Knowvia" style={{flex: "7 1 560px", minWidth: "0", background: "#FFFFFF", borderRadius: "24px", border: "1px solid #CFDCDA", boxShadow: "0 24px 60px rgba(22,62,54,0.10)", overflow: "hidden"}}>
-            <div style={{display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px", padding: "22px clamp(20px,2.4vw,28px)", background: "#F3F7F6", borderBottom: "1px solid #CFDCDA"}}>
-              <div style={{display: "flex", flexDirection: "column", gap: "2px"}}>
-                <span style={{fontSize: "13px", fontWeight: "700", letterSpacing: "0.06em", textTransform: "uppercase", color: "#55696D"}}>
-                  {"Policy schedule"}
-                </span>
-                <span style={{fontFamily: "var(--font-display), 'Iowan Old Style', Georgia, serif", fontSize: "24px", lineHeight: "1.2", color: "#163F42"}}>
-                  {"Family floater, for Maa and you"}
+    <section id="how" aria-labelledby="how-h" style={{background: "#F3F7F6", padding: "clamp(72px,9vw,128px) 0"}}>
+      <div className="kv-film">
+        <div className="kv-player kv-rise">
+          <div className="kv-stage" data-c={v.film.c} role="img" aria-label="Animated example: a policy is added, read page by page, gaps are flagged, and each family member gets answers.">
+            <svg className="kv-rings" aria-hidden="true" viewBox="0 0 800 800" style={{right: "-140px", top: "-140px", width: "520px", height: "520px", opacity: "0.12"}}>
+              <circle cx="400" cy="400" r="290" fill="none" stroke="#A8DCCB" strokeWidth="3"></circle>
+              <circle cx="400" cy="400" r="240" fill="none" stroke="#A8DCCB" strokeWidth="3"></circle>
+              <circle cx="400" cy="400" r="190" fill="none" stroke="#A8DCCB" strokeWidth="3"></circle>
+            </svg>
+            {" "}
+            <div className="kv-layer kv-l0">
+              <div style={{position: "absolute", left: "55%", top: "50%", transform: "translate(-50%,-50%)", width: "min(64%,380px)", border: "2px dashed rgba(200,230,160,0.6)", borderRadius: "20px", padding: "28px", display: "flex", flexDirection: "column", alignItems: "center", gap: "14px", color: "#FFFFFF", textAlign: "center", boxSizing: "border-box"}}>
+                <div className="kv-file" style={{display: "flex", alignItems: "center", gap: "12px", background: "#FFFFFF", color: "#1A3034", borderRadius: "12px", padding: "12px 16px", fontWeight: "600"}}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                    <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                    <path d="M14 3v6h6"></path>
+                  </svg>
+                  {"Policy_schedule.pdf"}
+                </div>
+                <div style={{width: "100%", height: "6px", borderRadius: "3px", background: "rgba(255,255,255,0.18)", overflow: "hidden"}}>
+                  <span className="kv-upbar" style={{display: "block", height: "100%", background: "#C8E6A0", transformOrigin: "left"}}></span>
+                </div>
+                <span style={{fontSize: "15px", color: "#A8DCCB"}}>
+                  {"Adding your policy"}
                 </span>
               </div>
-              <span style={{flex: "0 0 auto", display: "inline-flex", alignItems: "center", height: "26px", padding: "0 10px", borderRadius: "6px", background: "#E6EFEC", color: "#163F42", fontSize: "14px", fontWeight: "600"}}>
-                {"Example"}
-              </span>
             </div>
             {" "}
-            <ul style={{listStyle: "none", margin: "0", padding: "0"}}>
-              <li className="kv-docrow" style={{display: "grid", gridTemplateColumns: "minmax(120px,150px) minmax(0,1fr) auto", gap: "6px 20px", alignItems: "center", padding: "18px clamp(20px,2.4vw,28px)"}}>
-                <span className="kv-docref" style={{fontSize: "14px", fontWeight: "700", color: "#163F42", fontVariantNumeric: "tabular-nums"}}>
-                  {"Page 2, line 4"}
-                </span>
-                <div>
-                  <p style={{margin: "0", fontSize: "14px", color: "#55696D"}}>
-                    {"Sum insured"}
-                  </p>
-                  <p style={{margin: "0", fontSize: "18px", lineHeight: "1.4"}}>
-                    {"₹5,00,000 floater"}
-                  </p>
-                </div>
-                <span style={{display: "inline-flex", alignItems: "center", gap: "6px", height: "28px", padding: "0 10px", borderRadius: "6px", background: "#E3F0EE", color: "#163F42", fontSize: "14px", fontWeight: "600"}}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <polyline points="5 12.5 10 17 19 7"></polyline>
-                  </svg>
-                  {"Known"}
-                </span>
-              </li>
-              <li className="kv-docrow" style={{display: "grid", gridTemplateColumns: "minmax(120px,150px) minmax(0,1fr) auto", gap: "6px 20px", alignItems: "center", padding: "18px clamp(20px,2.4vw,28px)", borderTop: "1px solid #E6EFEC"}}>
-                <span className="kv-docref" style={{fontSize: "14px", fontWeight: "700", color: "#163F42", fontVariantNumeric: "tabular-nums"}}>
-                  {"Page 4, line 12"}
-                </span>
-                <div>
-                  <p style={{margin: "0", fontSize: "14px", color: "#55696D"}}>
-                    {"Insured persons"}
-                  </p>
-                  <p style={{margin: "0", fontSize: "18px", lineHeight: "1.4"}}>
-                    {"Maa is enrolled as a dependant"}
-                  </p>
-                </div>
-                <span style={{display: "inline-flex", alignItems: "center", gap: "6px", height: "28px", padding: "0 10px", borderRadius: "6px", background: "#E3F0EE", color: "#163F42", fontSize: "14px", fontWeight: "600"}}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <polyline points="5 12.5 10 17 19 7"></polyline>
-                  </svg>
-                  {"Known"}
-                </span>
-              </li>
-              <li className="kv-docrow" style={{display: "grid", gridTemplateColumns: "minmax(120px,150px) minmax(0,1fr) auto", gap: "6px 20px", alignItems: "center", padding: "18px clamp(20px,2.4vw,28px)", borderTop: "1px solid #E6EFEC"}}>
-                <span className="kv-docref" style={{fontSize: "14px", fontWeight: "700", color: "#163F42", fontVariantNumeric: "tabular-nums"}}>
-                  {"Page 11, clause 4.2"}
-                </span>
-                <div>
-                  <p style={{margin: "0", fontSize: "14px", color: "#55696D"}}>
-                    {"Waiting periods"}
-                  </p>
-                  <p style={{margin: "0", fontSize: "18px", lineHeight: "1.4"}}>
-                    {"Cataract: 2 years"}
-                  </p>
-                </div>
-                <span style={{display: "inline-flex", alignItems: "center", gap: "6px", height: "28px", padding: "0 10px", borderRadius: "6px", background: "#E3F0EE", color: "#163F42", fontSize: "14px", fontWeight: "600"}}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <polyline points="5 12.5 10 17 19 7"></polyline>
-                  </svg>
-                  {"Known"}
-                </span>
-              </li>
-              <li className="kv-docrow kv-march" style={{display: "grid", gridTemplateColumns: "minmax(120px,150px) minmax(0,1fr) auto", gap: "6px 20px", alignItems: "center", padding: "18px clamp(20px,2.4vw,28px)", backgroundColor: "#FBF1DD"}}>
-                <span className="kv-docref" style={{fontSize: "14px", fontWeight: "700", color: "#7A5207"}}>
-                  {"Not in this document"}
-                </span>
-                <div>
-                  <p style={{margin: "0", fontSize: "14px", color: "#7A5207"}}>
-                    {"Room-rent limit"}
-                  </p>
-                  <p style={{margin: "0", fontSize: "18px", lineHeight: "1.4"}}>
-                    {"The schedule does not say. Your policy wording might."}
-                  </p>
-                </div>
-                <span style={{display: "inline-flex", alignItems: "center", gap: "6px", height: "28px", padding: "0 10px", borderRadius: "6px", background: "#FFFFFF", color: "#7A5207", border: "1.5px dashed #7A5207", boxSizing: "border-box", fontSize: "14px", fontWeight: "600", whiteSpace: "nowrap"}}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <circle cx="12" cy="12" r="9"></circle>
-                    <path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.3c-0.7 0.3-1 0.8-1 1.5v0.4"></path>
-                  </svg>
-                  {"Not confirmed"}
-                </span>
-              </li>
-              <li className="kv-docrow" style={{display: "grid", gridTemplateColumns: "minmax(120px,150px) minmax(0,1fr) auto", gap: "6px 20px", alignItems: "center", padding: "20px clamp(20px,2.4vw,28px)", background: "#163F42", color: "#FFFFFF"}}>
-                <span className="kv-docref" style={{display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "14px", fontWeight: "700", color: "#FFFFFF"}}>
-                  <span aria-hidden="true" style={{width: "10px", height: "10px", borderRadius: "50%", background: "#E0A02B"}}></span>
-                  {"Next step"}
-                </span>
-                <div>
-                  <p style={{margin: "0", fontSize: "18px", lineHeight: "1.4", fontWeight: "600"}}>
-                    {"Ask HR for the policy wording"}
-                  </p>
-                  <p style={{margin: "0", fontSize: "15px", lineHeight: "1.45", color: "#C9DDD9"}}>
-                    {"Who: you. By when: before you choose a room."}
-                  </p>
-                </div>
-                <span aria-hidden="true"></span>
-              </li>
-            </ul>
-          </article>
-          <dl style={{flex: "5 1 340px", margin: "0", display: "flex", flexDirection: "column"}}>
-            <div className="kv-rise" style={{display: "flex", flexDirection: "column", gap: "8px", padding: "0 0 24px"}}>
-              <dt style={{display: "flex", alignItems: "center", gap: "10px", fontFamily: "var(--font-display), 'Iowan Old Style', Georgia, serif", fontSize: "26px", lineHeight: "1.2", color: "#163F42"}}>
-                <span aria-hidden="true" style={{display: "inline-flex", alignItems: "center", justifyContent: "center", width: "32px", height: "32px", borderRadius: "8px", background: "#E3F0EE", color: "#163F42"}}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="5 12.5 10 17 19 7"></polyline>
-                  </svg>
-                </span>
-                {"Known, with proof"}
-              </dt>
-              <dd style={{margin: "0", fontSize: "17px", lineHeight: "1.55"}}>
-                {"Every fact carries its page and line, so at the desk you can say “it says here”."}
-              </dd>
+            <div className="kv-layer kv-l1">
+              <div className="kv-doc">
+                <span style={{display: "block", height: "12px", width: "55%", borderRadius: "3px", background: "#163F42", opacity: "0.8", marginBottom: "6px"}}></span>
+                <span className="kv-ln" style={{width: "92%"}}></span>
+                <span className="kv-ln" style={{width: "84%"}}></span>
+                <span className="kv-ln kv-ln-g" style={{width: "70%"}}></span>
+                <span className="kv-ln" style={{width: "88%"}}></span>
+                <span className="kv-ln" style={{width: "62%"}}></span>
+                <span className="kv-ln" style={{width: "90%"}}></span>
+                <span className="kv-ln kv-ln-u" style={{width: "76%"}}></span>
+                <span className="kv-ln" style={{width: "80%"}}></span>
+                <span className="kv-ln" style={{width: "86%"}}></span>
+                <span className="kv-ln" style={{width: "58%"}}></span>
+                <span className="kv-ln kv-ln-n" style={{width: "68%"}}></span>
+                <span className="kv-ln" style={{width: "91%"}}></span>
+                <span className="kv-ln" style={{width: "74%"}}></span>
+              </div>
+              {" "}
+              <div className="kv-scan"></div>
+              {" "}
+              <div style={{position: "absolute", right: "7%", top: "12%", color: "#FFFFFF", textAlign: "right"}}>
+                <p style={{margin: "0", fontFamily: "var(--font-display), 'Iowan Old Style', Georgia, serif", fontSize: "clamp(36px,5vw,64px)", lineHeight: "1"}}>
+                  {"32"}
+                </p>
+                <p style={{margin: "0", fontSize: "15px", color: "#A8DCCB"}}>
+                  {"pages, read in full"}
+                </p>
+              </div>
             </div>
-            <div className="kv-rise" style={{display: "flex", flexDirection: "column", gap: "8px", padding: "24px 0", borderTop: "1px solid #CFDCDA"}}>
-              <dt style={{display: "flex", alignItems: "center", gap: "10px", fontFamily: "var(--font-display), 'Iowan Old Style', Georgia, serif", fontSize: "26px", lineHeight: "1.2", color: "#163F42"}}>
-                <span aria-hidden="true" style={{display: "inline-flex", alignItems: "center", justifyContent: "center", width: "32px", height: "32px", borderRadius: "8px", background: "#FBF1DD", color: "#7A5207", border: "1.5px dashed #7A5207", boxSizing: "border-box"}}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="9"></circle>
-                    <path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.3c-0.7 0.3-1 0.8-1 1.5v0.4"></path>
-                  </svg>
-                </span>
-                {"Gaps, marked in place"}
-              </dt>
-              <dd style={{margin: "0", fontSize: "17px", lineHeight: "1.55"}}>
-                {"Missing or unclear stays on the document itself. "}
-                <strong style={{fontWeight: "700"}}>
-                  {"We never guess."}
-                </strong>
-              </dd>
+            {" "}
+            <div className="kv-layer kv-l2">
+              <div className="kv-flags">
+                <div className="kv-flag">
+                  <span className="kv-badge kv-b-covered">
+                    {"Covered"}
+                  </span>
+                  {"Cataract · page 11"}
+                </div>
+                <div className="kv-flag">
+                  <span className="kv-badge kv-b-unclear">
+                    {"Not confirmed"}
+                  </span>
+                  {"Room-rent limit"}
+                </div>
+                <div className="kv-flag">
+                  <span className="kv-badge kv-b-next">
+                    {"Next step"}
+                  </span>
+                  {"Ask HR for the wording"}
+                </div>
+              </div>
             </div>
-            <div className="kv-rise" style={{display: "flex", flexDirection: "column", gap: "8px", padding: "24px 0 0", borderTop: "1px solid #CFDCDA"}}>
-              <dt style={{display: "flex", alignItems: "center", gap: "10px", fontFamily: "var(--font-display), 'Iowan Old Style', Georgia, serif", fontSize: "26px", lineHeight: "1.2", color: "#163F42"}}>
-                <span aria-hidden="true" style={{display: "inline-flex", alignItems: "center", justifyContent: "center", width: "32px", height: "32px", borderRadius: "8px", background: "#163F42"}}>
-                  <span style={{width: "10px", height: "10px", borderRadius: "50%", background: "#E0A02B"}}></span>
-                </span>
-                {"One next step"}
-              </dt>
-              <dd style={{margin: "0", fontSize: "17px", lineHeight: "1.55"}}>
-                {"Who does it and by when, written into the list. Not a lecture."}
-              </dd>
+            {" "}
+            <div className="kv-layer kv-l3">
+              <div className="kv-result">
+                <p style={{margin: "0 0 6px", fontFamily: "var(--font-display), 'Iowan Old Style', Georgia, serif", fontSize: "clamp(20px,2.4vw,30px)", color: "#163F42"}}>
+                  {"Your family, read"}
+                </p>
+                {" "}
+                <div className="kv-person-row">
+                  <span className="kv-av" style={{background: "#C8E6A0", color: "#0F4A3A"}}>
+                    {"M"}
+                  </span>
+                  <span>
+                    <b>
+                      {"Maa"}
+                    </b>
+                    <br />
+                    <span style={{fontSize: "14px", color: "#55696D"}}>
+                      {"Cataract after March 2026"}
+                    </span>
+                  </span>
+                  <span className="kv-badge kv-b-covered">
+                    {"Covered"}
+                  </span>
+                </div>
+                {" "}
+                <div className="kv-person-row">
+                  <span className="kv-av" style={{background: "#CDEBE5", color: "#163F42"}}>
+                    {"Y"}
+                  </span>
+                  <span>
+                    <b>
+                      {"You"}
+                    </b>
+                    <br />
+                    <span style={{fontSize: "14px", color: "#55696D"}}>
+                      {"Room-rent limit not on the schedule"}
+                    </span>
+                  </span>
+                  <span className="kv-badge kv-b-unclear">
+                    {"Not confirmed"}
+                  </span>
+                </div>
+                {" "}
+                <div className="kv-person-row">
+                  <span className="kv-av" style={{background: "#FBF1DD", color: "#7A5207"}}>
+                    {"B"}
+                  </span>
+                  <span>
+                    <b>
+                      {"Brother"}
+                    </b>
+                    <br />
+                    <span style={{fontSize: "14px", color: "#55696D"}}>
+                      {"Not on this policy"}
+                    </span>
+                  </span>
+                  <span className="kv-badge kv-b-gap">
+                    {"Not covered"}
+                  </span>
+                </div>
+              </div>
             </div>
-          </dl>
+          </div>
+          {" "}
+          <div className="kv-controls">
+            <button className="kv-play" type="button" onClick={v.film.toggle} aria-label={v.film.label}>
+              {truthy(v.film.playing) && (
+                <>
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"></rect>
+                  <rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"></rect>
+                </svg>
+                </>
+              )}
+              {truthy(v.film.paused) && (
+                <>
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M7 5v14l12-7z" fill="currentColor"></path>
+                </svg>
+                </>
+              )}
+            </button>
+            {" "}
+            <div className="kv-segs" aria-hidden="true">
+              {(v.film.chaps ?? []).map((sg: Any, i1: number) => (
+                <Fragment key={i1}>
+                  <span className="kv-seg">
+                    <span className={sg.barCls}></span>
+                  </span>
+                </Fragment>
+              ))}
+            </div>
+            {" "}
+            <span style={{fontVariantNumeric: "tabular-nums", fontSize: "14px", color: "#A8DCCB", minWidth: "86px", textAlign: "right"}}>
+              {v.film.time}
+            </span>
+          </div>
+        </div>
+        {" "}
+        <div style={{display: "flex", flexDirection: "column", gap: "28px"}}>
+          <div style={{display: "flex", flexDirection: "column", gap: "16px"}}>
+            <p className="kv-eyebrow kv-reveal" style={{color: "#176F69"}}>
+              {"Watch it work · 20 seconds"}
+            </p>
+            <h2 id="how-h" className="kv-h2 kv-reveal" style={{color: "#163F42", maxWidth: "14ch"}}>
+              {"See three answers for every person."}
+            </h2>
+            <p className="kv-lede kv-reveal kv-d120" style={{color: "#55696D", maxWidth: "40ch"}}>
+              {"When Knowvia opens, add the health policies you already have. It reads them person by person, and shows its working."}
+            </p>
+          </div>
+          <div style={{display: "flex", flexDirection: "column", borderTop: "1px solid #CFDCDA"}}>
+            {(v.film.chaps ?? []).map((ch: Any, i2: number) => (
+              <Fragment key={i2}>
+                <button className="kv-chap" type="button" aria-current={ch.cur} onClick={ch.go}>
+                  <span style={css(ch.numStyle)}>
+                    {ch.n}
+                  </span>
+                  <span>
+                    <strong style={{display: "block", fontSize: "19px"}}>
+                      {ch.title}
+                    </strong>
+                    <span style={{display: "block", fontSize: "15px", lineHeight: "1.45", marginTop: "2px"}}>
+                      {ch.text}
+                    </span>
+                  </span>
+                  <span className="kv-chapbar" aria-hidden="true">
+                    <span className={ch.barCls}></span>
+                  </span>
+                </button>
+              </Fragment>
+            ))}
+          </div>
         </div>
       </div>
     </section>
