@@ -74,12 +74,12 @@ export function LandingPage() {
         <ContrastSection v={v} />
         <RoomTeaser v={v} />
         <FamilyQuote />
-        <LimitsSection v={v} />
         <QuestionsSection v={v} />
         <ResearchSegment>
           <IndustrySection v={v} />
           <StoriesSection v={v} />
           <HouseholdControl v={v} />
+          <LimitsSection v={v} />
         </ResearchSegment>
         <PartnersSection v={v} />
         <EarlyListSection v={v} />
