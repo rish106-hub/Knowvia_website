@@ -73,8 +73,8 @@ export function LandingPage() {
         <ClauseBand v={v} />
         <ContrastSection v={v} />
         <RoomTeaser v={v} />
-        <LimitsSection v={v} />
         <FamilyQuote />
+        <LimitsSection v={v} />
         <QuestionsSection v={v} />
         <ResearchSegment>
           <IndustrySection v={v} />
