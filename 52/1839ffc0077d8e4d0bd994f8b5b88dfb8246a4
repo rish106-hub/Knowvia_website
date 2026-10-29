@@ -1,0 +1,28 @@
+playwright.demo.config.ts
+  s_855e84efa46c3b::t_cd125a103a94e6 1-43
+  s_855e84efa46c3b::t_5aa5f1a97c4a93 44-51
+docs/demo/integration-findings.md
+  s_855e84efa46c3b::t_d10d75c2c0b4c5 1-91
+tests/demo/flow.ts
+  s_855e84efa46c3b::t_979dcb1441d81d 1-222
+tests/demo/record-flow.spec.ts
+  s_855e84efa46c3b::t_ad4cf120351056 1-25
+tests/demo/repeatability.spec.ts
+  s_855e84efa46c3b::t_fd673d7bf4a9eb 1-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "521839ffc0077d8e4d0bd994f8b5b88dfb8246a4",
+  "prompts": {},
+  "sessions": {
+    "s_855e84efa46c3b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c1fd1e2b-a092-4ef0-9e46-139a5f2e40b4",
+        "model": "unknown"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
