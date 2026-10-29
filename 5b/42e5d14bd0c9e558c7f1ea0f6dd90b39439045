@@ -1,0 +1,19 @@
+src/components/home/HowItWorksSection.tsx
+  s_d28f305ab7f436::t_04b8ae15e29dde 1,5,12-25,27-29,35,47,59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5b42e5d14bd0c9e558c7f1ea0f6dd90b39439045",
+  "prompts": {},
+  "sessions": {
+    "s_d28f305ab7f436": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bfc64965-d544-4466-b933-93846f2ea574",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
