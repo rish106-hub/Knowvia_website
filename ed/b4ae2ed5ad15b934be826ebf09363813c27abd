@@ -1,0 +1,33 @@
+docs/demo/README.md
+  s_855e84efa46c3b::t_859394b0aa0ffe 1-60
+package.json
+  s_855e84efa46c3b::t_7f3fce3c34bb7b 13-16
+scripts/demo/secret-scan.sh
+  s_855e84efa46c3b::t_00302c91d52bf6 1-17
+.env.demo.example
+  s_a0c0719d5c2828::t_8d0063eeb368d2 1-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "edb4ae2ed5ad15b934be826ebf09363813c27abd",
+  "prompts": {},
+  "sessions": {
+    "s_855e84efa46c3b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c1fd1e2b-a092-4ef0-9e46-139a5f2e40b4",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    },
+    "s_a0c0719d5c2828": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-ac0c2b38f2e53c43f",
+        "model": "unknown"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
