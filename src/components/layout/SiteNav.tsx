@@ -26,8 +26,8 @@ export function SiteNav() {
           </Link>
         </div>
         <div className="kv-desktop" style={{display: "flex", alignItems: "center", gap: "28px", fontSize: "16px", fontWeight: "600"}}>
-          <Link className="kv-nav-link" href="/#industry">
-            {"Why it matters"}
+          <Link className="kv-nav-link" href="/#research">
+            {"Our research"}
           </Link>
           <Link className="kv-nav-link" href="/#how">
             {"How it works"}
@@ -59,8 +59,8 @@ export function SiteNav() {
         <>
         <div id="mobile-menu" className="kv-mobile" style={{padding: "8px 0 24px"}}>
           <div style={{display: "flex", flexDirection: "column", fontSize: "19px", fontWeight: "600"}}>
-            <Link href="/#industry" style={{minHeight: "52px", display: "flex", alignItems: "center", borderBottom: "1px solid #CFDCDA", color: "#1A3034", textDecoration: "none"}}>
-              {"Why it matters"}
+            <Link href="/#research" style={{minHeight: "52px", display: "flex", alignItems: "center", borderBottom: "1px solid #CFDCDA", color: "#1A3034", textDecoration: "none"}}>
+              {"Our research"}
             </Link>
             <Link href="/#how" style={{minHeight: "52px", display: "flex", alignItems: "center", borderBottom: "1px solid #CFDCDA", color: "#1A3034", textDecoration: "none"}}>
               {"How it works"}

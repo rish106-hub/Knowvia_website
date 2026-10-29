@@ -33,7 +33,7 @@ export class Component extends DCLogic {
     });
     watch([document.getElementById('partners')], { threshold: 0.3 }, function (en) { if (en.isIntersecting) self.setState({ flowIn: true }); });
     // section rail
-    var railIds = ['industry', 'clauses', 'desk', 'how', 'try', 'stories', 'privacy', 'promises', 'questions', 'partners'];
+    var railIds = ['how', 'clauses', 'desk', 'try', 'privacy', 'promises', 'questions', 'research', 'partners'];
     watch(railIds.map(function (id) { return document.getElementById(id); }), { rootMargin: '-45% 0px -50% 0px' }, function (en) {
       if (en.isIntersecting) self.setState({ railIdx: railIds.indexOf(en.target.id) });
     });
@@ -583,7 +583,7 @@ export class Component extends DCLogic {
     var railIdx = this.state.railIdx;
     var rail = {
       show: this.state.railShow ? 'true' : 'false',
-      items: [['#industry', 'Why it matters'], ['#clauses', 'The clauses'], ['#desk', 'Two ways'], ['#how', 'Watch it work'], ['#try', 'Room test'], ['#stories', 'Real stories'], ['#privacy', 'Privacy'], ['#promises', 'Our promise'], ['#questions', 'Questions'], ['#partners', 'For business']].map(function (r, i) {
+      items: [['#how', 'Watch it work'], ['#clauses', 'The clauses'], ['#desk', 'Two ways'], ['#try', 'Room test'], ['#privacy', 'Privacy'], ['#promises', 'Our promise'], ['#questions', 'Questions'], ['#research', 'Our research'], ['#partners', 'For business']].map(function (r, i) {
         return { href: r[0], label: r[1], cur: i === railIdx ? 'true' : 'false' };
       })
     };

@@ -18,6 +18,7 @@ import { IndustrySection } from "./IndustrySection";
 import { LimitsSection } from "./LimitsSection";
 import { PartnersSection } from "./PartnersSection";
 import { QuestionsSection } from "./QuestionsSection";
+import { ResearchSegment } from "./ResearchSegment";
 import { RoomTestSection } from "./RoomTestSection";
 import { StoriesSection } from "./StoriesSection";
 import { Component as LandingModel } from "./landing-model";
@@ -67,17 +68,19 @@ export function LandingPage() {
       <main id="main">
         <div className="kv-curtain">
           <HeroSection v={v} />
-          <IndustrySection v={v} />
+          <HowItWorksSection v={v} />
         </div>
         <ClauseBand v={v} />
         <ContrastSection v={v} />
-        <HowItWorksSection v={v} />
         <RoomTestSection v={v} />
-        <StoriesSection v={v} />
         <HouseholdControl v={v} />
         <LimitsSection v={v} />
         <FamilyQuote />
         <QuestionsSection v={v} />
+        <ResearchSegment>
+          <IndustrySection v={v} />
+          <StoriesSection v={v} />
+        </ResearchSegment>
         <PartnersSection v={v} />
         <EarlyListSection v={v} />
       </main>
