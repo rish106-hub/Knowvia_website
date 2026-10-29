@@ -1,0 +1,49 @@
+src/server/app/demo-backend/delays.ts
+  s_855e84efa46c3b::t_6585fc5c95f5bb 1-10
+src/server/app/demo-backend/fixtures/seed-data.ts
+  s_855e84efa46c3b::t_a9690acc7f1977 1-55
+src/server/app/demo-backend/fixtures/types.ts
+  s_855e84efa46c3b::t_3264ddc3316834 1-25
+src/server/app/demo-backend/http.ts
+  s_855e84efa46c3b::t_6876c1416b3658 1-72
+src/server/app/demo-backend/index.ts
+  s_855e84efa46c3b::t_2e3397847a8c87 1-26
+src/server/app/demo-backend/router.ts
+  s_855e84efa46c3b::t_8250e3afc831fe 1-820
+src/server/app/demo-backend/select.ts
+  s_855e84efa46c3b::t_4a622125bb727a 1-15
+src/server/app/demo-backend/store.ts
+  s_855e84efa46c3b::t_2c2a2237eb1dc1 1-110
+src/server/app/runtime.ts
+  s_855e84efa46c3b::t_fa0fd3c5e1d16b 2,16-17
+tests/unit/demo-backend/consent-revoke.test.ts
+  s_855e84efa46c3b::t_8b65afe0620ba7 1-82
+tests/unit/demo-backend/documents.test.ts
+  s_855e84efa46c3b::t_57d9cce1dc2bab 1-98
+tests/unit/demo-backend/errors-and-guard.test.ts
+  s_855e84efa46c3b::t_e86de0177f1997 1-107
+tests/unit/demo-backend/evidence.test.ts
+  s_855e84efa46c3b::t_21ef0c99d040ad 1-131
+tests/unit/demo-backend/helpers.ts
+  s_855e84efa46c3b::t_57ac783cebb65a 1-91
+tests/unit/demo-backend/households.test.ts
+  s_855e84efa46c3b::t_e0fd50f0e977c1 1-81
+tests/unit/demo-backend/ocr.test.ts
+  s_855e84efa46c3b::t_d9fc00d58f47ed 1-95
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e359154b7f0aa1471994c7570acef960ceb3ac86",
+  "prompts": {},
+  "sessions": {
+    "s_855e84efa46c3b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c1fd1e2b-a092-4ef0-9e46-139a5f2e40b4",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
