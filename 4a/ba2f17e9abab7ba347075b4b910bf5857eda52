@@ -1,0 +1,38 @@
+tests/e2e/demo/cover.spec.ts
+  s_855e84efa46c3b::t_0f80da5a008d0f 4
+  s_855e84efa46c3b::t_cf872e14cb22d8 1-3,5-194
+src/components/app/evidence/AnswerReveal.tsx
+  s_855e84efa46c3b::t_45659fd64cde7d 1-47
+src/components/app/evidence/CitationSheet.tsx
+  s_855e84efa46c3b::t_454d2bf14a1cda 1-34
+src/components/app/evidence/CoverMatrix.tsx
+  s_855e84efa46c3b::t_f8f19f55cccdfd 1-82
+src/components/app/evidence/CoverSkeleton.tsx
+  s_855e84efa46c3b::t_3df4a0da989b94 1-29
+src/components/app/evidence/EvidenceScreen.tsx
+  s_855e84efa46c3b::t_a6f2939b9494f7 5,7-8,10-11,13-14,39,103,120,123,143,148-157
+src/components/app/evidence/FactCardView.tsx
+  s_855e84efa46c3b::t_b1f1822d4a6ca6 6,23,25,28
+src/components/app/evidence/evidence.module.css
+  s_855e84efa46c3b::t_3a45f17d017a1d 105-124
+src/components/app/evidence/primitives.tsx
+  s_855e84efa46c3b::t_c0dbadf4cac76c 66-67,69,115-134,136,144,146,149-177
+src/components/app/evidence/useReveal.ts
+  s_855e84efa46c3b::t_8d05ed0a838208 1-57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4aba2f17e9abab7ba347075b4b910bf5857eda52",
+  "prompts": {},
+  "sessions": {
+    "s_855e84efa46c3b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c1fd1e2b-a092-4ef0-9e46-139a5f2e40b4",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
