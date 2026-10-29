@@ -1,0 +1,28 @@
+src/components/home/research-founder.css
+  s_41312429701683::t_5acfb3a9b95ee6 1-2,4-5,13-19,25
+  s_41312429701683::t_e8c3e2f7b86081 20
+  s_41312429701683::t_b6690bf7929458 8
+  s_41312429701683::t_a093403fa41e1e 3,6-7,9-12,21-24
+src/components/home/ResearchSegment.tsx
+  s_41312429701683::t_5acfb3a9b95ee6 4,6-10,39-52,57-76,78,80-87
+  s_41312429701683::t_b6690bf7929458 53-56
+  s_41312429701683::t_e8c3e2f7b86081 77,79
+src/app/design.css
+  s_41312429701683::t_1f27cc4b3f364d 407-408
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "aa8878f2445dd99634f7be87a3eff21e8cfa6597",
+  "prompts": {},
+  "sessions": {
+    "s_41312429701683": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "168e5c34-4d96-4f5c-9df1-8879e5a29b06",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
