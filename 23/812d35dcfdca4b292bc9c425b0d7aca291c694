@@ -1,0 +1,29 @@
+package-lock.json
+  s_855e84efa46c3b::t_1057666617ccd1 28,1388-1407,5808-5814,5855-5874
+package.json
+  s_855e84efa46c3b::t_41b0768bd5200c 36
+scripts/demo/build-policy-pdf.ts
+  s_855e84efa46c3b::t_150a2b58130749 1-87
+src/server/app/demo-backend/fixtures/seed-data.ts
+  s_855e84efa46c3b::t_eaaa0b755608fc 1-4,6-16,19-123,125-127
+tests/unit/demo-fixtures/policy-pdf.test.ts
+  s_855e84efa46c3b::t_d25286e445f577 1-51
+tests/unit/demo-fixtures/seed.test.ts
+  s_855e84efa46c3b::t_7092cfb012a11b 1-105
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "23812d35dcfdca4b292bc9c425b0d7aca291c694",
+  "prompts": {},
+  "sessions": {
+    "s_855e84efa46c3b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c1fd1e2b-a092-4ef0-9e46-139a5f2e40b4",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
