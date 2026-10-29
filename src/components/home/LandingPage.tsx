@@ -9,6 +9,7 @@ import type { Any } from "@/lib/dc";
 import { useDcModel } from "@/lib/use-dc-model";
 import { ClauseBand } from "./ClauseBand";
 import { ContrastSection } from "./ContrastSection";
+import { DemoVideoSection } from "./DemoVideoSection";
 import { EarlyListSection } from "./EarlyListSection";
 import { FamilyQuote } from "./FamilyQuote";
 import { HeroSection } from "./HeroSection";
@@ -71,6 +72,7 @@ export function LandingPage() {
         </div>
         <ClauseBand v={v} />
         <ContrastSection v={v} />
+        <DemoVideoSection />
         <HowItWorksSection v={v} />
         <RoomTestSection v={v} />
         <StoriesSection v={v} />
