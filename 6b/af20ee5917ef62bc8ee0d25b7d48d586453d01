@@ -1,0 +1,37 @@
+tests/e2e/demo/privacy.spec.ts
+  s_855e84efa46c3b::t_c953307f69548c 1-247
+src/app/app/privacy/page.tsx
+  s_855e84efa46c3b::t_dc7da1bab9515d 1-8
+src/components/app/privacy/DeletionInventory.tsx
+  s_855e84efa46c3b::t_7e21daef19c664 1-75
+src/components/app/privacy/DemoDataMark.tsx
+  s_855e84efa46c3b::t_9137fd134bba1f 1-14
+src/components/app/privacy/privacy.module.css
+  s_855e84efa46c3b::t_54a3d932080376 1-29
+src/components/app/privacy/RevokeSwitch.tsx
+  s_855e84efa46c3b::t_f8325bc2800e50 1-120
+src/components/app/privacy/AuditTimeline.tsx
+  s_855e84efa46c3b::t_48683d73a7304a 1-43
+src/components/app/privacy/privacy-view.ts
+  s_855e84efa46c3b::t_255b44931159cc 1-109
+src/components/app/privacy/PrivacyCentre.tsx
+  s_855e84efa46c3b::t_ab70258cfba56b 1-85
+src/components/app/privacy/ConsentLedger.tsx
+  s_855e84efa46c3b::t_e5f1ab133e28fa 1-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6baf20ee5917ef62bc8ee0d25b7d48d586453d01",
+  "prompts": {},
+  "sessions": {
+    "s_855e84efa46c3b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c1fd1e2b-a092-4ef0-9e46-139a5f2e40b4",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
