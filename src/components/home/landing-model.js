@@ -37,11 +37,6 @@ export class Component extends DCLogic {
     watch(railIds.map(function (id) { return document.getElementById(id); }), { rootMargin: '-45% 0px -50% 0px' }, function (en) {
       if (en.isIntersecting) self.setState({ railIdx: railIds.indexOf(en.target.id) });
     });
-    // the film starts the first time it is seen
-    watch([document.getElementById('how')], { threshold: 0.4 }, function (en) {
-      if (en.isIntersecting && !self.done.film && !reduce) { self.done.film = true; self.filmPlay(true); }
-      else if (!en.isIntersecting && self.state.filmPlaying) self.filmPlay(false);
-    });
     // story tiles draw their charts the first time they are seen
     watch(Array.prototype.slice.call(document.querySelectorAll('[data-story]')), { threshold: 0.4 }, function (en) {
       if (!en.isIntersecting) return;
