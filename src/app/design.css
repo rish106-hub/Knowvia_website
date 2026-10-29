@@ -330,7 +330,7 @@ html.kv-js .kv-tile.kv-reveal.kv-in:hover{transform:translateY(-4px)}
 /* curtain: the hero holds still and the numbers slide up over it */
 @media (prefers-reduced-motion:no-preference) and (min-width:901px){
 .kv-curtain>.kv-hero{position:sticky;top:0;z-index:0;transform-origin:50% 0}
-.kv-curtain>.kv-ticker,.kv-curtain>#industry{position:relative;z-index:1}
+.kv-curtain>.kv-ticker,.kv-curtain>#how{position:relative;z-index:1}
 }
 @supports (animation-timeline: scroll()){
 @media (prefers-reduced-motion:no-preference) and (min-width:901px){
