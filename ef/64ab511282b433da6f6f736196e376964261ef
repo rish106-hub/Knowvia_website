@@ -1,0 +1,49 @@
+tests/e2e/demo/processing.spec.ts
+  s_855e84efa46c3b::t_fdcf50ce959393 1-329
+src/app/app/documents/page.tsx
+  s_855e84efa46c3b::t_46d1da197383ce 7-9
+src/components/app/documents/DocumentRow.tsx
+  s_855e84efa46c3b::t_9ebd2ae840e398 13-14,26-27,30-34,48-53,153-154
+src/components/app/documents/DocumentsScreen.tsx
+  s_855e84efa46c3b::t_2b21aa04772fb3 15-16,19,50
+src/components/app/documents/ReadingSteps.tsx
+  s_855e84efa46c3b::t_4b48ed299b24a1 1-58
+src/components/app/documents/UploadCard.tsx
+  s_855e84efa46c3b::t_5fa02cfe06034f 1-60
+src/components/app/documents/UploadPanel.tsx
+  s_855e84efa46c3b::t_bc97aacbd81d9f 15-16,22,27,132,152-162,212-214,217,221,246-247,253
+src/components/app/documents/polling.ts
+  s_855e84efa46c3b::t_70fe13a71296b8 2,10-11,28-29,42
+src/components/app/documents/reading.css
+  s_855e84efa46c3b::t_70532163a62550 1-55
+src/components/app/documents/useStagePolling.ts
+  s_855e84efa46c3b::t_8d6bc3cccdeb0c 27-28,32,58,79
+src/lib/app-evidence/reading-view.ts
+  s_855e84efa46c3b::t_71444aa67ae758 1-109
+src/server/app/contract.ts
+  s_855e84efa46c3b::t_64391152541e33 62-66
+src/server/app/document-view.ts
+  s_855e84efa46c3b::t_a6129290dd8211 27-32,88-90
+tests/unit/app-bff/document-view-pages-done.test.ts
+  s_855e84efa46c3b::t_c6dfc1f7dba4a1 1-38
+tests/unit/app-ui/polling.test.ts
+  s_855e84efa46c3b::t_bd59f9d2cb302c 7,70-88
+tests/unit/app-ui/reading-view.test.ts
+  s_855e84efa46c3b::t_59f5dca622bfaa 1-154
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ef64ab511282b433da6f6f736196e376964261ef",
+  "prompts": {},
+  "sessions": {
+    "s_855e84efa46c3b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c1fd1e2b-a092-4ef0-9e46-139a5f2e40b4",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
