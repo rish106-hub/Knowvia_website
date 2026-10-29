@@ -1,0 +1,27 @@
+src/components/home/landing-model.js
+  s_d28f305ab7f436::t_d7cea6e31e0c96 36,586
+src/app/design.css
+  s_d28f305ab7f436::t_d7cea6e31e0c96 333
+src/components/home/ResearchSegment.tsx
+  s_d28f305ab7f436::t_803f4d806ee01d 1-60
+src/components/home/LandingPage.tsx
+  s_d28f305ab7f436::t_d7cea6e31e0c96 21,71,80-83
+src/components/layout/SiteNav.tsx
+  s_d28f305ab7f436::t_d7cea6e31e0c96 29-30,62-63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "95a766af9ca7caf926e5615b9c707069b3e4fc12",
+  "prompts": {},
+  "sessions": {
+    "s_d28f305ab7f436": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bfc64965-d544-4466-b933-93846f2ea574",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
