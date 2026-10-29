@@ -1,0 +1,22 @@
+src/components/home/DemoVideoSection.tsx
+  s_721717c3897fa5::t_90c17e5f7dd10c 1-39
+src/components/home/LandingPage.tsx
+  s_721717c3897fa5::t_91e085918c53fc 75
+  s_721717c3897fa5::t_ab298d32824ea2 12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d3b5352f35a2ceb7a0896a71f6986a7c68bf73b5",
+  "prompts": {},
+  "sessions": {
+    "s_721717c3897fa5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15abdf2b-65d5-4163-98ad-8cdfdd26b396",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
