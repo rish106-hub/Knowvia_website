@@ -1,5 +1,5 @@
 // Plain-language labels for the evidence and preview screens. Pure data, no React.
-// ALL copy that makes a statement about consent, coverage, review or checks NEEDS LEGAL REVIEW (see docs/block5/s34-ui.md).
+// ALL copy that makes a statement about consent, coverage, review or checks NEEDS LEGAL REVIEW.
 
 export const RULE_LABELS: Record<string, string> = {
   sum_insured: "Sum insured",

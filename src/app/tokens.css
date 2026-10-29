@@ -1,6 +1,6 @@
 /*
  * Brand tokens for future /app screens. Hand-written, NOT generated.
- * Values are the ones already used by the approved artboards (see docs/block5/token-inventory.md).
+ * Values are the ones already used by the approved artboards.
  * Import this from the /app layout only; do not import it into generated files (design.css, design-onboarding.css).
  */
 :root {

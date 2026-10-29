@@ -110,7 +110,7 @@ write('src/components/layout/SiteFooter.tsx', HEADER.format(src='Main.dc.html') 
 
 # landing model: the artboard's own logic, wired to the real API and microphone
 model = script_of(main_src)
-write('src/components/home/landing-model.js', '// Generated from Main.dc.html, then wired to /api/waitlist and the microphone (see scripts/design-port/README.md).\n'
+write('src/components/home/landing-model.js', '// Generated from Main.dc.html, then wired to /api/waitlist and the microphone.\n'
       '/* eslint-disable @typescript-eslint/no-this-alias -- ported canvas logic keeps its `var self = this` closures */\nimport { DCLogic } from "@/lib/dc-logic";\n\nexport ' + model.strip() + '\n')
 
 # ---------- Onboarding routes ----------

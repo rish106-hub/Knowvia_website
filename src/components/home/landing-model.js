@@ -1,4 +1,4 @@
-// Generated from Main.dc.html, then wired to /api/waitlist and the microphone (see scripts/design-port/README.md).
+// Generated from Main.dc.html, then wired to /api/waitlist and the microphone.
 /* eslint-disable @typescript-eslint/no-this-alias -- ported canvas logic keeps its `var self = this` closures */
 import { DCLogic } from "@/lib/dc-logic";
 

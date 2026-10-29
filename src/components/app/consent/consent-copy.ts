@@ -1,5 +1,5 @@
 // Wording for permissions that exist, and for withdrawing them. Pure: unit tested in tests/unit/app-ui.
-// DRAFT: all of this needs legal review before launch (docs/block5/s2-ui.md).
+// DRAFT: all of this needs legal review before launch.
 import type { ConsentView, DocumentView } from "@/lib/app-contract";
 import { documentKindLabel } from "../documents/stage";
 
