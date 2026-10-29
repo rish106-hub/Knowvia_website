@@ -7,7 +7,7 @@ import { type Any, css } from "@/lib/dc";
 export function RoomTestSection({ v }: { v: Any }) {
   return (
     <>
-    <section id="try" className="kv-bleed kv-room" aria-labelledby="room-h">
+    <section id="room-test" className="kv-bleed kv-room" aria-labelledby="room-h">
       <div className="kv-L">
         <p className="kv-eyebrow kv-reveal" style={{color: "#7A5207"}}>
           {"Try it · the room test"}

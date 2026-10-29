@@ -3,12 +3,12 @@
 
 import { type ReactNode, useEffect, useState } from "react";
 
-const RESEARCH_HASHES = ["#research", "#industry", "#stories"];
+const RESEARCH_HASHES = ["#research", "#industry", "#stories", "#privacy"];
 
 /**
  * Collapsed "View our research" band near the foot of the page. It holds the
- * "This keeps happening to families" numbers and the "Four details hid in plain sight"
- * stories, so the first screens after the hero go straight to the video.
+ * "This keeps happening to families" numbers, the "Four details hid in plain sight"
+ * stories and the "Each person decides what family sees" privacy controls, so the first screens after the hero go straight to the video.
  * The sections stay in the DOM while closed, so the landing model can still find them.
  */
 export function ResearchSegment({ children }: { children: ReactNode }) {
@@ -38,7 +38,7 @@ export function ResearchSegment({ children }: { children: ReactNode }) {
             {"Why we built this."}
           </h2>
           <p className="kv-lede kv-reveal kv-d120" style={{color: "#DDF0DC", maxWidth: "46ch"}}>
-            {"Four numbers on claims, and four details we found in real family policies."}
+            {"Four numbers on claims, four details from real family policies, and how each person controls what family sees."}
           </p>
           <button
             className="kv-btn"

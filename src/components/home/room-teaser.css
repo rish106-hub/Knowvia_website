@@ -1,0 +1,37 @@
+/* Hand-written, NOT generated. Styles for RoomTeaser.tsx: the room-test band and its pop-up. */
+
+.kv-rt{position:relative;overflow:hidden;background:#FBF1DD;padding:clamp(64px,8vw,112px) 0}
+.kv-rt-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,0.95fr);gap:clamp(32px,5vw,80px);align-items:center}
+.kv-rt-cta{position:relative;display:inline-flex;align-items:center;gap:12px;align-self:flex-start;height:64px;padding:0 34px;border:0;border-radius:999px;background:#7A5207;color:#FFFFFF;font:inherit;font-size:19px;font-weight:700;cursor:pointer;transition:background-color 180ms ease-out,transform 180ms ease-out,box-shadow 180ms ease-out}
+.kv-rt-cta:hover{background:#5E3F05;transform:translateY(-2px);box-shadow:0 14px 30px rgba(122,82,7,0.32)}
+.kv-rt-cta:active{transform:translateY(1px);box-shadow:none}
+.kv-rt-cta:focus-visible{outline:3px solid #163F42;outline-offset:3px}
+.kv-rt-cta{animation:kvRtRing 2.2s ease-out infinite}
+@keyframes kvRtRing{0%{box-shadow:0 0 0 0 rgba(224,160,43,0.6)}70%,100%{box-shadow:0 0 0 18px rgba(224,160,43,0)}}
+.kv-rt-cta:hover{animation:none}
+.kv-rt-cta svg{transition:transform 180ms ease-out}
+.kv-rt-cta:hover svg{transform:translateX(4px)}
+
+.kv-rt-card{position:relative;animation:kvRtIn 700ms var(--kv-out) backwards;overflow:hidden;border-radius:28px;background:#163F42;color:#FFFFFF;padding:clamp(24px,3vw,40px);display:flex;flex-direction:column;gap:18px;box-shadow:0 24px 60px rgba(22,63,66,0.22);cursor:pointer;text-align:left;border:0;font:inherit;width:100%}
+.kv-rt-card:hover{transform:translateY(-3px)}
+.kv-rt-card{transition:transform 200ms ease-out}
+.kv-rt-card:focus-visible{outline:3px solid #7A5207;outline-offset:3px}
+.kv-rt-chips{display:flex;flex-wrap:wrap;gap:8px}
+.kv-rt-chip{display:flex;flex-direction:column;gap:2px;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,0.08);color:#DDF0DC;font-size:14px;transition:background-color 300ms,color 300ms}
+.kv-rt-chip b{font-size:15px}
+.kv-rt-chip[data-on="true"]{background:#F6D38A;color:#4A3203}
+.kv-rt-num{font-family:var(--font-display),'Iowan Old Style',Georgia,serif;font-size:clamp(52px,6vw,88px);line-height:0.95;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;transition:color 300ms}
+.kv-rt-hint{margin:0;font-size:15px;color:#A8DCCB}
+
+.kv-rt-dialog{padding:0;border:0;border-radius:28px;width:min(1200px,96vw);max-width:96vw;max-height:92vh;overflow:auto;background:#FBF1DD;color:#1A3034;--kv-edge:clamp(24px,4vw,56px);box-shadow:0 40px 120px rgba(0,0,0,0.45)}
+.kv-rt-dialog::backdrop{background:rgba(15,40,42,0.72);backdrop-filter:blur(4px)}
+.kv-rt-dialog[open]{animation:kvRtIn 320ms var(--kv-out) both}
+.kv-rt-dialog .kv-reveal{opacity:1 !important;transform:none !important;clip-path:none !important}
+.kv-rt-close{position:sticky;top:0;z-index:2;display:flex;justify-content:flex-end;padding:16px 16px 0;pointer-events:none}
+.kv-rt-close button{pointer-events:auto;height:44px;padding:0 20px;border:0;border-radius:999px;background:#163F42;color:#FFFFFF;font:inherit;font-size:16px;font-weight:600;cursor:pointer}
+.kv-rt-close button:focus-visible{outline:3px solid #7A5207;outline-offset:2px}
+.kv-rt-dialog .kv-room{margin-top:-60px}
+@keyframes kvRtIn{from{opacity:0;transform:translateY(24px) scale(0.98)}to{opacity:1;transform:none}}
+
+@media (max-width:900px){.kv-rt-grid{grid-template-columns:1fr}.kv-rt-dialog{border-radius:20px;max-height:94vh}.kv-rt-cta{width:100%;justify-content:center}}
+@media (prefers-reduced-motion:reduce){.kv-rt-dialog[open]{animation:none}}

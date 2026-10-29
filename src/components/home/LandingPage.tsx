@@ -19,7 +19,7 @@ import { LimitsSection } from "./LimitsSection";
 import { PartnersSection } from "./PartnersSection";
 import { QuestionsSection } from "./QuestionsSection";
 import { ResearchSegment } from "./ResearchSegment";
-import { RoomTestSection } from "./RoomTestSection";
+import { RoomTeaser } from "./RoomTeaser";
 import { StoriesSection } from "./StoriesSection";
 import { Component as LandingModel } from "./landing-model";
 
@@ -72,14 +72,14 @@ export function LandingPage() {
         </div>
         <ClauseBand v={v} />
         <ContrastSection v={v} />
-        <RoomTestSection v={v} />
-        <HouseholdControl v={v} />
+        <RoomTeaser v={v} />
         <LimitsSection v={v} />
         <FamilyQuote />
         <QuestionsSection v={v} />
         <ResearchSegment>
           <IndustrySection v={v} />
           <StoriesSection v={v} />
+          <HouseholdControl v={v} />
         </ResearchSegment>
         <PartnersSection v={v} />
         <EarlyListSection v={v} />
