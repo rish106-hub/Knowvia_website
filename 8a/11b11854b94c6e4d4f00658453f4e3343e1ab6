@@ -1,0 +1,21 @@
+docs/superpowers/specs/2026-10-29-demo-ui-flow-design.md
+  s_855e84efa46c3b::t_4ac41480064c28 1-114
+docs/superpowers/plans/2026-10-29-demo-ui-flow.md
+  s_855e84efa46c3b::t_f4f7bd80394e98 1-183
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8a11b11854b94c6e4d4f00658453f4e3343e1ab6",
+  "prompts": {},
+  "sessions": {
+    "s_855e84efa46c3b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c1fd1e2b-a092-4ef0-9e46-139a5f2e40b4",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
