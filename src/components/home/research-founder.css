@@ -1,0 +1,25 @@
+/* Research band header: copy and the research button on the left, the founder photo and connect buttons on the right.
+   The photo cell shares a row with the copy, the connect buttons share a row with "View our research". */
+.kv-rs-grid{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"copy photo" "cta connect";column-gap:clamp(32px,5vw,72px);row-gap:28px;align-items:stretch}
+.kv-rs-copy{grid-area:copy;display:flex;flex-direction:column;align-items:flex-start;gap:20px}
+.kv-rs-cta{grid-area:cta;align-self:end}
+.kv-rs-photo{grid-area:photo;margin:0;align-self:start;display:flex;flex-direction:column;align-items:center;gap:14px}
+.kv-rs-avatar{position:relative;width:176px;flex:none;aspect-ratio:1;border-radius:50%;overflow:hidden;background:#125A55;box-shadow:0 0 0 4px rgba(200,230,160,0.35)}
+.kv-rs-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;display:block}
+.kv-rs-name{margin:0;font-family:var(--font-display),'Iowan Old Style',Georgia,serif;font-size:22px;line-height:1.1;letter-spacing:-0.01em;color:#FFFFFF;text-align:center}
+.kv-rs-connect{grid-area:connect;align-self:end;display:flex;flex-direction:column;align-items:center;gap:12px}
+.kv-rs-connect-label{margin:0;color:#C8E6A0;text-align:center}
+.kv-rs-links{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.kv-rs-link{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:56px;padding:0 20px;border:1.5px solid rgba(200,230,160,0.5);border-radius:999px;color:#FFFFFF;font-size:16px;font-weight:600;text-decoration:none;transition:background-color 180ms ease-out,border-color 180ms ease-out,transform 180ms ease-out}
+.kv-rs-link:hover{background:rgba(200,230,160,0.14);border-color:#C8E6A0;transform:translateY(-1px)}
+.kv-rs-link:active{transform:translateY(1px)}
+.kv-rs-link:focus-visible{outline:3px solid #C8E6A0;outline-offset:3px}
+@media (max-width:900px){
+.kv-rs-grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"copy" "cta" "photo" "connect";row-gap:24px}
+.kv-rs-cta{align-self:start}
+.kv-rs-link{padding:0 16px}
+.kv-rs-photo{align-items:flex-start;width:176px}
+.kv-rs-name{align-self:center}
+.kv-rs-connect{align-items:flex-start}
+.kv-rs-links{justify-content:flex-start}
+}

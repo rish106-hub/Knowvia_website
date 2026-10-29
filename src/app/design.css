@@ -404,3 +404,5 @@ html.kv-js .kv-tile.kv-reveal.kv-in:hover{transform:translateY(-4px)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none !important;animation:none !important}}
 .kv-only-mobile{display:none}
 @media (max-width:760px){.kv-only-mobile{display:block}.kv-only-desktop{display:none}}
+/* phones: the twelve terms wrap as compact chips instead of a twelve-row column */
+@media (max-width:760px){.kv-clauses{display:flex;flex-wrap:wrap;gap:8px}.kv-clause{width:auto;padding:9px 14px 10px 12px;gap:8px;font-size:17px}}
