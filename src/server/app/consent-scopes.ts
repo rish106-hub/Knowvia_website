@@ -14,14 +14,14 @@ export const CONSENT_NOTICES: ConsentNotice[] = [
     version: NOTICE_VERSION,
     status: "draft_needs_legal_review",
     title: "Keep your policy documents (DRAFT)",
-    body: "DRAFT, needs legal review. You allow Knowvia to store the policy PDFs you add so you can read them here.",
+    body: "DRAFT, needs legal review. You allow CoverSaath to store the policy PDFs you add so you can read them here.",
   },
   {
     scope: "ocr_sarvam",
     version: NOTICE_VERSION,
     status: "draft_needs_legal_review",
     title: "Read this document with a reading service (DRAFT)",
-    body: "DRAFT, needs legal review. You allow this one document to be sent to a text-reading service so Knowvia can read it.",
+    body: "DRAFT, needs legal review. You allow this one document to be sent to a text-reading service so CoverSaath can read it.",
   },
   {
     scope: "question_gemini",

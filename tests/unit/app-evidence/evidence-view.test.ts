@@ -102,9 +102,9 @@ describe("evidence view: reviews", () => {
     const card = allCards(view(h)).find((c) => c.id === "finding/fact-room")!;
     expect(card.kind).toBe("confirmed_by_you");
     expect(card.stateLabel).toBe("Confirmed by you");
-    expect(card.stateDetail).toMatch(/not verified by Knowvia or your insurer/);
+    expect(card.stateDetail).toMatch(/not verified by CoverSaath or your insurer/);
     expect(card.confirm).toBeNull();
-    expect(JSON.stringify(card)).not.toMatch(/\bverified\b(?! by Knowvia)/i);
+    expect(JSON.stringify(card)).not.toMatch(/\bverified\b(?! by CoverSaath)/i);
   });
   it("a stale or reviewer_revoked review does not count", () => {
     const h = handoffUnverified({ reviews: [reviewHousehold("fact-room", "stale"), reviewHousehold("fact-wait", "reviewer_revoked")] });

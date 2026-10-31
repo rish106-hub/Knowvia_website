@@ -1,9 +1,11 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AppApiError, appFetch } from "@/lib/app-client";
 import type { DocumentView, Overview, SessionView } from "@/lib/app-contract";
 import { isSessionError } from "./error-copy";
+import { isPublicAppPath } from "./public-paths";
 import { replaceDocument } from "./overview-utils";
 
 export type SignedOutReason = "none" | "expired" | "signed_out";
@@ -39,6 +41,8 @@ export function asApiError(error: unknown): AppApiError {
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AppState>({ status: "loading" });
   const alive = useRef(true);
+  const publicPath = isPublicAppPath(usePathname());
+  const started = useRef(false);
 
   const handleError = useCallback((error: unknown) => {
     if (error instanceof AppApiError && isSessionError(error)) {
@@ -75,14 +79,21 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
   }, [loadOverview]);
 
+  // The first read of /session waits until the visitor is on a screen that needs it (not S00 or S01), then happens once.
   useEffect(() => {
     alive.current = true;
-    const task = window.setTimeout(() => void reload(), 0);
+    const task =
+      publicPath || started.current
+        ? undefined
+        : window.setTimeout(() => {
+            started.current = true;
+            void reload();
+          }, 0);
     return () => {
       alive.current = false;
-      window.clearTimeout(task);
+      if (task !== undefined) window.clearTimeout(task);
     };
-  }, [reload]);
+  }, [reload, publicPath]);
 
   const updateDocument = useCallback((doc: DocumentView) => {
     setState((current) =>

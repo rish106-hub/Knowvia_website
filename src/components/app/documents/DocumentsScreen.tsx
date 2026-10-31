@@ -55,7 +55,7 @@ function DocumentsInner({ overview }: { overview: Overview }) {
 
       {anyReadable ? (
         <Notice tone="info" title="Some documents are readable" live="off" actions={<ButtonLink href="/app/cover" size="sm" variant="secondary" icon={<ArrowRight size={18} weight="bold" aria-hidden="true" />}>Continue to your cover</ButtonLink>}>
-          Reading only means Knowvia has the text. It has not checked or confirmed anything from it yet.
+          Reading only means CoverSaath has the text. It has not checked or confirmed anything from it yet.
         </Notice>
       ) : null}
     </>

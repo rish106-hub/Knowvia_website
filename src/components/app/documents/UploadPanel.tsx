@@ -229,12 +229,12 @@ export function UploadPanel({ overview, onAdded }: { overview: Overview; onAdded
         <div className="kva-card" style={{ background: "var(--kv-mist)" }}>
           <ConsentNoticeCard
             scope="collect"
-            lead="Adding a PDF means Knowvia stores it for your case. This permission covers the PDFs you add until you withdraw it on the Home page."
+            lead="Adding a PDF means CoverSaath stores it for your case. This permission covers the PDFs you add until you withdraw it on the Home page."
             notices={notices}
           />
         </div>
       ) : (
-        <p className="kva-p kva-small kva-muted">You have allowed Knowvia to store the PDFs you add. You can withdraw that on the Home page.</p>
+        <p className="kva-p kva-small kva-muted">You have allowed CoverSaath to store the PDFs you add. You can withdraw that on the Home page.</p>
       )}
 
       <div role="status" aria-live="polite">

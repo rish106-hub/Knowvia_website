@@ -48,7 +48,7 @@ export function PermissionsPanel({ overview }: { overview: Overview }) {
       <h2 className="kva-h2" id="kva-permissions-h">
         Permissions
       </h2>
-      <p className="kva-p kva-muted kva-small">Each permission covers one thing. Knowvia asks when you take an action that needs one, and you can withdraw any of them here.</p>
+      <p className="kva-p kva-muted kva-small">Each permission covers one thing. CoverSaath asks when you take an action that needs one, and you can withdraw any of them here.</p>
       <p className="kva-sr" role="status">
         {done}
       </p>

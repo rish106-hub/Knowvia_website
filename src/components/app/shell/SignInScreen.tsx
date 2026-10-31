@@ -63,7 +63,7 @@ export function SignInScreen({ reason }: { reason: SignInReason }) {
   return (
     <>
       <div className="kva-stack">
-        <h1 className="kva-h1">{expired ? "Your session ended" : signedOut ? "You have signed out" : "Sign in to Knowvia"}</h1>
+        <h1 className="kva-h1">{expired ? "Your session ended" : signedOut ? "You have signed out" : "Sign in to CoverSaath"}</h1>
         {expired ? (
           <Notice tone="warning" title="Getting back into the same household is not available yet" live="polite">
             A new development sign-in starts a new, empty household, so documents from your earlier session will not be there.
@@ -83,11 +83,11 @@ export function SignInScreen({ reason }: { reason: SignInReason }) {
       ) : failure?.kind === "unavailable" ? (
         <div className="kva-card" data-testid="sign-in-unavailable">
           <Notice tone="info" title="Sign-in is not available yet" live="polite">
-            Knowvia accounts are not open yet. No code was sent, and nothing was saved.
+            CoverSaath accounts are not open yet. No code was sent, and nothing was saved.
           </Notice>
           <div>
             <ButtonLink href="/" variant="secondary" size="sm">
-              Back to the Knowvia site
+              Back to the CoverSaath site
             </ButtonLink>
           </div>
         </div>

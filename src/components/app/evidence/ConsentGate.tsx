@@ -28,7 +28,7 @@ export function ConsentGate({ documentCount, notice, noticeError, granting, gran
         <DraftMark />
         <h2 id="kve-consent-h" className={css.h2}>Before we read {documentCount === 1 ? "your document" : "your documents"}</h2>
         <p className={css.p}>
-          To answer from your document, Knowvia sends <strong>text from it to Gemini</strong>, a Google service, which reads it and quotes the parts it relies on. This happens only if you agree.
+          To answer from your document, CoverSaath sends <strong>text from it to Gemini</strong>, a Google service, which reads it and quotes the parts it relies on. This happens only if you agree.
         </p>
         <p className={css.p}>You can withdraw this later from your home page. If you do, the answer made from your document is erased.</p>
         {notice ? (

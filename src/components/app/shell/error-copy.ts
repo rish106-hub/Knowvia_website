@@ -28,19 +28,19 @@ const BY_CODE: Record<string, Omit<ErrorCopy, "action"> & { action?: ErrorAction
   },
   CSRF_BLOCKED: { title: "Request blocked", message: "Your browser blocked this request for safety. Reload the page and try again.", action: "reload" },
   RATE_LIMITED: { title: "Too many attempts", message: "Wait a few minutes, then try again.", action: "none" },
-  IDENTITY_NOT_IMPLEMENTED: { title: "Sign-in is not available yet", message: "Knowvia accounts are not open yet.", action: "none" },
-  APP_DISABLED: { title: "Sign-in is not available yet", message: "Knowvia accounts are not open yet.", action: "none" },
-  APP_MISCONFIGURED: { title: "Knowvia is not set up here yet", message: "Nothing was changed.", action: "none" },
-  BACKEND_AUTH_FAILED: { title: "Knowvia could not finish that", message: `Our service is not responding properly. ${TRY_LATER}`, action: "retry" },
-  BACKEND_UNREACHABLE: { title: "Knowvia could not be reached", message: `Our service is not responding. ${TRY_LATER}`, action: "retry" },
+  IDENTITY_NOT_IMPLEMENTED: { title: "Sign-in is not available yet", message: "CoverSaath accounts are not open yet.", action: "none" },
+  APP_DISABLED: { title: "Sign-in is not available yet", message: "CoverSaath accounts are not open yet.", action: "none" },
+  APP_MISCONFIGURED: { title: "CoverSaath is not set up here yet", message: "Nothing was changed.", action: "none" },
+  BACKEND_AUTH_FAILED: { title: "CoverSaath could not finish that", message: `Our service is not responding properly. ${TRY_LATER}`, action: "retry" },
+  BACKEND_UNREACHABLE: { title: "CoverSaath could not be reached", message: `Our service is not responding. ${TRY_LATER}`, action: "retry" },
   BACKEND_TIMEOUT: { title: "That took too long", message: `Our service did not answer in time. ${TRY_LATER}`, action: "retry" },
-  BACKEND_BAD_RESPONSE: { title: "Knowvia could not finish that", message: `Our service sent an answer we could not use. ${TRY_LATER}`, action: "retry" },
+  BACKEND_BAD_RESPONSE: { title: "CoverSaath could not finish that", message: `Our service sent an answer we could not use. ${TRY_LATER}`, action: "retry" },
   NETWORK_UNREACHABLE: {
     title: "You look offline",
-    message: "We could not reach Knowvia. Check your connection, then try again.",
+    message: "We could not reach CoverSaath. Check your connection, then try again.",
     action: "retry",
   },
-  UNEXPECTED_RESPONSE: { title: "Something went wrong", message: "Knowvia sent an answer we could not read.", action: "retry" },
+  UNEXPECTED_RESPONSE: { title: "Something went wrong", message: "CoverSaath sent an answer we could not read.", action: "retry" },
   INVALID_REQUEST: { title: "Check what you entered", message: "Something was not accepted. Check the details and try again.", action: "none" },
   CONSENT_SUBJECT_REQUIRED: {
     title: "Another adult is needed",
@@ -52,13 +52,13 @@ const BY_CODE: Record<string, Omit<ErrorCopy, "action"> & { action?: ErrorAction
   CONSENT_REQUIRED: { title: "Permission needed", message: "This step needs your permission first. Allow it, then try again.", action: "reload" },
   CONSENT_SCOPE_REQUIRED: {
     title: "Permission needed",
-    message: "Knowvia does not have your permission to store this PDF. Allow it, then try again.",
+    message: "CoverSaath does not have your permission to store this PDF. Allow it, then try again.",
     action: "reload",
   },
-  FIELD_ACCESS_REQUIRED: { title: "Permission needed", message: "Knowvia cannot open this until you allow storing your PDFs again.", action: "none" },
-  OCR_PROVIDER_DISABLED: { title: "Reading is not available yet", message: "Knowvia cannot read documents here yet. Your PDF is still stored.", action: "none" },
-  OCR_PROVIDER_NOT_CONFIGURED: { title: "Reading is not available yet", message: "Knowvia cannot read documents here yet. Your PDF is still stored.", action: "none" },
-  EVIDENCE_DISABLED: { title: "Questions are not available yet", message: "Knowvia cannot answer questions about your documents here yet.", action: "none" },
+  FIELD_ACCESS_REQUIRED: { title: "Permission needed", message: "CoverSaath cannot open this until you allow storing your PDFs again.", action: "none" },
+  OCR_PROVIDER_DISABLED: { title: "Reading is not available yet", message: "CoverSaath cannot read documents here yet. Your PDF is still stored.", action: "none" },
+  OCR_PROVIDER_NOT_CONFIGURED: { title: "Reading is not available yet", message: "CoverSaath cannot read documents here yet. Your PDF is still stored.", action: "none" },
+  EVIDENCE_DISABLED: { title: "Questions are not available yet", message: "CoverSaath cannot answer questions about your documents here yet.", action: "none" },
   POLICY_EVIDENCE_UNAVAILABLE: { title: "Nothing to read yet", message: "These documents have not been read yet, so there is nothing to answer from.", action: "none" },
   UPLOAD_IN_PROGRESS: { title: "One upload at a time", message: "Another upload is still in progress. Wait for it to finish, then try again.", action: "retry" },
   PDF_ONLY: { title: "PDF only", message: PDF_ONLY_MESSAGE, action: "choose_again" },
@@ -68,12 +68,12 @@ const BY_CODE: Record<string, Omit<ErrorCopy, "action"> & { action?: ErrorAction
   UNSUPPORTED_DOCUMENT_KIND: { title: "Choose a document type", message: "Say what kind of document this is, then try again.", action: "none" },
   DOCUMENT_STORAGE_NOT_CONFIGURED: { title: "Adding PDFs is not available yet", message: "Nothing was uploaded.", action: "none" },
   DUPLICATE_DOCUMENT: { title: "Already added", message: "You have already added this PDF.", action: "reload" },
-  UPLOAD_CAPACITY_REACHED: { title: "Knowvia is busy", message: "Too many files are arriving at once. Try again in a few minutes.", action: "retry" },
+  UPLOAD_CAPACITY_REACHED: { title: "CoverSaath is busy", message: "Too many files are arriving at once. Try again in a few minutes.", action: "retry" },
   DOCUMENT_DELETE_FORBIDDEN: { title: "Cannot delete", message: "You are not allowed to delete this document.", action: "none" },
   OCR_JOB_NOT_STARTED: { title: "Reading has not started", message: "Start reading this PDF first.", action: "reload" },
   STATE_LIMIT_REACHED: { title: "Limit reached", message: "This household has reached what can be saved for now.", action: "none" },
   NOT_FOUND: { title: "Not found", message: "That is no longer there. Reload the page.", action: "reload" },
-  METHOD_NOT_ALLOWED: { title: "Not supported", message: "Knowvia cannot do that here.", action: "none" },
+  METHOD_NOT_ALLOWED: { title: "Not supported", message: "CoverSaath cannot do that here.", action: "none" },
 };
 
 export function errorCopy(error: ErrorLike): ErrorCopy {
@@ -86,12 +86,12 @@ export function errorCopy(error: ErrorLike): ErrorCopy {
   if (error.status === 413) return { title: BY_CODE.FILE_TOO_LARGE.title, message: FILE_TOO_LARGE_MESSAGE, action: "choose_again" };
   if (error.status === 415) return { title: BY_CODE.PDF_ONLY.title, message: PDF_ONLY_MESSAGE, action: "choose_again" };
   if (error.status === 429) return { ...BY_CODE.RATE_LIMITED, action: "none" } as ErrorCopy;
-  if (error.status === 403) return { title: "Not allowed", message: "Knowvia cannot do that for you.", action: "none" };
+  if (error.status === 403) return { title: "Not allowed", message: "CoverSaath cannot do that for you.", action: "none" };
   if (error.status === 404) return { ...BY_CODE.NOT_FOUND, action: "reload" } as ErrorCopy;
   if (error.status === 0 || error.status >= 500 || error.retryable) {
-    return { title: "Something went wrong", message: `Knowvia could not finish that. ${TRY_LATER}`, action: "retry" };
+    return { title: "Something went wrong", message: `CoverSaath could not finish that. ${TRY_LATER}`, action: "retry" };
   }
-  return { title: "Something went wrong", message: "Knowvia could not finish that.", action: "none" };
+  return { title: "Something went wrong", message: "CoverSaath could not finish that.", action: "none" };
 }
 
 /** True for the two codes that mean the cookie session is gone. */

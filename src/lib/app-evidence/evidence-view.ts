@@ -236,7 +236,7 @@ export function findingCard(finding: HandoffFinding, handoff: Handoff, answer: E
   if (review.disputed) return card("conflicting", { why: "You marked this as unclear or not matching the document." });
   // Known requires an independent accepted review AND the backend marking the fact verified AND a citation.
   if (review.independentAccepted && finding.verified === true && citations.length > 0) return card("known", { stateDetail: "Reviewed by an independent reviewer" });
-  if (review.householdAccepted && finding.verified !== true) return card("confirmed_by_you", { stateDetail: "You checked this against the quoted text. It is not verified by Knowvia or your insurer." });
+  if (review.householdAccepted && finding.verified !== true) return card("confirmed_by_you", { stateDetail: "You checked this against the quoted text. It is not verified by CoverSaath or your insurer." });
   const canConfirm = !review.anyCurrent && citations.some((c) => c.quote !== null) && finding.verified !== true;
   return card("from_document", { confirm: canConfirm ? { factId: finding.factId } : null });
 }

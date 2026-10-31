@@ -23,6 +23,8 @@ export type AppConfig =
       bootstrapToken: string;
       sessionSecret: string;
       devIdentity: boolean;
+      /** Synthetic demo data and demo-only controls. Never allowed in production. */
+      demoData: boolean;
       allowedOrigins: string[];
       /** Trusted proxies that append to X-Forwarded-For (0 = ignore the header). */
       trustedProxyHops: number;
@@ -55,6 +57,7 @@ export function loadAppConfig(source: EnvSource = process.env): AppConfig {
   // Production unless NODE_ENV is explicitly development or test: an unset or unusual value (prod, staging) fails closed.
   const production = !["development", "test"].includes(source.NODE_ENV ?? "");
   const devIdentity = truthy(source.APP_DEV_IDENTITY);
+  const demoData = truthy(source.APP_DEMO_DATA);
   const bad: string[] = [];
 
   const api = apiUrl.safeParse(source.COVERSAATH_API_URL ?? "");
@@ -65,6 +68,8 @@ export function loadAppConfig(source: EnvSource = process.env): AppConfig {
   if (!secret.success) bad.push("APP_SESSION_SECRET");
   // The dev identity provider mints a household for any email. It must never run in production.
   if (devIdentity && production) bad.push("APP_DEV_IDENTITY (refused when NODE_ENV=production)");
+  // Demo data is synthetic. It must never be switched on in production.
+  if (demoData && production) bad.push("APP_DEMO_DATA (refused when NODE_ENV=production)");
 
   const origins = new Set<string>();
   for (const candidate of [source.NEXT_PUBLIC_SITE_URL, ...(source.APP_ALLOWED_ORIGINS ?? "").split(",")]) {
@@ -89,6 +94,7 @@ export function loadAppConfig(source: EnvSource = process.env): AppConfig {
     bootstrapToken: token.data,
     sessionSecret: secret.data,
     devIdentity,
+    demoData,
     allowedOrigins: [...origins],
     trustedProxyHops,
   };

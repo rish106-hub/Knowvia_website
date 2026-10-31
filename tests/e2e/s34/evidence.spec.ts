@@ -104,7 +104,7 @@ test.describe("reading", () => {
     const fake = new FakeCover(consentedOverview());
     fake.failNext("POST /cases/:id/questions", "abort");
     await open(page, fake);
-    await expect(page.getByText("We could not reach Knowvia")).toBeVisible();
+    await expect(page.getByText("We could not reach CoverSaath")).toBeVisible();
     await page.getByRole("button", { name: "Try again" }).click();
     await expect(page.getByRole("heading", { name: "What we found" })).toBeVisible();
   });
@@ -217,13 +217,13 @@ test.describe("self-confirmation", () => {
     await open(page, fake);
     const card = main(page).locator("[data-fact-state]").filter({ hasText: "The document describes a limit" }).filter({ hasText: "Page 4" }).first();
     await card.getByRole("button", { name: "Confirm this from the document" }).click();
-    await expect(card).toContainText("It does not make this verified by Knowvia or your insurer");
+    await expect(card).toContainText("It does not make this verified by CoverSaath or your insurer");
     await card.getByRole("button", { name: "Yes, the text says this" }).click();
     await expect(main(page)).toContainText("Saved. That item now shows as confirmed by you.");
     const confirmed = main(page).locator('[data-fact-state="confirmed_by_you"]');
     await expect(confirmed).toHaveCount(1);
     await expect(confirmed).toContainText("Confirmed by you");
-    await expect(confirmed).toContainText("It is not verified by Knowvia or your insurer");
+    await expect(confirmed).toContainText("It is not verified by CoverSaath or your insurer");
     await expect(confirmed.locator('[data-state="known"]')).toHaveCount(0);
     expect(fake.last("POST /catalogue-confirmers")?.body).toEqual({ adultUserId: "adult-synth-owner" });
     const review = fake.last("POST /cases/:id/catalogue-reviews")!;

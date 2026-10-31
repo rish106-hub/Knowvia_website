@@ -23,7 +23,7 @@ export function ConsentNoticeCard({ scope, lead, notices }: { scope: ConsentScop
   if (state.status === "error") {
     return (
       <Notice tone="error" title="Could not load the permission wording" actions={<Button size="sm" variant="secondary" onClick={retry}>Try again</Button>}>
-        {errorCopy(state.error).message} Without the wording, Knowvia cannot ask for this permission.
+        {errorCopy(state.error).message} Without the wording, CoverSaath cannot ask for this permission.
       </Notice>
     );
   }
@@ -31,7 +31,7 @@ export function ConsentNoticeCard({ scope, lead, notices }: { scope: ConsentScop
   if (!notice) {
     return (
       <Notice tone="error" title="Permission wording missing">
-        Knowvia does not have wording for this permission, so it cannot ask for it.
+        CoverSaath does not have wording for this permission, so it cannot ask for it.
       </Notice>
     );
   }

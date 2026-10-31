@@ -6,8 +6,10 @@ test.describe("signed out and sign-in", () => {
     const bff = new FakeBff({ signedIn: false });
     await bff.install(page);
     await page.goto("/app");
+    await expect(page).toHaveURL(/\/app\/start$/);
+    await page.getByRole("link", { name: "Sign in", exact: true }).click();
     await expect(page).toHaveURL(/\/app\/sign-in$/);
-    await expect(page.getByRole("heading", { level: 1, name: "Sign in to Knowvia" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Sign in to CoverSaath" })).toBeVisible();
     await expect(page.getByText("Development sign-in", { exact: true })).toBeVisible();
     await expect(page.getByText(/does not check your email and does not send a code/)).toBeVisible();
     await expect(page.getByLabel("Email")).toBeVisible();

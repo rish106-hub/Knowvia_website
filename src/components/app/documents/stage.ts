@@ -22,7 +22,7 @@ const STAGES: Record<DocumentStage, StageInfo> = {
   awaiting_ocr_consent: {
     label: "Needs your permission",
     tone: "attention",
-    description: "To read the text in this PDF, Knowvia sends it to an outside reading service (OCR). That needs your permission.",
+    description: "To read the text in this PDF, CoverSaath sends it to an outside reading service (OCR). That needs your permission.",
     indeterminate: false,
   },
   processing: {
@@ -34,13 +34,13 @@ const STAGES: Record<DocumentStage, StageInfo> = {
   readable: {
     label: "Readable",
     tone: "done",
-    description: "Knowvia could read the text of this PDF. Nothing has been checked or confirmed from it yet.",
+    description: "CoverSaath could read the text of this PDF. Nothing has been checked or confirmed from it yet.",
     indeterminate: false,
   },
   unreadable: {
     label: "Could not read",
     tone: "problem",
-    description: "Knowvia could not read the text in this PDF. You can try again, or delete it and add a different file.",
+    description: "CoverSaath could not read the text in this PDF. You can try again, or delete it and add a different file.",
     indeterminate: false,
   },
   rejected: {

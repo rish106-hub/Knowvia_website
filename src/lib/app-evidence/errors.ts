@@ -14,7 +14,7 @@ export function describeError(error: unknown, context: ErrorContext): ErrorView 
   const status = typeof e.status === "number" ? e.status : 0;
   switch (code) {
     case "NETWORK_UNREACHABLE":
-      return view(code, "We could not reach Knowvia", "Check your connection and try again. Nothing you have done here has been lost.", "retry");
+      return view(code, "We could not reach CoverSaath", "Check your connection and try again. Nothing you have done here has been lost.", "retry");
     case "SESSION_REQUIRED":
     case "SESSION_EXPIRED":
       return view(code, "You are signed out", "Sign in again to carry on.", "sign_in");
@@ -33,7 +33,7 @@ export function describeError(error: unknown, context: ErrorContext): ErrorView 
     case "POLICY_EVIDENCE_DOCUMENTS_REQUIRED":
       return view(code, "Your document is not ready to read yet", "The text of your document is not ready. Check its status in your documents.", "documents");
     case "EVIDENCE_BUSY":
-      return view(code, "Knowvia is busy right now", "Too many documents are being read. Wait a minute and try again.", "retry", true);
+      return view(code, "CoverSaath is busy right now", "Too many documents are being read. Wait a minute and try again.", "retry", true);
     case "EVIDENCE_DISABLED":
       return view(code, "Reading is switched off", "Reading documents is not available right now. Try again later.", "none", false);
     case "RATE_LIMITED":

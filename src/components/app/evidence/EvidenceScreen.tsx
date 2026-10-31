@@ -53,7 +53,7 @@ export function EvidenceScreen() {
               </ul>
             </>
           ) : (
-            <p className={css.p}>Add a policy document first. Then Knowvia can show you what it says and where it says it.</p>
+            <p className={css.p}>Add a policy document first. Then CoverSaath can show you what it says and where it says it.</p>
           )}
           <div className={css.row}>
             <Link className={cx(css.btn, css.btnPrimary)} href="/app/documents">Go to your documents</Link>
@@ -167,7 +167,7 @@ export function EvidenceScreen() {
           <section className={css.next} aria-labelledby="kve-next-h">
             <span className={css.nextTag}><ArrowIcon /> Next</span>
             <h2 id="kve-next-h" className={css.nextTitle}>Say what you are checking</h2>
-            <p>Pick a situation and Knowvia shows what these documents do and do not settle for it.</p>
+            <p>Pick a situation and CoverSaath shows what these documents do and do not settle for it.</p>
             <div className={css.row}>
               <Link className={cx(css.btn, css.btnPrimary)} href="/app/cover/preview">See what this means for you</Link>
             </div>

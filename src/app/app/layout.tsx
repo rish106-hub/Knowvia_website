@@ -7,7 +7,7 @@ import "@/components/app/ui/app.css";
 
 // The authenticated app is invisible unless the BFF is on. Nothing under /app is public while APP_ENABLED is not "true".
 export const metadata: Metadata = {
-  title: { default: "Knowvia app", template: "%s | Knowvia" },
+  title: { default: "CoverSaath app", template: "%s | CoverSaath" },
   robots: { index: false, follow: false },
 };
 

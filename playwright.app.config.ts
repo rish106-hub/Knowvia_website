@@ -34,6 +34,7 @@ export default defineConfig({
       NEXT_DIST_DIR: DIST,
       APP_ENABLED: "true",
       APP_DEV_IDENTITY: "true",
+      APP_DEMO_DATA: "true",
       COVERSAATH_API_URL: "http://127.0.0.1:9",
       COVERSAATH_BOOTSTRAP_TOKEN: "e2e-fake-bootstrap-token-not-real",
       APP_SESSION_SECRET: "e2e-fake-session-secret-0123456789abcdef",

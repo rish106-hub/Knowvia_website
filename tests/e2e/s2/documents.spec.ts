@@ -29,7 +29,7 @@ test.describe("empty and consent", () => {
     await open(page, bff);
     const notice = page.locator('[data-consent-scope="collect"]');
     await expect(notice.getByRole("heading", { name: "Store your PDF" })).toBeVisible();
-    await expect(notice).toContainText("Draft: Knowvia keeps the PDF you add");
+    await expect(notice).toContainText("Draft: CoverSaath keeps the PDF you add");
     await expect(notice.getByText("Draft wording, pending legal review")).toBeVisible();
     await expect(page.getByRole("checkbox")).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Allow and add this PDF" })).toBeVisible();
@@ -90,7 +90,7 @@ test.describe("upload", () => {
       consents: [{ scope: "collect", grantId: "grant-collect-0", documentIds: [], grantedAt: "2026-10-20T10:00:00.000Z", noticeStatus: "draft_needs_legal_review" }],
     });
     await open(page, bff);
-    await expect(page.getByText("You have allowed Knowvia to store the PDFs you add.")).toBeVisible();
+    await expect(page.getByText("You have allowed CoverSaath to store the PDFs you add.")).toBeVisible();
     await expect(page.getByRole("button", { name: "Add this PDF" })).toBeVisible();
     await kind(page, "Policy wording").check();
     await choose(page, PDF_FILE("wording.pdf"));
@@ -108,7 +108,7 @@ test.describe("upload", () => {
     await kind(page, "Policy schedule").check();
     await choose(page, PDF_FILE());
     await page.getByRole("button", { name: "Allow and add this PDF" }).click();
-    await expect(alerts(page)).toContainText("Knowvia could not be reached");
+    await expect(alerts(page)).toContainText("CoverSaath could not be reached");
     await page.getByRole("button", { name: "Retry" }).click();
     await expect(page.getByText("PDF added")).toBeVisible();
     const uploads = bff.callsTo("POST /cases/:id/documents");
@@ -291,7 +291,7 @@ test.describe("reading (OCR)", () => {
     await page.goto("/app/documents");
     await page.getByRole("button", { name: /^Allow reading/ }).click();
 
-    const dialog = page.getByRole("dialog", { name: "Let Knowvia read this PDF?" });
+    const dialog = page.getByRole("dialog", { name: "Let CoverSaath read this PDF?" });
     await expect(dialog).toBeVisible();
     await expect(dialog.getByRole("heading", { name: "Read this PDF with an outside service" })).toBeVisible();
     await expect(dialog.getByText("Draft wording, pending legal review")).toBeVisible();
@@ -476,7 +476,7 @@ test.describe("delete and revoke", () => {
     await page.getByRole("button", { name: /Withdraw permission: Read policy schedule/ }).click();
     const dialog = page.getByRole("dialog", { name: "Withdraw this permission?" });
     await expect(dialog).toContainText("stops sending this PDF to the reading service");
-    await expect(dialog).toContainText("erases the text and answers Knowvia derived from this PDF");
+    await expect(dialog).toContainText("erases the text and answers CoverSaath derived from this PDF");
     await dialog.getByRole("button", { name: "Withdraw permission" }).click();
     await expect(dialog).toHaveCount(0);
     await expect(list.locator("li")).toHaveCount(1);

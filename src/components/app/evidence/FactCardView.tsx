@@ -61,7 +61,7 @@ export function FactCardView({ card, headingLevel = 4, onOpenCitation, onReview,
           ) : (
             <div id={panelId} className={css.confirmPanel}>
               <p className={css.p}>Read the quoted text above. Does it say this?</p>
-              <p className={cx(css.p, css.small, css.muted)}>Your confirmation is recorded as yours. It does not make this verified by Knowvia or your insurer.</p>
+              <p className={cx(css.p, css.small, css.muted)}>Your confirmation is recorded as yours. It does not make this verified by CoverSaath or your insurer.</p>
               <div className={css.row}>
                 <Button size="sm" busy={saving} onClick={() => onReview(card.confirm!.factId, "accepted")}>
                   {saving ? "Saving" : "Yes, the text says this"}

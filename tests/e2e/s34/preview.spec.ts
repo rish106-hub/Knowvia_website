@@ -180,7 +180,7 @@ test.describe("failures", () => {
     const fake = new FakeCover(consentedOverview());
     fake.failNext("POST /coverage-preview", "abort");
     await open(page, fake);
-    await expect(page.getByText("We could not reach Knowvia")).toBeVisible();
+    await expect(page.getByText("We could not reach CoverSaath")).toBeVisible();
     await page.getByRole("button", { name: "Try again" }).click();
     await expect(page.getByText("Your documents do not settle this yet")).toBeVisible();
   });

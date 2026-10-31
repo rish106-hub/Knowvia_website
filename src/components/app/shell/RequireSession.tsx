@@ -17,7 +17,7 @@ export function RequireSession({ children }: { children: (overview: Overview) =>
 
   useEffect(() => {
     if (state.status !== "signed_out") return;
-    router.replace(state.reason === "expired" ? "/app/sign-in?reason=expired" : state.reason === "signed_out" ? "/app/sign-in?reason=signed_out" : "/app/sign-in");
+    router.replace(state.reason === "expired" ? "/app/sign-in?reason=expired" : state.reason === "signed_out" ? "/app/sign-in?reason=signed_out" : "/app/start");
   }, [state, router]);
 
   if (state.status === "loading" || state.status === "signed_out") {

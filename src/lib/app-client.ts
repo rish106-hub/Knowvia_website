@@ -20,7 +20,7 @@ export class AppApiError extends Error {
 
 const NETWORK_ERROR = {
   code: "NETWORK_UNREACHABLE",
-  message: "We could not reach Knowvia. Check your connection and try again.",
+  message: "We could not reach CoverSaath. Check your connection and try again.",
   retryable: true,
 } as ErrorBody["error"];
 

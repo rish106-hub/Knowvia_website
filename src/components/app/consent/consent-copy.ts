@@ -17,19 +17,19 @@ export function consentTitle(consent: ConsentView, documents: DocumentView[]): s
 export function revokeExplanation(consent: ConsentView): string[] {
   if (consent.scope === "collect") {
     return [
-      "Knowvia stops storing new PDFs for you and will ask again before you add another.",
-      "Withdrawing also erases answers Knowvia worked out using this permission.",
+      "CoverSaath stops storing new PDFs for you and will ask again before you add another.",
+      "Withdrawing also erases answers CoverSaath worked out using this permission.",
       "PDFs you already added are not removed by this. Delete a PDF from the Documents page to remove it.",
     ];
   }
   if (consent.scope === "ocr_sarvam") {
     return [
-      "Knowvia stops sending this PDF to the reading service.",
-      "Withdrawing erases the text and answers Knowvia derived from this PDF. To use it again, you would allow reading again.",
+      "CoverSaath stops sending this PDF to the reading service.",
+      "Withdrawing erases the text and answers CoverSaath derived from this PDF. To use it again, you would allow reading again.",
     ];
   }
   return [
-    "Knowvia stops using these documents to answer your questions.",
+    "CoverSaath stops using these documents to answer your questions.",
     "Withdrawing erases the answers already given from them.",
   ];
 }

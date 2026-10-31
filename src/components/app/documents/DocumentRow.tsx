@@ -154,7 +154,7 @@ export function DocumentRow({ doc, localName, stalled, onRestartPolling }: Props
             </Button>
           }
         >
-          {stalled === "cap" ? "Knowvia stopped checking automatically. It may still finish." : "Knowvia could not get an update. Your PDF is not lost."}
+          {stalled === "cap" ? "CoverSaath stopped checking automatically. It may still finish." : "CoverSaath could not get an update. Your PDF is not lost."}
         </Notice>
       ) : null}
 
@@ -203,7 +203,7 @@ export function DocumentRow({ doc, localName, stalled, onRestartPolling }: Props
 
       <ConfirmDialog
         open={dialog === "ocr_consent"}
-        title="Let Knowvia read this PDF?"
+        title="Let CoverSaath read this PDF?"
         confirmLabel="Allow and read this PDF"
         cancelLabel="Not now"
         busy={busy === "ocr"}
@@ -229,7 +229,7 @@ export function DocumentRow({ doc, localName, stalled, onRestartPolling }: Props
           <p className="kva-p">
             <strong>{rowLabel}</strong>
           </p>
-          <p className="kva-p">This deletes the PDF and the text and answers Knowvia built from it. It cannot be undone.</p>
+          <p className="kva-p">This deletes the PDF and the text and answers CoverSaath built from it. It cannot be undone.</p>
           <p className="kva-p kva-small kva-muted">Your permissions stay as they are. You can withdraw them on the Home page.</p>
         </div>
       </ConfirmDialog>

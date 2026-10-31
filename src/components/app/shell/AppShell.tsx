@@ -18,7 +18,7 @@ function Brand({ href }: { href: string }) {
         <path d="M265 404l274-210" fill="none" stroke="#E0A02B" strokeWidth="58" strokeLinecap="round" />
         <path d="M557 150l46 46-46 46-46-46z" fill="#E0A02B" />
       </svg>
-      <span>Knowvia</span>
+      <span>CoverSaath</span>
     </Link>
   );
 }
@@ -54,7 +54,7 @@ function Chrome({ children }: { children: ReactNode }) {
       </a>
       <header className="kva-header">
         <div className="kva-header__inner">
-          <Brand href={ready ? "/app" : "/app/sign-in"} />
+          <Brand href={ready ? "/app" : "/app/start"} />
           {ready ? (
             <div className="kva-header__nav-wrap">
               <nav className="kva-nav" aria-label="App">
@@ -88,7 +88,7 @@ function Chrome({ children }: { children: ReactNode }) {
         {children}
       </main>
       <footer className="kva-footer">
-        <p className="kva-p">Knowvia app preview. Nothing here is advice on what your insurer will pay.</p>
+        <p className="kva-p">CoverSaath app preview. Nothing here is advice on what your insurer will pay.</p>
       </footer>
     </div>
   );
