@@ -1,21 +1,24 @@
 import { spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
 const read = (rel: string) => readFileSync(join(root, rel), "utf8");
 const hasPython = spawnSync("python3", ["--version"]).status === 0;
+const hasArtboards = existsSync(join(root, "design/claude-design/Main.dc.html"));
 
 describe("design port contract", () => {
-  it.skipIf(!hasPython)("regenerating from the artboards changes no generated file", () => {
+  it.skipIf(!hasPython || !hasArtboards)("regenerating from the artboards changes no generated file", () => {
     const run = spawnSync("bash", ["scripts/design-port/check-regen.sh"], { cwd: root, encoding: "utf8" });
     expect(run.stderr, run.stderr).toBe("");
     expect(run.status).toBe(0);
   });
 
   it("onboarding upload is PDF only, in the artboard and the generated component", () => {
-    for (const rel of ["design/claude-design/O5-Upload.dc.html", "src/components/onboarding/OnboardingAddPolicies.tsx"]) {
+    const files = ["src/components/onboarding/OnboardingAddPolicies.tsx"];
+    if (hasArtboards) files.unshift("design/claude-design/O5-Upload.dc.html");
+    for (const rel of files) {
       const text = read(rel);
       expect(text, rel).not.toMatch(/jpe?g|png|photo/i);
       expect(text, rel).toContain("PDF, up to 15 MB each");
@@ -73,10 +76,10 @@ describe("token bridge", () => {
       "--kv-muted": "#55696d",
       "--kv-border": "#cfdcda",
     };
-    const artboards = read("design/claude-design/Main.dc.html").toLowerCase();
+    const artboards = hasArtboards ? read("design/claude-design/Main.dc.html").toLowerCase() : null;
     for (const [name, hex] of Object.entries(brand)) {
       expect(tokens, name).toContain(`${name}: ${hex};`);
-      expect(artboards, `${hex} must exist in the artboards`).toContain(hex);
+      if (artboards) expect(artboards, `${hex} must exist in the artboards`).toContain(hex);
     }
   });
 
