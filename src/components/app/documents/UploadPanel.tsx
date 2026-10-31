@@ -15,6 +15,15 @@ import { precheckPdf } from "./precheck";
 import { KIND_CHOICES } from "./stage";
 
 type ProductFlowReadiness = {
+  documentIntake: {
+    ready: boolean;
+    missing: string[];
+  };
+  policyProcessing: {
+    readingReady: boolean;
+    questionsReady: boolean;
+    missing: string[];
+  };
   productFlow: {
     ready: boolean;
     missing: string[];
@@ -62,8 +71,16 @@ export function UploadPanel({ overview, onAdded }: { overview: Overview; onAdded
     let active = true;
     appFetch<ProductFlowReadiness>("/integrations")
       .then((status) => {
-        if (!status?.productFlow || typeof status.productFlow.ready !== "boolean" || !Array.isArray(status.productFlow.missing)) {
-          throw new Error("The backend did not return a valid product-flow readiness response.");
+        if (
+          !status?.documentIntake ||
+          typeof status.documentIntake.ready !== "boolean" ||
+          !Array.isArray(status.documentIntake.missing) ||
+          !status?.policyProcessing ||
+          typeof status.policyProcessing.readingReady !== "boolean" ||
+          typeof status.policyProcessing.questionsReady !== "boolean" ||
+          !Array.isArray(status.policyProcessing.missing)
+        ) {
+          throw new Error("The backend did not return a valid document-processing readiness response.");
         }
         if (active) setProductFlow(status);
       })
@@ -79,8 +96,9 @@ export function UploadPanel({ overview, onAdded }: { overview: Overview; onAdded
     };
   }, [handleError, readinessRetry]);
 
-  const productFlowReady = productFlow?.productFlow.ready === true;
-  const missingReadiness = (productFlow?.productFlow.missing ?? []).map((key) => READINESS_LABELS[key] ?? key);
+  const intakeReady = productFlow?.documentIntake.ready === true;
+  const missingIntake = (productFlow?.documentIntake.missing ?? []).map((key) => READINESS_LABELS[key] ?? key);
+  const missingProcessing = (productFlow?.policyProcessing.missing ?? []).map((key) => READINESS_LABELS[key] ?? key);
   function retryReadiness() {
     setReadinessLoading(true);
     setReadinessError(false);
@@ -223,13 +241,21 @@ export function UploadPanel({ overview, onAdded }: { overview: Overview; onAdded
           Upload is paused until Knowvia can confirm that the document-to-reading flow is available.
         </Notice>
       ) : null}
-      {!readinessLoading && !readinessError && productFlow && !productFlowReady ? (
-        <Notice tone="warning" title="Policy reading is not ready yet">
-          <p className="kva-p">Your PDF should not be uploaded yet. These required services are not ready:</p>
+      {!readinessLoading && !readinessError && productFlow && !intakeReady ? (
+        <Notice tone="warning" title="Secure document intake is not ready">
+          <p className="kva-p">Your PDF cannot be stored safely yet. Upload is paused until these services are available:</p>
           <ul className="kva-list">
-            {missingReadiness.map((item) => <li className="kva-item" key={item}>{item}</li>)}
+            {missingIntake.map((item) => <li className="kva-item" key={item}>{item}</li>)}
           </ul>
-          <p className="kva-p kva-small">Your existing documents are not affected. This check does not depend on the external FSS catalogue.</p>
+        </Notice>
+      ) : null}
+      {!readinessLoading && !readinessError && productFlow && intakeReady && !productFlow.policyProcessing.questionsReady ? (
+        <Notice tone="info" title="Some reading features are not ready yet">
+          <p className="kva-p">You can securely add your PDF. Reading and question features will become available when these services are configured:</p>
+          <ul className="kva-list">
+            {missingProcessing.map((item) => <li className="kva-item" key={item}>{item}</li>)}
+          </ul>
+          <p className="kva-p kva-small">Your document remains under your control. This does not depend on the external FSS catalogue.</p>
         </Notice>
       ) : null}
 
@@ -336,7 +362,7 @@ export function UploadPanel({ overview, onAdded }: { overview: Overview; onAdded
         </Notice>
       ) : null}
 
-      <Button block busy={working} disabled={waitingForWording || readinessLoading || readinessError || !productFlowReady} onClick={() => void submit()}>
+      <Button block busy={working} disabled={waitingForWording || readinessLoading || readinessError || !intakeReady} onClick={() => void submit()}>
         {addLabel}
       </Button>
     </section>
