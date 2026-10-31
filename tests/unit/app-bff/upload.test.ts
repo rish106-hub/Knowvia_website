@@ -17,7 +17,7 @@ describe("upload validation (all before any backend call)", () => {
     const response = await ctx.app.dispatch("documents.upload", uploadRequest(jar), { caseId: "case-1" });
     expect(response.status).toBe(201);
     const body = await response.json();
-    expect(body.document).toMatchObject({ stage: "received", backendStatus: "received_pending_checks", nextAction: "wait", note: "scan_state_not_visible" });
+    expect(body.document).toMatchObject({ stage: "received", backendStatus: "received_pending_checks", nextAction: "grant_ocr_consent", note: "scan_state_not_visible" });
     expect(JSON.stringify(body)).not.toContain("synthetic");
     const forwarded = ctx.backend.calls.at(-1)!;
     expect(forwarded.headers).toMatchObject({

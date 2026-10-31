@@ -2,10 +2,8 @@
 
 import { ArrowClockwise, CircleNotch, FilePdf, Trash } from "@phosphor-icons/react";
 import { useRef, useState } from "react";
-import { AppApiError, appFetch, newIdempotencyKey } from "@/lib/app-client";
+import { AppApiError, appFetch } from "@/lib/app-client";
 import type { DocumentView } from "@/lib/app-contract";
-import { ConsentNoticeCard } from "../consent/ConsentNoticeCard";
-import { useConsentNotices } from "../consent/useConsentNotices";
 import { errorCopy, type ErrorCopy } from "../shell/error-copy";
 import { asApiError, useApp } from "../shell/session-context";
 import { Button, ConfirmDialog, Notice, StatusBadge } from "../ui";
@@ -21,9 +19,11 @@ type Props = {
   localName?: string;
   stalled?: StalledReason;
   onRestartPolling: (id: string) => void;
+  /** "Allow reading" on this row: take the person to the one reading permission for the batch. */
+  onRequestReadingConsent: () => void;
 };
 
-export function DocumentRow({ doc, localName, stalled, onRestartPolling }: Props) {
+export function DocumentRow({ doc, localName, stalled, onRestartPolling, onRequestReadingConsent }: Props) {
   const { updateDocument, reloadOverview, handleError } = useApp();
   const info = stageInfo(doc.stage);
   const actions = documentActions(doc);
@@ -33,12 +33,9 @@ export function DocumentRow({ doc, localName, stalled, onRestartPolling }: Props
 
   const [busy, setBusy] = useState<null | "ocr" | "delete" | "recheck">(null);
   const [error, setError] = useState<RowError | null>(null);
-  const [dialog, setDialog] = useState<null | "ocr_consent" | "delete">(null);
+  const [dialog, setDialog] = useState<null | "delete">(null);
   const [dialogError, setDialogError] = useState<{ title: string; message: string } | null>(null);
-  const notices = useConsentNotices(dialog === "ocr_consent");
   const rowRef = useRef<HTMLLIElement>(null);
-  // Kept until the grant succeeds, so every retry of one "allow" action sends the same key.
-  const consentKey = useRef<string | null>(null);
 
   function fail(caught: unknown, retry?: () => void): ErrorCopy | null {
     if (handleError(caught)) return null;
@@ -56,37 +53,6 @@ export function DocumentRow({ doc, localName, stalled, onRestartPolling }: Props
     } catch (caught) {
       fail(caught, () => void startOcr());
       if (caught instanceof AppApiError && (caught.code === "CONSENT_REQUIRED" || caught.code === "DOCUMENT_NOT_FOUND")) await reloadOverview();
-    } finally {
-      setBusy(null);
-    }
-  }
-
-  async function allowAndRead() {
-    setBusy("ocr");
-    setDialogError(null);
-    try {
-      consentKey.current ??= newIdempotencyKey();
-      await appFetch("/consents", {
-        method: "POST",
-        json: { scope: "ocr_sarvam", documentId: doc.id },
-        headers: { "Idempotency-Key": consentKey.current },
-      });
-      consentKey.current = null;
-    } catch (caught) {
-      setBusy(null);
-      if (!handleError(caught)) {
-        const copy = errorCopy(asApiError(caught));
-        setDialogError({ title: copy.title, message: copy.message });
-      }
-      return;
-    }
-    setDialog(null);
-    try {
-      const body = await appFetch<{ document: DocumentView }>(`/documents/${doc.id}/ocr`, { method: "POST" });
-      updateDocument(body.document);
-    } catch (caught) {
-      fail(caught, () => void startOcr());
-      await reloadOverview();
     } finally {
       setBusy(null);
     }
@@ -119,8 +85,7 @@ export function DocumentRow({ doc, localName, stalled, onRestartPolling }: Props
 
   function onPrimary() {
     if (actions.primary === "grant_ocr_consent") {
-      setDialogError(null);
-      setDialog("ocr_consent");
+      onRequestReadingConsent();
     } else if (actions.primary) {
       void startOcr();
     }
@@ -200,20 +165,6 @@ export function DocumentRow({ doc, localName, stalled, onRestartPolling }: Props
           ) : null}
         </div>
       ) : null}
-
-      <ConfirmDialog
-        open={dialog === "ocr_consent"}
-        title="Let CoverSaath read this PDF?"
-        confirmLabel="Allow and read this PDF"
-        cancelLabel="Not now"
-        busy={busy === "ocr"}
-        confirmDisabled={notices.state.status !== "ready"}
-        error={dialogError}
-        onConfirm={() => void allowAndRead()}
-        onClose={() => setDialog(null)}
-      >
-        <ConsentNoticeCard scope="ocr_sarvam" lead={`This sends your ${rowLabel} to an outside reading service (OCR) so its text can be read. This permission covers this one PDF.`} notices={notices} />
-      </ConfirmDialog>
 
       <ConfirmDialog
         open={dialog === "delete"}

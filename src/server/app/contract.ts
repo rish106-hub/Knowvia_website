@@ -209,11 +209,16 @@ const id = z.string().min(1).max(128).regex(/^[A-Za-z0-9][A-Za-z0-9._:-]*$/);
 export const grantConsentRequestSchema = z
   .object({
     scope: z.enum(CONSENT_SCOPE_NAMES),
+    /** ocr_sarvam only: one document. Kept so a single-document request still works; same as documentIds with one entry. */
     documentId: id.optional(),
+    /** ocr_sarvam and question_gemini: 1 to 10 documents. Duplicates are removed and the list is sorted by the BFF. */
     documentIds: z.array(id).min(1).max(10).optional(),
   })
   .superRefine((value, ctx) => {
-    if (value.scope === "ocr_sarvam" && !value.documentId) ctx.addIssue({ code: "custom", path: ["documentId"], message: "required" });
+    if (value.scope === "ocr_sarvam") {
+      if (!value.documentId && !value.documentIds) ctx.addIssue({ code: "custom", path: ["documentId"], message: "required" });
+      if (value.documentId && value.documentIds) ctx.addIssue({ code: "custom", path: ["documentIds"], message: "use documentId or documentIds, not both" });
+    }
     if (value.scope === "question_gemini" && !value.documentIds) ctx.addIssue({ code: "custom", path: ["documentIds"], message: "required" });
   });
 export type GrantConsentRequest = z.input<typeof grantConsentRequestSchema>;

@@ -18,7 +18,7 @@ type Phase =
   | { name: "idle" }
   | { name: "working"; step: "case" | "consent" | "upload" }
   | { name: "failed"; copy: ErrorCopy }
-  | { name: "added"; filename: string };
+  | { name: "added"; filename: string; asksReading: boolean };
 
 const STEP_TEXT = {
   case: "Setting up your case.",
@@ -133,7 +133,7 @@ export function UploadPanel({ overview, onAdded }: { overview: Overview; onAdded
       });
       updateDocument(result.document);
       onAdded(result.document, file.name);
-      setPhase({ name: "added", filename: file.name });
+      setPhase({ name: "added", filename: file.name, asksReading: result.document.nextAction === "grant_ocr_consent" });
       setFile(null);
       keyRef.current = null;
       void reloadOverview();
@@ -246,6 +246,7 @@ export function UploadPanel({ overview, onAdded }: { overview: Overview; onAdded
         {phase.name === "added" ? (
           <Notice tone="success" live="off" title="PDF added">
             {phase.filename} is in your list below.
+            {phase.asksReading ? " Add the other documents you want read, then allow reading once for all of them." : ""}
           </Notice>
         ) : null}
       </div>

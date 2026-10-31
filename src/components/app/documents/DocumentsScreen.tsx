@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowRight } from "@phosphor-icons/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { Overview } from "@/lib/app-contract";
 import { sortDocuments } from "../shell/overview-utils";
 import { RequireSession } from "../shell/RequireSession";
@@ -9,8 +9,10 @@ import { useApp } from "../shell/session-context";
 import { ButtonLink, Notice } from "../ui";
 import { DocumentRow } from "./DocumentRow";
 import { PermissionWithdrawnNotice } from "./PermissionWithdrawnNotice";
+import { ReadingConsentSheet } from "./ReadingConsentSheet";
+import { documentsAwaitingReadingPermission, documentsReadyToStartReading } from "./stage";
 import { UploadPanel } from "./UploadPanel";
-import { useStagePolling } from "./useStagePolling";
+import { useAutoStartReading, useStagePolling } from "./useStagePolling";
 
 export function DocumentsScreen() {
   return <RequireSession>{(overview) => <DocumentsInner overview={overview} />}</RequireSession>;
@@ -21,7 +23,16 @@ function DocumentsInner({ overview }: { overview: Overview }) {
   // Backend documents carry no file name. Names are remembered only for files added in this browser session.
   const [names, setNames] = useState<Record<string, string>>({});
   const { stalled, restart } = useStagePolling(overview.documents, { onDocument: updateDocument, onError: handleError });
+  const { failed } = useAutoStartReading(overview.documents, { onDocument: updateDocument, onError: handleError });
+  const sheetRef = useRef<HTMLElement>(null);
   const documents = sortDocuments(overview.documents);
+  const awaitingPermission = documentsAwaitingReadingPermission(overview.documents, overview.documentsAccess);
+  const notStarted = documentsReadyToStartReading(overview.documents).filter((doc) => failed.includes(doc.id));
+
+  function showReadingSheet() {
+    sheetRef.current?.focus();
+    sheetRef.current?.scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  }
   const anyReadable = documents.some((doc) => doc.stage === "readable");
 
   return (
@@ -35,6 +46,14 @@ function DocumentsInner({ overview }: { overview: Overview }) {
 
       <UploadPanel overview={overview} onAdded={(doc, filename) => setNames((current) => ({ ...current, [doc.id]: filename }))} />
 
+      <ReadingConsentSheet ref={sheetRef} documents={awaitingPermission} />
+
+      {notStarted.length > 0 ? (
+        <Notice tone="warning" title="Reading did not start for some documents" live="off">
+          {notStarted.length === 1 ? "One document" : `${notStarted.length} documents`} could not be started. Use Start reading on {notStarted.length === 1 ? "it" : "each one"} below.
+        </Notice>
+      ) : null}
+
       <section className="kva-section" aria-labelledby="kva-list-h">
         <h2 className="kva-h2" id="kva-list-h">
           Your documents
@@ -47,7 +66,7 @@ function DocumentsInner({ overview }: { overview: Overview }) {
         ) : (
           <ul className="kva-docs">
             {documents.map((doc) => (
-              <DocumentRow key={doc.id} doc={doc} localName={names[doc.id]} stalled={stalled[doc.id]} onRestartPolling={restart} />
+              <DocumentRow key={doc.id} doc={doc} localName={names[doc.id]} stalled={stalled[doc.id]} onRestartPolling={restart} onRequestReadingConsent={showReadingSheet} />
             ))}
           </ul>
         )}

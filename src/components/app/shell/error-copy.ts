@@ -53,6 +53,11 @@ const BY_CODE: Record<string, Omit<ErrorCopy, "action"> & { action?: ErrorAction
   VOICE_INTAKE_NOT_IMPLEMENTED: { title: "Not available yet", message: "Speaking to CoverSaath is not available yet.", action: "none" },
   CONSENT_NOT_FOUND: { title: "Permission not found", message: "It may already be withdrawn. Reload to see the current list.", action: "reload" },
   CONSENT_REQUIRED: { title: "Permission needed", message: "This step needs your permission first. Allow it, then try again.", action: "reload" },
+  CONSENT_ALREADY_HELD: {
+    title: "Already allowed",
+    message: "Reading is already allowed for one of these documents. Reload to see the current permissions.",
+    action: "reload",
+  },
   CONSENT_SCOPE_REQUIRED: {
     title: "Permission needed",
     message: "CoverSaath does not have your permission to store this PDF. Allow it, then try again.",

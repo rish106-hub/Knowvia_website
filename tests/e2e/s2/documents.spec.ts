@@ -269,41 +269,38 @@ test.describe("stages", () => {
     await expect.poll(() => bff.callsTo("GET /overview").length).toBeGreaterThan(before);
   });
 
-  test("an awaiting_ocr_consent document with consent already held offers Start reading", async ({ page }) => {
+  test("an awaiting_ocr_consent document with consent already held starts reading by itself", async ({ page }) => {
     const doc = docAt("awaiting_ocr_consent", { nextAction: "start_ocr" });
     const bff = new FakeBff({
       documents: [doc],
       consents: [{ scope: "ocr_sarvam", grantId: "grant-ocr-1", documentIds: [doc.id], grantedAt: "2026-10-20T10:00:00.000Z", noticeStatus: "draft_needs_legal_review" }],
     });
     await open(page, bff);
-    await page.getByRole("button", { name: /^Start reading/ }).click();
     await expect(page.locator('[data-stage="processing"]')).toBeVisible();
+    expect(bff.callsTo("POST /documents/:id/ocr")).toHaveLength(1);
     expect(bff.callsTo("POST /consents")).toHaveLength(0);
   });
 });
 
 test.describe("reading (OCR)", () => {
-  test("allow reading: per-document consent, start, then polling refresh until readable", async ({ page }) => {
+  test("allow reading: one permission for the batch, start by itself, then polling refresh until readable", async ({ page }) => {
     await page.clock.install();
     const doc = docAt("awaiting_ocr_consent");
     const bff = new FakeBff({ documents: [doc], refreshScript: { [doc.id]: ["processing", "processing", "readable"] } });
     await bff.install(page);
     await page.goto("/app/documents");
-    await page.getByRole("button", { name: /^Allow reading/ }).click();
 
-    const dialog = page.getByRole("dialog", { name: "Let CoverSaath read this PDF?" });
-    await expect(dialog).toBeVisible();
-    await expect(dialog.getByRole("heading", { name: "Read this PDF with an outside service" })).toBeVisible();
-    await expect(dialog.getByText("Draft wording, pending legal review")).toBeVisible();
-    await expect(dialog.getByText("This permission covers this one PDF.")).toBeVisible();
+    const sheet = page.getByTestId("reading-consent-sheet");
+    await expect(sheet.getByRole("heading", { name: "Read this document?" })).toBeVisible();
+    await expect(sheet.getByRole("heading", { name: "Read this PDF with an outside service" })).toBeVisible();
+    await expect(sheet.getByText("Draft wording, pending legal review")).toBeVisible();
     expect(bff.callsTo("POST /consents")).toHaveLength(0);
-    await dialog.getByRole("button", { name: "Allow and read this PDF" }).click();
+    await sheet.getByRole("button", { name: "Allow and read this document" }).click();
 
-    await expect(dialog).toHaveCount(0);
     const row = page.locator(`[data-doc-id="${doc.id}"]`);
     await expect(row).toHaveAttribute("data-stage", "processing");
     await expect(row.locator(".kva-badge")).toContainText("Reading");
-    expect(JSON.parse(bff.callsTo("POST /consents")[0].body!.toString())).toEqual({ scope: "ocr_sarvam", documentId: doc.id });
+    expect(JSON.parse(bff.callsTo("POST /consents")[0].body!.toString())).toEqual({ scope: "ocr_sarvam", documentIds: [doc.id] });
     expect(bff.callsTo("POST /documents/:id/ocr")).toHaveLength(1);
 
     // Backoff: nothing at 2 s, first poll after 3 s, then 4.8 s, then 7.68 s.
@@ -321,17 +318,23 @@ test.describe("reading (OCR)", () => {
     expect(bff.callsTo("POST /documents/:id/ocr/refresh")).toHaveLength(3);
   });
 
-  test("Not now closes the dialog, returns focus and sends nothing", async ({ page }) => {
-    const bff = new FakeBff({ documents: [docAt("awaiting_ocr_consent")] });
+  test("several documents are covered by one permission and nothing is sent before Allow", async ({ page }) => {
+    const docs = [docAt("awaiting_ocr_consent"), docAt("awaiting_ocr_consent"), docAt("awaiting_checks")];
+    const bff = new FakeBff({ documents: docs });
     await open(page, bff);
-    const opener = page.getByRole("button", { name: /^Allow reading/ });
-    await opener.click();
-    const dialog = page.getByRole("dialog");
-    await expect(dialog.getByRole("button", { name: "Not now" })).toBeFocused();
-    await page.keyboard.press("Enter");
-    await expect(dialog).toHaveCount(0);
-    await expect(opener).toBeFocused();
+    const sheet = page.getByTestId("reading-consent-sheet");
+    await expect(sheet.getByRole("heading", { name: "Read these 3 documents?" })).toBeVisible();
+    await expect(sheet.getByText("Read these 3 documents with a text-reading service so CoverSaath can show you what they say.")).toBeVisible();
     expect(bff.callsTo("POST /consents")).toHaveLength(0);
+    expect(bff.callsTo("POST /documents/:id/ocr")).toHaveLength(0);
+
+    await sheet.getByRole("button", { name: "Allow and read these 3 documents" }).click();
+    await expect(page.locator('[data-stage="processing"]')).toHaveCount(2);
+    expect(bff.callsTo("POST /consents")).toHaveLength(1);
+    expect(JSON.parse(bff.callsTo("POST /consents")[0].body!.toString()).documentIds.slice().sort()).toEqual(docs.map((d) => d.id).sort());
+    // The third document is still in its checks, so it is not started.
+    expect(bff.callsTo("POST /documents/:id/ocr")).toHaveLength(2);
+    await expect(page.getByTestId("reading-consent-sheet")).toHaveCount(0);
   });
 
   test("OCR failure: unreadable, then Try reading again starts a new job", async ({ page }) => {

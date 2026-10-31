@@ -27,6 +27,7 @@ const MESSAGES: Record<string, string> = {
   METHOD_NOT_ALLOWED: "That method is not allowed here.",
   STATE_LIMIT_REACHED: "Too many items are being tracked in this session.",
   CONSENT_REQUIRED: "Permission is needed before this can continue.",
+  CONSENT_ALREADY_HELD: "Reading is already allowed for one of these documents.",
   CONSENT_SCOPE_REQUIRED: "The permission given does not cover this.",
   CONSENT_SUBJECT_REQUIRED: "Only the person concerned can give this permission.",
   FIELD_ACCESS_REQUIRED: "You do not have access to this.",

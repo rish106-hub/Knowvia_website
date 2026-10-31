@@ -148,11 +148,29 @@ function pathId(ctx: Ctx, name: string): string {
 const jobIdFor = (state: AppState, documentId: string): string | undefined =>
   Object.hasOwn(state.ocrJobs, documentId) ? state.ocrJobs[documentId] : undefined;
 
+/** The documents a consent request names, as the BFF records them: deduplicated and sorted. Empty for the storage permission. */
+function consentDocuments(body: { scope: ConsentScopeName; documentId?: string; documentIds?: string[] }): string[] {
+  if (body.scope === "ocr_sarvam") return [...new Set(body.documentIds ?? (body.documentId ? [body.documentId] : []))].sort();
+  if (body.scope === "question_gemini") return [...new Set(body.documentIds ?? [])].sort();
+  return [];
+}
+
+/** The newest held permission of this scope that names the document (or any, when no document is given). */
 const findConsent = (state: AppState, scope: ConsentScopeName, documentId?: string): StateConsent | undefined =>
-  state.consents.find((c) => c.scope === scope && (documentId === undefined || c.docs.includes(documentId)));
+  [...state.consents].reverse().find((c) => c.scope === scope && (documentId === undefined || c.docs.includes(documentId)));
 
 function toConsentView(consent: StateConsent): ConsentView {
   return { scope: consent.scope, grantId: consent.id, documentIds: consent.docs, grantedAt: consent.at, noticeStatus: "draft_needs_legal_review" };
+}
+
+/**
+ * The documents a reading permission names must be documents of this session's case. Unknown ids are refused (400)
+ * before the backend creates anything. The backend separately refuses a document of another household.
+ */
+async function assertDocumentsInCase(ctx: Ctx, docs: string[]): Promise<void> {
+  const caseId = ctx.state.caseId;
+  const known = caseId ? new Set((await ctx.backend.listDocuments(ctx.session.token, caseId)).documents.map((document) => document.id)) : new Set<string>();
+  if (docs.some((documentId) => !known.has(documentId))) throw appError(400, "INVALID_REQUEST", { fields: ["documentIds"] });
 }
 
 /**
@@ -175,6 +193,12 @@ async function readScanMode(ctx: Ctx): Promise<string | null> {
 const needsScanMode = (documents: Array<{ status: string }>) => documents.some((document) => document.status === "received_pending_checks");
 
 const CONSENT_LOST_CODES = new Set(["CONSENT_REQUIRED", "CONSENT_SCOPE_REQUIRED", "OCR_AUTHORIZATION_REQUIRED", "DOCUMENT_NOT_OCR_READY"]);
+/**
+ * The backend no longer honours this permission (withdrawn, expired or never valid). The BFF forgets it so a stale grant is
+ * never reused, never offered as "already given" and never picked to start reading. DOCUMENT_NOT_OCR_READY is left out: it
+ * can mean one document is not ready, which must not drop the permission for the others in the batch.
+ */
+const GRANT_GONE_CODES = new Set(["CONSENT_REQUIRED", "CONSENT_SCOPE_REQUIRED", "OCR_AUTHORIZATION_REQUIRED"]);
 
 /** Lists the case documents and composes UI stages, refreshing each known OCR job (idempotent, read-like). */
 async function loadDocumentViews(ctx: Ctx, caseId: string): Promise<{ documents: DocumentView[]; restricted: boolean }> {
@@ -200,8 +224,10 @@ async function loadDocumentViews(ctx: Ctx, caseId: string): Promise<{ documents:
         try {
           ocrJob = await backend.refreshOcr(session.token, jobId, { consentGrantId: grant.id });
         } catch (error) {
-          if (error instanceof AppError && CONSENT_LOST_CODES.has(error.code)) ocrConsent = false;
-          else if (!(error instanceof AppError && error.code === "OCR_JOB_NOT_FOUND")) throw error;
+          if (error instanceof AppError && CONSENT_LOST_CODES.has(error.code)) {
+            ocrConsent = false;
+            if (GRANT_GONE_CODES.has(error.code)) forgetConsent(ctx, grant.id);
+          } else if (!(error instanceof AppError && error.code === "OCR_JOB_NOT_FOUND")) throw error;
         }
       }
       return composeDocumentView({ document, ocrJob, ocrConsent, scanMode });
@@ -473,14 +499,20 @@ const ROUTES = {
       const key = optionalIdempotencyKey(ctx.request);
       const body = await readJson(ctx.request, grantConsentRequestSchema);
       const { session, state } = ctx;
-      const docs = body.scope === "ocr_sarvam" ? [body.documentId as string] : body.scope === "question_gemini" ? [...new Set(body.documentIds as string[])].sort() : [];
+      const docs = consentDocuments(body);
       const existing = state.consents.find((c) => c.scope === body.scope && c.docs.length === docs.length && c.docs.every((d, i) => d === docs[i]));
       if (existing) return { status: 200, body: { consent: toConsentView(existing), reused: true } };
 
+      if (body.scope === "ocr_sarvam") {
+        await assertDocumentsInCase(ctx, docs);
+        // One document, one reading permission. A second, overlapping one would outlive the withdrawal of the first and
+        // let reading start again for a document the person had just taken back.
+        if (docs.some((documentId) => findConsent(state, "ocr_sarvam", documentId))) throw appError(409, "CONSENT_ALREADY_HELD", { fields: ["documentIds"] });
+      }
       assertRoomForConsent(ctx, docs);
       let caseId: string | null = null;
       if (body.scope === "collect") caseId = (await ensureCase(ctx, "planned_care")).caseId;
-      const grant = buildConsentGrant(body.scope, { adultId: session.adultId, householdId: session.householdId, caseId, documentId: body.documentId, documentIds: docs });
+      const grant = buildConsentGrant(body.scope, { adultId: session.adultId, householdId: session.householdId, caseId, documentIds: docs });
       const created = await ctx.backend.grantConsent(session.token, grant, key);
       const consent: StateConsent = { id: created.id, scope: body.scope, docs, at: new Date(ctx.nowMs).toISOString() };
       addConsent(ctx, consent);
@@ -491,7 +523,7 @@ const ROUTES = {
     auth: true,
     async run(ctx) {
       const body = await readJson(ctx.request, revokeConsentRequestSchema);
-      const docs = body.scope === "ocr_sarvam" ? [body.documentId as string] : body.scope === "question_gemini" ? [...new Set(body.documentIds as string[])].sort() : [];
+      const docs = consentDocuments(body);
       const matches = ctx.state.consents.filter((c) => c.scope === body.scope && c.docs.length === docs.length && c.docs.every((d, i) => d === docs[i]));
       if (matches.length === 0) throw appError(404, "CONSENT_NOT_FOUND");
       let revoked = 0;
@@ -568,8 +600,10 @@ const ROUTES = {
           ocrJob = await ctx.backend.refreshOcr(ctx.session.token, jobId, { consentGrantId: grant.id });
         } catch (error) {
           // Only "the job or the permission is gone" changes what we report. Anything else is a real failure to surface.
-          if (error instanceof AppError && CONSENT_LOST_CODES.has(error.code)) ocrConsent = false;
-          else if (!(error instanceof AppError && error.code === "OCR_JOB_NOT_FOUND")) throw error;
+          if (error instanceof AppError && CONSENT_LOST_CODES.has(error.code)) {
+            ocrConsent = false;
+            if (GRANT_GONE_CODES.has(error.code)) forgetConsent(ctx, grant.id);
+          } else if (!(error instanceof AppError && error.code === "OCR_JOB_NOT_FOUND")) throw error;
         }
       }
       const scanMode = needsScanMode([document]) ? await readScanMode(ctx) : null;
@@ -614,7 +648,13 @@ const ROUTES = {
         const probe: AppState = { ...ctx.state, ocrJobs: { ...ctx.state.ocrJobs, [documentId]: "x".repeat(96) } };
         stateCookie(probe, ctx.session, ctx.config.sessionSecret, ctx.config.production, ctx.nowMs);
       }
-      const job = await ctx.backend.startOcr(ctx.session.token, documentId, { consentGrantId: grant.id });
+      let job;
+      try {
+        job = await ctx.backend.startOcr(ctx.session.token, documentId, { consentGrantId: grant.id });
+      } catch (error) {
+        if (error instanceof AppError && GRANT_GONE_CODES.has(error.code)) forgetConsent(ctx, grant.id);
+        throw error;
+      }
       if (jobIdFor(ctx.state, documentId) !== job.id) {
         ctx.state.ocrJobs[documentId] = job.id;
         ctx.markState();

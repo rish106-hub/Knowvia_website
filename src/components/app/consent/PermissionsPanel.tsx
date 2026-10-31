@@ -133,7 +133,7 @@ export function PermissionsPanel({ standalone = false }: { standalone?: boolean 
             <p className="kva-p">
               <strong>{target.label}</strong>
             </p>
-            {permissionRevokeExplanation(target.kind).map((line) => (
+            {permissionRevokeExplanation(target.kind, target.documentIds.length).map((line) => (
               <p className="kva-p" key={line}>
                 {line}
               </p>

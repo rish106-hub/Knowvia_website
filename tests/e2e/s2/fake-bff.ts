@@ -37,7 +37,7 @@ export function makeDoc(over: Partial<DocumentView> = {}): DocumentView {
 }
 
 const NEXT: Record<DocumentStage, NextAction> = {
-  received: "wait", awaiting_checks: "wait", awaiting_ocr_consent: "grant_ocr_consent", processing: "wait", readable: "none",
+  received: "grant_ocr_consent", awaiting_checks: "grant_ocr_consent", awaiting_ocr_consent: "grant_ocr_consent", processing: "wait", readable: "none",
   unreadable: "retry_ocr", rejected: "none", deleting: "wait", deleted: "none",
 };
 export function docAt(stage: DocumentStage, over: Partial<DocumentView> = {}): DocumentView {
@@ -204,8 +204,11 @@ export class FakeBff {
     const consent: ConsentView = existing ?? { scope: body.scope, grantId: `grant-${body.scope}-${this.seq}`, documentIds, grantedAt: "2026-10-20T10:31:00.000Z", noticeStatus: "draft_needs_legal_review" };
     if (!existing) this.consents = [...this.consents, consent];
     if (body.scope === "collect") this.caseId ??= "case-1";
-    if (body.scope === "ocr_sarvam" && body.documentId) {
-      this.documents = this.documents.map((doc) => (doc.id === body.documentId && doc.stage === "awaiting_ocr_consent" ? { ...doc, nextAction: "start_ocr" } : doc));
+    if (body.scope === "ocr_sarvam") {
+      // Mirrors the BFF: documents named by the permission stop asking for it. Accepted ones are ready to start; the rest wait for their checks.
+      this.documents = this.documents.map((doc) =>
+        documentIds.includes(doc.id) && doc.nextAction === "grant_ocr_consent" ? { ...doc, nextAction: doc.stage === "awaiting_ocr_consent" ? "start_ocr" : "wait" } : doc,
+      );
     }
     return this.json(route, existing ? 200 : 201, { consent, reused: Boolean(existing) });
   }

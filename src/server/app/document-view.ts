@@ -47,7 +47,9 @@ export function composeDocumentView(input: ComposeInput): DocumentView {
       // Quarantine, scanning, scan-disabled and scan-failed are all this one status. The backend cannot tell
       // them apart, so we never promise progress.
       stage = input.justUploaded ? "received" : "awaiting_checks";
-      nextAction = "wait";
+      // The reading permission is asked once, for the whole batch, as soon as documents exist. Until it is held the
+      // action is to grant it; the stage does not change (the document is still waiting for its checks).
+      nextAction = ocrConsent ? "wait" : "grant_ocr_consent";
       note = "scan_state_not_visible";
       // A later read of a document that is still waiting, with scanning reported as switched off: it will not progress.
       if (!input.justUploaded && input.scanMode === "disabled") note = "scan_disabled";

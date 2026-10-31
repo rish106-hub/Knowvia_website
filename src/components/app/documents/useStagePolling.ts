@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AppApiError, appFetch } from "@/lib/app-client";
 import type { DocumentView } from "@/lib/app-contract";
 import { decidePoll } from "./polling";
-import { documentActions } from "./stage";
+import { createSerialQueue, planAutoStart } from "./auto-start";
+import { documentActions, documentsReadyToStartReading } from "./stage";
 
 export type StalledReason = "cap" | "failures";
 
@@ -14,8 +15,15 @@ type Options = {
   onError: (error: unknown) => boolean;
 };
 
+/** What a watched document is polled for. `checks` = reading is allowed and the document is still in its security checks. */
+function pollKind(doc: DocumentView): "ocr_refresh" | "read" | "checks" | null {
+  const actions = documentActions(doc);
+  return actions.polls ?? (actions.waitsForChecks ? "checks" : null);
+}
+
 /**
- * Keeps documents that are being read (POST /documents/{id}/ocr/refresh) or deleted (GET /documents/{id}) current.
+ * Keeps documents that are being read (POST /documents/{id}/ocr/refresh), deleted (GET /documents/{id}) or waiting for
+ * their security checks after reading was allowed (GET /documents/{id}) current.
  * Backoff 3 s -> 20 s, paused while the tab is hidden, stops when the stage settles, capped at 40 polls, and gives up
  * after 3 failures in a row. A stalled document is reported so the row can offer "Check again".
  */
@@ -30,8 +38,8 @@ export function useStagePolling(documents: DocumentView[], { onDocument, onError
   });
 
   const watchKey = documents
-    .filter((doc) => documentActions(doc).polls)
-    .map((doc) => `${doc.id}\t${doc.stage}\t${documentActions(doc).polls}`)
+    .filter((doc) => pollKind(doc))
+    .map((doc) => `${doc.id}\t${doc.stage}\t${pollKind(doc)}`)
     .sort()
     .join("|");
 
@@ -42,7 +50,7 @@ export function useStagePolling(documents: DocumentView[], { onDocument, onError
     for (const entry of watchKey.split("|")) {
       const [id, stage, polls] = entry.split("\t");
       if (stalledRef.current[id]) continue;
-      const watching = stage as "processing" | "deleting";
+      const watching = polls === "checks" ? "checks" : (stage as "processing" | "deleting");
       let attempt = 0;
       let failures = 0;
       let cancelled = false;
@@ -117,4 +125,50 @@ export function useStagePolling(documents: DocumentView[], { onDocument, onError
   }, []);
 
   return { stalled, restart };
+}
+
+type AutoStartOptions = {
+  onDocument: (doc: DocumentView) => void;
+  /** Returns true when the error was a session error (the app signs out and redirects). */
+  onError: (error: unknown) => boolean;
+};
+
+/**
+ * Starts reading by itself for a document that has just been accepted while the reading permission is held and no job
+ * exists (POST /documents/{id}/ocr). One request at a time: the BFF keeps its job list in a cookie that each response
+ * rewrites, so two requests in flight would lose one job. Each document is tried once; if the start fails the row keeps
+ * its "Start reading" button and the id is returned in `failed`. Nothing starts without the permission: the BFF refuses
+ * with CONSENT_REQUIRED and the backend re-checks the exact permission for that document.
+ */
+export function useAutoStartReading(documents: DocumentView[], { onDocument, onError }: AutoStartOptions) {
+  const [failed, setFailed] = useState<string[]>([]);
+  const tried = useRef(new Set<string>());
+  const enqueue = useRef(createSerialQueue());
+  const callbacks = useRef({ onDocument, onError });
+  useEffect(() => {
+    callbacks.current = { onDocument, onError };
+  });
+
+  const readyKey = documentsReadyToStartReading(documents)
+    .map((doc) => doc.id)
+    .sort()
+    .join("|");
+
+  useEffect(() => {
+    const plan = planAutoStart(readyKey ? readyKey.split("|") : [], tried.current);
+    tried.current = plan.tried;
+    for (const id of plan.start) {
+      void enqueue.current(async () => {
+        try {
+          const body = await appFetch<{ document: DocumentView }>(`/documents/${id}/ocr`, { method: "POST" });
+          callbacks.current.onDocument(body.document);
+        } catch (error) {
+          if (callbacks.current.onError(error)) return;
+          setFailed((current) => (current.includes(id) ? current : [...current, id]));
+        }
+      });
+    }
+  }, [readyKey]);
+
+  return { failed };
 }

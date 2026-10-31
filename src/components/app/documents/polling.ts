@@ -20,8 +20,11 @@ export type PollInput = {
   consecutiveFailures: number;
   /** Stage of the document after the last poll, or the stage being polled for. */
   stage: string;
-  /** Stage this loop exists for (processing or deleting). The loop ends once the document leaves it. */
-  watching: "processing" | "deleting";
+  /**
+   * Stage this loop exists for. The loop ends once the document leaves it. `checks` covers the two stages a document
+   * has while its security checks run (received, awaiting_checks): it ends when the document is accepted or rejected.
+   */
+  watching: "processing" | "deleting" | "checks";
   hidden: boolean;
 };
 
@@ -31,7 +34,8 @@ export type PollDecision =
   | { action: "stop"; reason: "settled" | "cap" | "failures" };
 
 export function decidePoll(input: PollInput): PollDecision {
-  if (input.stage !== input.watching) return { action: "stop", reason: "settled" };
+  const stillWatched = input.watching === "checks" ? input.stage === "received" || input.stage === "awaiting_checks" : input.stage === input.watching;
+  if (!stillWatched) return { action: "stop", reason: "settled" };
   if (input.consecutiveFailures >= POLL_MAX_CONSECUTIVE_FAILURES) return { action: "stop", reason: "failures" };
   if (input.attempt >= POLL_MAX_ATTEMPTS) return { action: "stop", reason: "cap" };
   if (input.hidden) return { action: "wait_visible" };

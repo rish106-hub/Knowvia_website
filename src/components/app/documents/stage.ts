@@ -85,6 +85,39 @@ export function documentKindLabel(kind: string): string {
   return KIND_LABELS[kind as DocumentKind] ?? "Document";
 }
 
+/** Most documents one reading permission may name. Matches the BFF limit (consent-scopes.ts MAX_READING_DOCUMENTS). */
+export const MAX_READING_DOCUMENTS = 10;
+
+/**
+ * The documents the next reading permission would cover: the ones still waiting for it, oldest first, at most 10.
+ * Nothing is offered when the storage permission was withdrawn (the list then comes from the deletion inventory), and a
+ * document whose checks are switched off is left out because it will not be read.
+ */
+export function documentsAwaitingReadingPermission(documents: DocumentView[], access: "full" | "permission_withdrawn" | undefined): DocumentView[] {
+  if (access === "permission_withdrawn") return [];
+  return documents
+    .filter(
+      (doc) =>
+        doc.nextAction === "grant_ocr_consent" &&
+        (doc.stage === "received" || doc.stage === "awaiting_checks" || doc.stage === "awaiting_ocr_consent") &&
+        !(doc.stage !== "awaiting_ocr_consent" && doc.note === "scan_disabled"),
+    )
+    .sort((a, b) => (a.uploadedAt ?? "").localeCompare(b.uploadedAt ?? "") || a.id.localeCompare(b.id))
+    .slice(0, MAX_READING_DOCUMENTS);
+}
+
+/** DRAFT, needs legal review. The one sentence that says what the batch reading permission does. */
+export function readingSheetLead(count: number): string {
+  return count === 1
+    ? "Read this document with a text-reading service so CoverSaath can show you what it says."
+    : `Read these ${count} documents with a text-reading service so CoverSaath can show you what they say.`;
+}
+
+/** The documents whose reading can start now: accepted, permission held, no job yet. */
+export function documentsReadyToStartReading(documents: DocumentView[]): DocumentView[] {
+  return documents.filter((doc) => doc.backendStatus === "accepted" && doc.stage === "awaiting_ocr_consent" && doc.nextAction === "start_ocr");
+}
+
 export type DocumentActions = {
   /** The one main action the row offers, from nextAction. */
   primary: "grant_ocr_consent" | "start_ocr" | "retry_ocr" | null;
@@ -93,14 +126,23 @@ export type DocumentActions = {
   canRecheck: boolean;
   /** Which background refresh keeps the row current. */
   polls: "ocr_refresh" | "read" | null;
+  /**
+   * Reading permission is held and the document is still in its security checks: re-read it until it is accepted, so
+   * reading can start by itself. False when checks are switched off (it would never move).
+   */
+  waitsForChecks: boolean;
 };
 
-export function documentActions(doc: Pick<DocumentView, "stage" | "nextAction">): DocumentActions {
+export function documentActions(doc: Pick<DocumentView, "stage" | "nextAction"> & { note?: DocumentView["note"] }): DocumentActions {
+  const checking = doc.stage === "received" || doc.stage === "awaiting_checks";
   const primary =
     doc.nextAction === "grant_ocr_consent" || doc.nextAction === "start_ocr" || doc.nextAction === "retry_ocr" ? doc.nextAction : null;
   const gone = doc.stage === "deleting" || doc.stage === "deleted";
+  // A document whose checks are switched off will never be read, so asking to allow reading it would promise nothing.
+  const pointless = checking && doc.note === "scan_disabled" && primary === "grant_ocr_consent";
   return {
-    primary: gone ? null : primary,
+    primary: gone || pointless ? null : primary,
+    waitsForChecks: checking && doc.nextAction === "wait" && doc.note !== "scan_disabled",
     canDelete: !gone,
     canRecheck: doc.stage === "received" || doc.stage === "awaiting_checks",
     polls: doc.stage === "processing" ? "ocr_refresh" : doc.stage === "deleting" ? "read" : null,

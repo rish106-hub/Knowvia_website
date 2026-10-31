@@ -54,6 +54,10 @@ export function createFakeBackend() {
     cases: [] as Array<{ id: string; status: string; createdAt: string }>,
     /** documentScan.mode in the integrations report. */
     scanMode: "clamd" as string,
+    /** Put in front of every document id, to test with ids as long as real ones. */
+    idPrefix: "",
+    /** Put in front of every OCR job id, for the same reason. */
+    jobIdPrefix: "",
   };
 
   const fetch: FetchLike = async (url, init) => {
@@ -135,7 +139,7 @@ export function createFakeBackend() {
       const key = headers["idempotency-key"];
       const existing = idempotency.get(key);
       if (existing) return json(200, { document: documents.get(existing), idempotentReplay: true });
-      const id = `doc-${++seq}`;
+      const id = `${control.idPrefix}doc-${++seq}`;
       const record: DocRecord = { id, caseId: "case-1", documentKind: headers["x-document-kind"], byteSize: bytes ?? 0, status: "received_pending_checks", uploadedAt: "2026-10-21T00:00:00.000Z" };
       documents.set(id, record);
       idempotency.set(key, id);
@@ -163,7 +167,7 @@ export function createFakeBackend() {
     }
     const ocrStart = path.match(/^\/api\/v1\/documents\/([^/]+)\/ocr-jobs$/);
     if (method === "POST" && ocrStart) {
-      const job = { id: `ocr-${++seq}`, documentId: ocrStart[1], status: "processing", errorCode: null, pageCount: null };
+      const job = { id: `${control.jobIdPrefix}ocr-${++seq}`, documentId: ocrStart[1], status: "processing", errorCode: null, pageCount: null };
       jobs.set(job.id, job);
       return json(202, { job });
     }
