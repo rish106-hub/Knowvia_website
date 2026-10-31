@@ -1,7 +1,7 @@
 "use client";
 
 import { FilePdf, UploadSimple, WarningCircle, X } from "@phosphor-icons/react";
-import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { appFetch, newIdempotencyKey } from "@/lib/app-client";
 import type { ConsentView, DocumentKind, DocumentView, Overview } from "@/lib/app-contract";
 import { ConsentNoticeCard } from "../consent/ConsentNoticeCard";
@@ -13,6 +13,30 @@ import { Button, Notice } from "../ui";
 import { formatBytes } from "./format";
 import { precheckPdf } from "./precheck";
 import { KIND_CHOICES } from "./stage";
+
+type ProductFlowReadiness = {
+  documentIntake: {
+    ready: boolean;
+    missing: string[];
+  };
+  policyProcessing: {
+    readingReady: boolean;
+    questionsReady: boolean;
+    missing: string[];
+  };
+  productFlow: {
+    ready: boolean;
+    missing: string[];
+  };
+};
+
+const READINESS_LABELS: Record<string, string> = {
+  encryptedDocumentStorage: "Encrypted document storage",
+  malwareScanning: "Malware scanning",
+  ocrProvider: "PDF text reading",
+  policyEvidence: "Policy evidence analysis",
+  liveAi: "AI model configuration",
+};
 
 type Phase =
   | { name: "idle" }
@@ -38,6 +62,48 @@ export function UploadPanel({ overview, onAdded }: { overview: Overview; onAdded
   const [fileError, setFileError] = useState<{ name: string; message: string } | null>(null);
   const [phase, setPhase] = useState<Phase>({ name: "idle" });
   const [dragging, setDragging] = useState(false);
+  const [productFlow, setProductFlow] = useState<ProductFlowReadiness | null>(null);
+  const [readinessError, setReadinessError] = useState(false);
+  const [readinessLoading, setReadinessLoading] = useState(true);
+  const [readinessRetry, setReadinessRetry] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    appFetch<ProductFlowReadiness>("/integrations")
+      .then((status) => {
+        if (
+          !status?.documentIntake ||
+          typeof status.documentIntake.ready !== "boolean" ||
+          !Array.isArray(status.documentIntake.missing) ||
+          !status?.policyProcessing ||
+          typeof status.policyProcessing.readingReady !== "boolean" ||
+          typeof status.policyProcessing.questionsReady !== "boolean" ||
+          !Array.isArray(status.policyProcessing.missing)
+        ) {
+          throw new Error("The backend did not return a valid document-processing readiness response.");
+        }
+        if (active) setProductFlow(status);
+      })
+      .catch((caught) => {
+        if (!active) return;
+        if (!handleError(caught)) setReadinessError(true);
+      })
+      .finally(() => {
+        if (active) setReadinessLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [handleError, readinessRetry]);
+
+  const intakeReady = productFlow?.documentIntake.ready === true;
+  const missingIntake = (productFlow?.documentIntake.missing ?? []).map((key) => READINESS_LABELS[key] ?? key);
+  const missingProcessing = (productFlow?.policyProcessing.missing ?? []).map((key) => READINESS_LABELS[key] ?? key);
+  function retryReadiness() {
+    setReadinessLoading(true);
+    setReadinessError(false);
+    setReadinessRetry((value) => value + 1);
+  }
   // One Idempotency-Key per (file, kind). Retrying the same upload reuses it so the backend can replay, not duplicate.
   const keyRef = useRef<string | null>(null);
   const running = useRef(false);
@@ -163,6 +229,36 @@ export function UploadPanel({ overview, onAdded }: { overview: Overview; onAdded
         Add a PDF
       </h2>
 
+      {readinessLoading ? (
+        <p className="kva-p kva-small kva-muted" role="status">Checking whether secure document reading is available.</p>
+      ) : null}
+      {readinessError ? (
+        <Notice
+          tone="warning"
+          title="We could not check document processing"
+          actions={<Button size="sm" variant="secondary" onClick={retryReadiness}>Check again</Button>}
+        >
+          Upload is paused until Knowvia can confirm that the document-to-reading flow is available.
+        </Notice>
+      ) : null}
+      {!readinessLoading && !readinessError && productFlow && !intakeReady ? (
+        <Notice tone="warning" title="Secure document intake is not ready">
+          <p className="kva-p">Your PDF cannot be stored safely yet. Upload is paused until these services are available:</p>
+          <ul className="kva-list">
+            {missingIntake.map((item) => <li className="kva-item" key={item}>{item}</li>)}
+          </ul>
+        </Notice>
+      ) : null}
+      {!readinessLoading && !readinessError && productFlow && intakeReady && !productFlow.policyProcessing.questionsReady ? (
+        <Notice tone="info" title="Some reading features are not ready yet">
+          <p className="kva-p">You can securely add your PDF. Reading and question features will become available when these services are configured:</p>
+          <ul className="kva-list">
+            {missingProcessing.map((item) => <li className="kva-item" key={item}>{item}</li>)}
+          </ul>
+          <p className="kva-p kva-small">Your document remains under your control. This does not depend on the external FSS catalogue.</p>
+        </Notice>
+      ) : null}
+
       <fieldset className={`kva-choices${kindError ? " kva-choices--error" : ""}`} ref={kindRef} aria-describedby={kindError ? "kva-kind-error" : undefined}>
         <legend>What kind of document is it?</legend>
         {KIND_CHOICES.map((choice) => (
@@ -266,7 +362,7 @@ export function UploadPanel({ overview, onAdded }: { overview: Overview; onAdded
         </Notice>
       ) : null}
 
-      <Button block busy={working} disabled={waitingForWording} onClick={() => void submit()}>
+      <Button block busy={working} disabled={waitingForWording || readinessLoading || readinessError || !intakeReady} onClick={() => void submit()}>
         {addLabel}
       </Button>
     </section>
