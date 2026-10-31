@@ -60,10 +60,11 @@ export function UploadPanel({ overview, onAdded }: { overview: Overview; onAdded
 
   useEffect(() => {
     let active = true;
-    setReadinessLoading(true);
-    setReadinessError(false);
     appFetch<ProductFlowReadiness>("/integrations")
       .then((status) => {
+        if (!status?.productFlow || typeof status.productFlow.ready !== "boolean" || !Array.isArray(status.productFlow.missing)) {
+          throw new Error("The backend did not return a valid product-flow readiness response.");
+        }
         if (active) setProductFlow(status);
       })
       .catch((caught) => {
@@ -80,6 +81,11 @@ export function UploadPanel({ overview, onAdded }: { overview: Overview; onAdded
 
   const productFlowReady = productFlow?.productFlow.ready === true;
   const missingReadiness = (productFlow?.productFlow.missing ?? []).map((key) => READINESS_LABELS[key] ?? key);
+  function retryReadiness() {
+    setReadinessLoading(true);
+    setReadinessError(false);
+    setReadinessRetry((value) => value + 1);
+  }
   // One Idempotency-Key per (file, kind). Retrying the same upload reuses it so the backend can replay, not duplicate.
   const keyRef = useRef<string | null>(null);
   const running = useRef(false);
@@ -212,7 +218,7 @@ export function UploadPanel({ overview, onAdded }: { overview: Overview; onAdded
         <Notice
           tone="warning"
           title="We could not check document processing"
-          actions={<Button size="sm" variant="secondary" onClick={() => setReadinessRetry((value) => value + 1)}>Check again</Button>}
+          actions={<Button size="sm" variant="secondary" onClick={retryReadiness}>Check again</Button>}
         >
           Upload is paused until Knowvia can confirm that the document-to-reading flow is available.
         </Notice>
