@@ -11,6 +11,8 @@ export type SessionData = {
   householdId: string;
   adultId: string;
   memberId: string;
+  /** How the person signed in. Absent on cookies from before V1b (read as "dev"). */
+  provider?: "dev" | "google";
 };
 
 const sessionSchema = z.object({
@@ -19,6 +21,7 @@ const sessionSchema = z.object({
   householdId: z.string().min(1).max(128),
   adultId: z.string().min(1).max(128),
   memberId: z.string().min(1).max(128),
+  provider: z.enum(["dev", "google"]).optional(),
 });
 
 export const CONSENT_SCOPES = ["collect", "ocr_sarvam", "question_gemini"] as const;
@@ -61,12 +64,12 @@ export const emptyState = (householdId: string): AppState => ({
   ocrJobs: {},
 });
 
-export type CookieNames = { session: string; state: string };
+export type CookieNames = { session: string; state: string; oidc: string };
 // __Host- requires Secure, so it is used only when the Secure flag is set (production).
 export const cookieNames = (production: boolean): CookieNames =>
   production
-    ? { session: "__Host-kv_session", state: "__Host-kv_state" }
-    : { session: "kv_session", state: "kv_state" };
+    ? { session: "__Host-kv_session", state: "__Host-kv_state", oidc: "__Host-kv_oidc" }
+    : { session: "kv_session", state: "kv_state", oidc: "kv_oidc" };
 
 export function parseCookieHeader(header: string | null): Map<string, string> {
   const jar = new Map<string, string>();
@@ -149,4 +152,41 @@ export function stateCookie(
   const value = sealCookie("state", state, secret, expiresMs);
   if (Buffer.byteLength(value) > MAX_COOKIE_VALUE_BYTES) throw appError(409, "STATE_LIMIT_REACHED");
   return serializeCookie(cookieNames(production).state, value, { production, maxAgeSeconds: (expiresMs - nowMs) / 1000 });
+}
+
+// ---- sign-in redirect flow (V1b) ----
+// kv_oidc carries the one-time secrets of a Google sign-in across the redirect: the state (CSRF control), the nonce (binds
+// the ID token to this browser) and the PKCE verifier. It holds no token and no identity. It is sealed, httpOnly,
+// SameSite=Lax (the callback is a top-level cross-site GET, which Lax allows) and lives ten minutes.
+
+export const OIDC_COOKIE_MAX_AGE_SECONDS = 600;
+export const OIDC_MODES = ["E", "P", "A"] as const;
+export type OidcMode = (typeof OIDC_MODES)[number];
+/** The entry mode: E care needed now, P care coming up, A asked by someone. Anything else is P. */
+export const parseOidcMode = (value: string | null | undefined): OidcMode => ((OIDC_MODES as readonly string[]).includes(value ?? "") ? (value as OidcMode) : "P");
+
+export type OidcFlow = { state: string; nonce: string; verifier: string; mode: OidcMode };
+
+const oidcFlowSchema = z.object({
+  state: z.string().regex(/^[A-Za-z0-9_-]{32,128}$/),
+  nonce: z.string().regex(/^[A-Za-z0-9_-]{32,128}$/),
+  verifier: z.string().regex(/^[A-Za-z0-9_-]{43,128}$/),
+  mode: z.enum(OIDC_MODES),
+});
+
+export function oidcCookie(flow: OidcFlow, secret: string, production: boolean, nowMs: number): string {
+  return serializeCookie(cookieNames(production).oidc, sealCookie("oidc", flow, secret, nowMs + OIDC_COOKIE_MAX_AGE_SECONDS * 1000), {
+    production,
+    maxAgeSeconds: OIDC_COOKIE_MAX_AGE_SECONDS,
+  });
+}
+
+/** The sign-in flow from the request cookies, or null when it is missing, tampered with, expired or malformed. */
+export function loadOidcFlow(cookieHeader: string | null, { secret, production, nowMs }: { secret: string; production: boolean; nowMs: number }): OidcFlow | null {
+  const raw = parseCookieHeader(cookieHeader).get(cookieNames(production).oidc);
+  if (!raw) return null;
+  const opened = openCookie<unknown>("oidc", raw, secret, nowMs);
+  if (!opened.ok) return null;
+  const parsed = oidcFlowSchema.safeParse(opened.value);
+  return parsed.success ? parsed.data : null;
 }

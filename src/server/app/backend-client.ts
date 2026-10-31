@@ -8,6 +8,8 @@ export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>
 export type BackendClientOptions = {
   baseUrl: string;
   bootstrapToken: string;
+  /** The backend's identity credential (KNOWVIA_IDENTITY_TOKEN). Only set when Google sign-in is configured. */
+  identityToken?: string;
   fetch?: FetchLike;
   timeoutMs?: number;
   uploadTimeoutMs?: number;
@@ -28,6 +30,17 @@ const createHouseholdResponse = z.object({
   ownerMember: z.object({ id: z.string() }).loose(),
   session: backendSession,
 });
+
+// POST /api/v1/identity-sessions (ADR 0012 D3, run V1a): 201 for a new identity, 200 with returning: true for a known one.
+const identitySessionResponse = z.object({
+  returning: z.boolean(),
+  household: z.object({ id: z.string() }).loose(),
+  adultId: z.string(),
+  memberId: z.string(),
+  session: backendSession,
+});
+export type BackendIdentitySession = BackendHouseholdSession & { returning: boolean };
+
 export type BackendHouseholdSession = {
   householdId: string;
   adultId: string;
@@ -149,7 +162,7 @@ const MAX_BACKEND_BODY_BYTES = 2 * 1024 * 1024;
 class BodyTooLargeError extends Error {}
 
 /** Reads a response body with a running byte cap, so an oversized or endless upstream body is never buffered whole. */
-async function readBoundedBody(response: Response, maxBytes: number): Promise<string> {
+export async function readBoundedBody(response: Response, maxBytes: number): Promise<string> {
   if (Number(response.headers.get("content-length") ?? "0") > maxBytes) {
     await response.body?.cancel().catch(() => undefined);
     throw new BodyTooLargeError();
@@ -186,6 +199,8 @@ export function createBackendClient(options: BackendClientOptions) {
     path: string;
     token?: string;
     bootstrap?: boolean;
+    /** Uses the identity credential. Like the bootstrap call, a 401 here is our configuration, never the visitor's mistake. */
+    identity?: boolean;
     json?: unknown;
     headers?: Record<string, string>;
     raw?: { body: Uint8Array; headers: Record<string, string> };
@@ -199,6 +214,7 @@ export function createBackendClient(options: BackendClientOptions) {
     const timer = setTimeout(() => controller.abort(), req.timeoutMs ?? timeoutMs);
     const headers: Record<string, string> = { accept: "application/json", ...req.headers };
     if (req.bootstrap) Object.assign(headers, bearer(options.bootstrapToken));
+    else if (req.identity) Object.assign(headers, bearer(options.identityToken ?? ""));
     else if (req.token) Object.assign(headers, bearer(req.token));
     let body: BodyInit | undefined;
     if (req.raw) {
@@ -233,7 +249,7 @@ export function createBackendClient(options: BackendClientOptions) {
   }
 
   async function send(req: RequestOptions): Promise<unknown> {
-    const authenticated = !req.bootstrap;
+    const authenticated = !req.bootstrap && !req.identity;
     const attempts = req.retryOnTransient ? 2 : 1;
     for (let index = 0; ; index += 1) {
       let failure: AppError;
@@ -278,6 +294,29 @@ export function createBackendClient(options: BackendClientOptions) {
         householdId: body.household.id,
         adultId: body.owner.id,
         memberId: body.ownerMember.id,
+        session: { token: body.session.token, sessionId: body.session.sessionId, expiresAt: body.session.expiresAt },
+      };
+    },
+    /**
+     * Maps a verified (issuer, subject) to an adult and returns a session. Only the pair is sent, never a token. Not retried:
+     * a repeat after an ambiguous failure would issue a second session.
+     */
+    async identitySession(input: { issuer: string; subject: string; displayName: string; contactEmail: string | null }): Promise<BackendIdentitySession> {
+      if (!options.identityToken) throw new AppError({ status: 502, code: "BACKEND_AUTH_FAILED", retryable: false });
+      const body = parse(
+        identitySessionResponse,
+        await send({
+          method: "POST",
+          path: "/api/v1/identity-sessions",
+          identity: true,
+          json: { issuer: input.issuer, subject: input.subject, displayName: input.displayName, ...(input.contactEmail ? { contactEmail: input.contactEmail } : {}) },
+        }),
+      );
+      return {
+        returning: body.returning,
+        householdId: body.household.id,
+        adultId: body.adultId,
+        memberId: body.memberId,
         session: { token: body.session.token, sessionId: body.session.sessionId, expiresAt: body.session.expiresAt },
       };
     },

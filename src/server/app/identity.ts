@@ -1,7 +1,7 @@
-// Identity seam. PROVISIONAL: decision D1 (identity) is OPEN. Only a DEVELOPMENT provider is implemented.
-// Real OTP / magic link / OIDC providers are typed stubs that answer 501 IDENTITY_NOT_IMPLEMENTED.
+// Identity seam. PROVISIONAL: decision D1 (identity) is OPEN. A DEVELOPMENT provider and, when configured (V1b), Google
+// OIDC are implemented. Real OTP / magic link / Microsoft / Apple / phone providers are typed stubs that answer 501.
 // OTP proves factor control only, never employer entitlement or insured status.
-import type { BackendClient, BackendHouseholdSession } from "./backend-client";
+import type { BackendClient, BackendHouseholdSession, BackendIdentitySession } from "./backend-client";
 import type { IdentityProviderKind } from "./contract";
 import { appError } from "./errors";
 
@@ -47,18 +47,45 @@ function notImplemented(kind: IdentityProviderKind): IdentityProvider {
 export const otpIdentityProvider = notImplemented("otp");
 export const magicLinkIdentityProvider = notImplemented("magic_link");
 export const oidcIdentityProvider = notImplemented("oidc");
-// Typed stubs. Google is replaced by a real provider later (run V1b); the others stay stubs.
-export const googleIdentityProvider = notImplemented("google");
+// Google is real only when configured (see signInWithVerifiedGoogleIdentity). Unconfigured, it stays a 501 stub.
+export const googleUnconfiguredProvider = notImplemented("google");
+/**
+ * Configured Google. A POST /session can never sign anyone in with it: a Google identity exists only after the redirect flow
+ * has verified an ID token, so a posted email is refused rather than trusted.
+ */
+export const googleRedirectOnlyProvider: IdentityProvider = {
+  kind: "google",
+  implemented: true,
+  async signIn() {
+    throw appError(400, "INVALID_REQUEST", { fields: ["provider"] });
+  },
+};
 export const microsoftIdentityProvider = notImplemented("microsoft");
 export const appleIdentityProvider = notImplemented("apple");
 export const phoneOtpIdentityProvider = notImplemented("phone_otp");
 
-export function resolveIdentityProvider(kind: IdentityProviderKind, { devIdentity }: { devIdentity: boolean }): IdentityProvider {
+const SAFE_DISPLAY_NAME = /[^\p{L}\p{N} .'-]/gu;
+const PLAIN_EMAIL = /^[^\s@]{1,64}@[^\s@]{1,255}$/;
+
+/** What the backend is told about a verified Google sign-in. The pair (issuer, subject) is the identity; nothing else keys it. */
+export type VerifiedIdentityClaims = { issuer: string; subject: string; name: string | null; email: string | null };
+
+/**
+ * Signs a verified Google identity in through the backend identity route. The display name is cleaned (the backend allows 1 to
+ * 80 characters); the e-mail, only when Google verified it, is stored as contact detail and is never used to find the adult.
+ */
+export function signInWithVerifiedGoogleIdentity(claims: VerifiedIdentityClaims, backend: Pick<BackendClient, "identitySession">): Promise<BackendIdentitySession> {
+  const cleaned = (claims.name ?? "").replace(SAFE_DISPLAY_NAME, "").replace(/\s+/g, " ").trim().slice(0, 80).trim();
+  const contactEmail = claims.email && PLAIN_EMAIL.test(claims.email) ? claims.email : null;
+  return backend.identitySession({ issuer: claims.issuer, subject: claims.subject, displayName: cleaned || "CoverSaath user", contactEmail });
+}
+
+export function resolveIdentityProvider(kind: IdentityProviderKind, { devIdentity, google = false }: { devIdentity: boolean; google?: boolean }): IdentityProvider {
   if (kind === "dev") return devIdentity ? devIdentityProvider : notImplemented("dev");
   if (kind === "otp") return otpIdentityProvider;
   if (kind === "magic_link") return magicLinkIdentityProvider;
   if (kind === "oidc") return oidcIdentityProvider;
-  if (kind === "google") return googleIdentityProvider;
+  if (kind === "google") return google ? googleRedirectOnlyProvider : googleUnconfiguredProvider;
   if (kind === "microsoft") return microsoftIdentityProvider;
   if (kind === "apple") return appleIdentityProvider;
   return phoneOtpIdentityProvider;

@@ -2,9 +2,9 @@
 // so it is testable without Next. The Next route files in src/app/api/app/** are thin wrappers (see runtime.ts).
 // PROVISIONAL: identity (D1) and topology (D2) are OPEN. Verified against a FAKE backend only.
 import { z } from "zod";
-import { createBackendClient, type BackendClient, type BackendConsentRecord, type FetchLike } from "./backend-client";
+import { createBackendClient, type BackendClient, type BackendConsentRecord, type BackendOcrJob, type FetchLike } from "./backend-client";
 import { findConnector, listConnectors } from "./connectors";
-import { buildConsentGrant, CONSENT_NOTICES, GEMINI_RECIPIENT, SARVAM_RECIPIENT } from "./consent-scopes";
+import { buildConsentGrant, CONSENT_NOTICES, GEMINI_RECIPIENT, MAX_READING_DOCUMENTS, SARVAM_RECIPIENT } from "./consent-scopes";
 import {
   askQuestionRequestSchema,
   catalogueReviewRequestSchema,
@@ -25,7 +25,9 @@ import { assertCsrf } from "./csrf";
 import { composeDocumentView } from "./document-view";
 import { AppConfigError, loadAppConfig, type AppConfig, type EnvSource } from "./env";
 import { AppError, appError, errorBody } from "./errors";
-import { resolveIdentityProvider } from "./identity";
+import { resolveIdentityProvider, signInWithVerifiedGoogleIdentity } from "./identity";
+import { createGoogleOidc, OidcError, safeEqual, type GoogleOidc } from "./oidc-google";
+import { randomBytes } from "node:crypto";
 import { clientKey, type RateLimiter } from "./rate-limit";
 import {
   clearCookie,
@@ -36,6 +38,9 @@ import {
   sessionCookie,
   stateCookie,
   emptyState,
+  loadOidcFlow,
+  oidcCookie,
+  parseOidcMode,
   type AppState,
   type ConsentScopeName,
   type SessionData,
@@ -55,14 +60,17 @@ function looseSessionToken(cookieHeader: string | null, config: { sessionSecret:
 export type AppDeps = {
   env: () => EnvSource;
   fetch: FetchLike;
+  /** Used only for calls to Google (discovery, keys, token exchange). Defaults to the global fetch. Tests inject a fake. */
+  oidcFetch?: FetchLike;
   now: () => number;
   rateLimiter: RateLimiter;
 };
 
-type InternalDeps = AppDeps & { uploadsInFlight: Map<string, number> };
+type InternalDeps = AppDeps & { uploadsInFlight: Map<string, number>; oidc: GoogleOidc };
 
 type EnabledConfig = Extract<AppConfig, { enabled: true }>;
-type Result = { status: number; body: unknown };
+/** `redirect` makes the pipeline answer 302 with no body. It must be an /app path or the discovered Google authorization URL. */
+type Result = { status: number; body?: unknown; redirect?: string };
 
 type Ctx = {
   request: Request;
@@ -77,6 +85,12 @@ type Ctx = {
   markState(): void;
   /** Set by session creation: replaces the session and starts a fresh state. */
   issued: SessionData | null;
+  /** Set with `issued` when a returning person's state could be rebuilt. The pipeline uses it instead of an empty state. */
+  issuedState: AppState | null;
+  /** Cookies a route sets itself (the sign-in flow cookie). Serialised with serializeCookie or clearCookie only. */
+  cookies: string[];
+  /** The one external URL (without its query) a redirect may point to: Google's discovered authorization endpoint. */
+  trustedRedirect: string | null;
 };
 
 /** `markerOnGet`: the route has a backend side effect on GET (an OCR refresh), so it needs X-Knowvia-App like a write. */
@@ -322,12 +336,46 @@ async function adoptOpenCase(ctx: Ctx): Promise<void> {
     if (error instanceof AppError && !error.clearSession) return;
     throw error;
   }
+  const caseId = newestOpenCaseId(cases);
+  if (!caseId) return;
+  ctx.state.caseId = caseId;
+  ctx.markState();
+}
+
+/** The newest case that is not closed or revoked, or null. */
+function newestOpenCaseId(cases: Array<{ id: string; status: string; createdAt?: string | null }>): string | null {
   const open = cases
     .filter((candidate) => candidate.status !== "closed" && candidate.status !== "revoked" && SAFE_ID.test(candidate.id))
     .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
-  if (open.length === 0) return;
-  ctx.state.caseId = open[0].id;
-  ctx.markState();
+  return open[0]?.id ?? null;
+}
+
+/**
+ * Starts (or fetches, the backend's createOrGetJob) the reading job for one document under the held reading permission, and
+ * remembers the job. Used by the ocr.start route and by the returning-person rebuild after sign-in.
+ */
+async function startOcrFor(ctx: Ctx, documentId: string): Promise<BackendOcrJob> {
+  const grant = findConsent(ctx.state, "ocr_sarvam", documentId);
+  if (!grant) throw appError(403, "CONSENT_REQUIRED");
+  // Room to remember the job is checked BEFORE the backend starts it, so a started job is never forgotten.
+  if (!jobIdFor(ctx.state, documentId)) {
+    if (Object.keys(ctx.state.ocrJobs).length >= MAX_STATE_ITEMS) throw appError(409, "STATE_LIMIT_REACHED");
+    // The sealed cookie has a byte cap too: prove a worst-case job entry fits before the backend starts the job.
+    const probe: AppState = { ...ctx.state, ocrJobs: { ...ctx.state.ocrJobs, [documentId]: "x".repeat(96) } };
+    stateCookie(probe, ctx.session, ctx.config.sessionSecret, ctx.config.production, ctx.nowMs);
+  }
+  let job;
+  try {
+    job = await ctx.backend.startOcr(ctx.session.token, documentId, { consentGrantId: grant.id });
+  } catch (error) {
+    if (error instanceof AppError && GRANT_GONE_CODES.has(error.code)) forgetConsent(ctx, grant.id);
+    throw error;
+  }
+  if (jobIdFor(ctx.state, documentId) !== job.id) {
+    ctx.state.ocrJobs[documentId] = job.id;
+    ctx.markState();
+  }
+  return job;
 }
 
 async function ensureCase(ctx: Ctx, triggerType: string): Promise<{ caseId: string; created: boolean }> {
@@ -351,10 +399,192 @@ const householdMatrix = z
   })
   .loose();
 
-const sessionView = (session: SessionData | null, provider: "dev" = "dev"): SessionView =>
+const sessionView = (session: SessionData | null): SessionView =>
   session
-    ? { authenticated: true, expiresAt: session.expiresAt, householdId: session.householdId, adultId: session.adultId, memberId: session.memberId, identity: { provider, provisional: true } }
+    ? { authenticated: true, expiresAt: session.expiresAt, householdId: session.householdId, adultId: session.adultId, memberId: session.memberId, identity: { provider: session.provider ?? "dev", provisional: true } }
     : { authenticated: false, expiresAt: null, householdId: null, adultId: null, memberId: null, identity: null };
+
+// ---------- Google sign-in (V1b) ----------
+
+const SIGN_IN_FAILED = "/app/sign-in?reason=failed";
+/** A failed sign-in says nothing about why: not to the person, not in the URL. */
+const signInFailed = (): Result => ({ status: 302, redirect: SIGN_IN_FAILED });
+const randomToken = () => randomBytes(32).toString("base64url");
+/** Longest authorization code accepted before any outbound call. Google's are far shorter. */
+const MAX_AUTH_CODE_CHARS = 2048;
+/** At most this many accepted documents are checked for a reading job after sign-in, so sign-in stays quick. */
+const MAX_OCR_RESUME_DOCUMENTS = 10;
+
+/** Class name or fixed reason code only. Never a message, which could carry a response fragment, and never a token. */
+function logSignInFailure(error: unknown) {
+  const label = error instanceof OidcError ? `oidc:${error.reason}` : error instanceof AppError ? `app:${error.code}` : error instanceof Error ? error.name : "unknown";
+  console.error("app-bff: google sign-in failed", label);
+}
+
+/**
+ * Turns the person's active backend permissions into the BFF's own record of them. A permission that cannot be described
+ * (no known recipient) is left out; the permissions screen still lists it from the backend.
+ */
+function consentsToState(records: BackendConsentRecord[]): StateConsent[] {
+  const consents: StateConsent[] = [];
+  // The backend lists newest first; the BFF looks for the newest grant at the end of its list.
+  for (const record of [...records].reverse()) {
+    if (record.status !== "active" || !SAFE_ID.test(record.id)) continue;
+    const kind = permissionKind(record);
+    const scope: ConsentScopeName | null = kind === "store_documents" ? "collect" : kind === "read_document" ? "ocr_sarvam" : kind === "answer_questions" ? "question_gemini" : null;
+    if (!scope) continue;
+    const docs = scope === "collect" ? [] : toPermissionView(record).documentIds.slice(0, MAX_READING_DOCUMENTS).sort();
+    consents.push({ id: record.id, scope, docs, at: record.grantedAt.slice(0, 40) });
+  }
+  return consents.slice(-MAX_STATE_ITEMS);
+}
+
+/** The largest version of the state that still fits the sealed cookie. A sign-in never fails because the state is big. */
+function fitState(ctx: Ctx, issued: SessionData, state: AppState): AppState {
+  const newest = state.consents.slice(-8);
+  const attempts: AppState[] = [state, { ...state, ocrJobs: {} }, { ...state, consents: newest, ocrJobs: {} }, { ...emptyState(state.hid), caseId: state.caseId }];
+  for (const attempt of attempts) {
+    try {
+      stateCookie(attempt, issued, ctx.config.sessionSecret, ctx.config.production, ctx.nowMs);
+      return attempt;
+    } catch {
+      continue;
+    }
+  }
+  return emptyState(state.hid);
+}
+
+/**
+ * Rebuilds what the state cookie would have held for a person who has signed in before, so they are not asked again for
+ * permissions they already gave. Every step is best effort: a failure gives a smaller state and never fails sign-in.
+ *
+ * Starting reading here is deliberate: a held, exact reading grant is standing permission the person gave on an earlier visit,
+ * and the backend bounds it (createOrGetJob returns an existing job, so a repeat sign-in never pays twice, and it refuses when
+ * reading is off). The wording of that permission is DRAFT and needs legal review.
+ */
+async function rebuildReturningState(ctx: Ctx, issued: SessionData): Promise<AppState> {
+  const state = emptyState(issued.householdId);
+  try {
+    const { consents } = await ctx.backend.listConsents(issued.token, issued.householdId);
+    state.consents = consentsToState(consents);
+  } catch (error) {
+    logSignInFailure(error);
+  }
+  try {
+    const { cases } = await ctx.backend.listCases(issued.token, issued.householdId);
+    state.caseId = newestOpenCaseId(cases);
+  } catch (error) {
+    logSignInFailure(error);
+  }
+  if (state.caseId && state.consents.some((consent) => consent.scope === "ocr_sarvam")) {
+    // The existing start: with a job already there the backend returns it (no provider call); without one it starts one, which
+    // is allowed only because this person already pressed Allow, and only if reading is switched on. Each document is on its own.
+    const rebuilt: Ctx = { ...ctx, session: issued, state, markState: () => undefined, issued: null, issuedState: null };
+    try {
+      const { documents } = await ctx.backend.listDocuments(issued.token, state.caseId);
+      const candidates = documents.filter((document) => document.status === "accepted" && findConsent(state, "ocr_sarvam", document.id));
+      for (const document of candidates.slice(0, MAX_OCR_RESUME_DOCUMENTS)) {
+        try {
+          await startOcrFor(rebuilt, document.id);
+        } catch (error) {
+          // For example 503 OCR_PROVIDER_DISABLED: leave this document without a job entry and carry on.
+          logSignInFailure(error);
+        }
+      }
+    } catch (error) {
+      logSignInFailure(error);
+    }
+  }
+  return fitState(ctx, issued, state);
+}
+
+const OIDC_ROUTES = {
+  "oidc.google.start": {
+    auth: false,
+    async run(ctx) {
+      const google = ctx.config.google;
+      if (!google) throw appError(501, "IDENTITY_NOT_IMPLEMENTED", { retryable: false });
+      try {
+        ctx.deps.rateLimiter.check(clientKey(ctx.request, ctx.config.trustedProxyHops), ctx.nowMs);
+        const flow = { state: randomToken(), nonce: randomToken(), verifier: randomToken(), mode: parseOidcMode(new URL(ctx.request.url).searchParams.get("mode")) };
+        const discovery = await ctx.deps.oidc.discover();
+        const redirect = ctx.deps.oidc.authorizationUrl(discovery, { clientId: google.clientId, redirectUrl: google.redirectUrl, ...flow });
+        ctx.cookies.push(oidcCookie(flow, ctx.config.sessionSecret, ctx.config.production, ctx.nowMs));
+        ctx.trustedRedirect = discovery.authorizationEndpoint;
+        return { status: 302, redirect };
+      } catch (error) {
+        logSignInFailure(error);
+        return signInFailed();
+      }
+    },
+  },
+  "oidc.google.callback": {
+    auth: false,
+    // CSRF: this GET is exempt from the X-Knowvia-App marker, because the browser arrives here from Google as a top-level
+    // navigation and cannot add a custom header. The control is the OIDC state: the value in the query must equal the one in
+    // the sealed, httpOnly kv_oidc cookie that THIS browser received from /auth/google/start, so a forged or replayed callback
+    // from another browser or another flow is refused. PKCE and the nonce bind the code and the ID token to the same flow.
+    async run(ctx) {
+      const google = ctx.config.google;
+      if (!google) throw appError(501, "IDENTITY_NOT_IMPLEMENTED", { retryable: false });
+      // The flow cookie is single-use: cleared on every path, success or not.
+      ctx.cookies.push(clearCookie(cookieNames(ctx.config.production).oidc, ctx.config.production));
+      let granted: Awaited<ReturnType<typeof signInWithVerifiedGoogleIdentity>>;
+      let issued: SessionData;
+      try {
+        ctx.deps.rateLimiter.check(clientKey(ctx.request, ctx.config.trustedProxyHops), ctx.nowMs);
+        const flow = loadOidcFlow(ctx.request.headers.get("cookie"), { secret: ctx.config.sessionSecret, production: ctx.config.production, nowMs: ctx.nowMs });
+        if (!flow) return signInFailed();
+        const query = new URL(ctx.request.url).searchParams;
+        if (query.has("error")) return signInFailed();
+        const states = query.getAll("state");
+        const codes = query.getAll("code");
+        if (states.length !== 1 || codes.length !== 1 || !codes[0] || codes[0].length > MAX_AUTH_CODE_CHARS) return signInFailed();
+        if (!safeEqual(states[0], flow.state)) return signInFailed();
+
+        const idToken = await ctx.deps.oidc.exchangeCode({ code: codes[0], verifier: flow.verifier, clientId: google.clientId, clientSecret: google.clientSecret, redirectUrl: google.redirectUrl });
+        const identity = await ctx.deps.oidc.verifyIdToken(idToken, { clientId: google.clientId, nonce: flow.nonce });
+        granted = await signInWithVerifiedGoogleIdentity({ issuer: identity.issuer, subject: identity.subject, name: identity.name, email: identity.email }, ctx.backend);
+        issued = {
+          token: granted.session.token,
+          expiresAt: granted.session.expiresAt,
+          householdId: granted.householdId,
+          adultId: granted.adultId,
+          memberId: granted.memberId,
+          provider: "google",
+        };
+        // A re-sign-in must not leave the previous backend session alive (the backend caps active sessions globally).
+        const previous = looseSessionToken(ctx.request.headers.get("cookie"), ctx.config);
+        if (previous) {
+          try {
+            await ctx.backend.revokeSession(previous);
+          } catch (error) {
+            // Already gone on the backend is fine. Anything else: do not issue a cookie while a copied old one may still work.
+            if (!(error instanceof AppError && error.code === "SESSION_EXPIRED")) {
+              await ctx.backend.revokeSession(issued.token).catch(() => undefined);
+              throw error;
+            }
+          }
+        }
+      } catch (error) {
+        logSignInFailure(error);
+        return signInFailed();
+      }
+      ctx.issued = issued;
+      // Everything below is a convenience. It can make the state smaller; it can never fail the sign-in.
+      if (granted.returning) {
+        try {
+          ctx.issuedState = await rebuildReturningState(ctx, issued);
+        } catch (error) {
+          logSignInFailure(error);
+          ctx.issuedState = null;
+        }
+      }
+      // The entry mode (E, P or A) only decides which view the dashboard shows first; every mode lands on /app.
+      return { status: 302, redirect: "/app" };
+    },
+  },
+} satisfies Record<string, Route>;
 
 // ---------- routes ----------
 
@@ -366,7 +596,7 @@ const ROUTES = {
       // Rate limit before any parsing or backend call.
       ctx.deps.rateLimiter.check(clientKey(ctx.request, ctx.config.trustedProxyHops), ctx.nowMs);
       const body = await readJson(ctx.request, createSessionRequestSchema);
-      const provider = resolveIdentityProvider(body.provider, { devIdentity: ctx.config.devIdentity });
+      const provider = resolveIdentityProvider(body.provider, { devIdentity: ctx.config.devIdentity, google: ctx.config.google !== null });
       const granted = await provider.signIn({ email: body.email, displayName: body.displayName }, ctx.backend);
       // A re-sign-in must not leave the previous backend session alive: the backend caps active sessions globally.
       const previous = looseSessionToken(ctx.request.headers.get("cookie"), ctx.config);
@@ -386,10 +616,12 @@ const ROUTES = {
         householdId: granted.householdId,
         adultId: granted.adultId,
         memberId: granted.memberId,
+        provider: "dev",
       };
       return { status: 201, body: sessionView(ctx.issued) };
     },
   },
+  ...OIDC_ROUTES,
   "overview.get": {
     auth: true,
     markerOnGet: true,
@@ -441,7 +673,14 @@ const ROUTES = {
   "connectors.list": {
     auth: false,
     async run(ctx) {
-      return { status: 200, body: { demo: ctx.config.demoData, connectors: listConnectors(ctx.config.demoData) } };
+      return {
+        status: 200,
+        body: {
+          demo: ctx.config.demoData,
+          connectors: listConnectors(ctx.config.demoData),
+          signIn: { google: ctx.config.google !== null, dev: ctx.config.devIdentity },
+        },
+      };
     },
   },
   "connectors.grant": {
@@ -639,26 +878,7 @@ const ROUTES = {
     auth: true,
     async run(ctx) {
       const documentId = pathId(ctx, "documentId");
-      const grant = findConsent(ctx.state, "ocr_sarvam", documentId);
-      if (!grant) throw appError(403, "CONSENT_REQUIRED");
-      // Room to remember the job is checked BEFORE the backend starts it, so a started job is never forgotten.
-      if (!jobIdFor(ctx.state, documentId)) {
-        if (Object.keys(ctx.state.ocrJobs).length >= MAX_STATE_ITEMS) throw appError(409, "STATE_LIMIT_REACHED");
-        // The sealed cookie has a byte cap too: prove a worst-case job entry fits before the backend starts the job.
-        const probe: AppState = { ...ctx.state, ocrJobs: { ...ctx.state.ocrJobs, [documentId]: "x".repeat(96) } };
-        stateCookie(probe, ctx.session, ctx.config.sessionSecret, ctx.config.production, ctx.nowMs);
-      }
-      let job;
-      try {
-        job = await ctx.backend.startOcr(ctx.session.token, documentId, { consentGrantId: grant.id });
-      } catch (error) {
-        if (error instanceof AppError && GRANT_GONE_CODES.has(error.code)) forgetConsent(ctx, grant.id);
-        throw error;
-      }
-      if (jobIdFor(ctx.state, documentId) !== job.id) {
-        ctx.state.ocrJobs[documentId] = job.id;
-        ctx.markState();
-      }
+      const job = await startOcrFor(ctx, documentId);
       const document = await ctx.backend.getDocument(ctx.session.token, documentId);
       return { status: 202, body: { document: composeDocumentView({ document, ocrJob: job, ocrConsent: true }) } };
     },
@@ -752,6 +972,32 @@ function jsonResponse(status: number, body: unknown, cookies: string[] = []): Re
   return new Response(JSON.stringify(body), { status, headers });
 }
 
+/** A redirect is either inside the app or the one Google authorization URL the start route just discovered. Nothing else. */
+export function redirectAllowed(redirect: string, trustedExternal: string | null): boolean {
+  if (/[\\\u0000-\u001f\u007f]/.test(redirect)) return false;
+  if (redirect === "/app" || redirect.startsWith("/app/") || redirect.startsWith("/app?")) return true;
+  if (!trustedExternal || !redirect.startsWith(`${trustedExternal}?`)) return false;
+  try {
+    const url = new URL(redirect);
+    return url.protocol === "https:" && `${url.origin}${url.pathname}` === trustedExternal;
+  } catch {
+    return false;
+  }
+}
+
+class RedirectRefused extends Error {
+  constructor() {
+    super("redirect refused");
+    this.name = "RedirectRefused";
+  }
+}
+
+function redirectResponse(location: string, cookies: string[]): Response {
+  const headers = new Headers({ location, "cache-control": "no-store", "referrer-policy": "no-referrer" });
+  for (const cookie of cookies) headers.append("set-cookie", cookie);
+  return new Response(null, { status: 302, headers });
+}
+
 function errorResponse(error: AppError, cookies: string[] = []): Response {
   return jsonResponse(error.status, errorBody(error), cookies);
 }
@@ -761,6 +1007,8 @@ const MAX_CONCURRENT_UPLOADS_PER_ADULT = 2;
 export function createApp(deps: AppDeps) {
   // Uploads are buffered in memory (up to 15 MiB each), so one signed-in adult may only hold a few open at once.
   const uploadsInFlight = new Map<string, number>();
+  // Discovery and signing keys are cached for the life of this app (one per process).
+  const oidc = createGoogleOidc({ fetch: deps.oidcFetch ?? ((input, init) => globalThis.fetch(input, init)), now: deps.now });
   async function handle(name: RouteName, request: Request, params: Record<string, string> = {}): Promise<Response> {
     let config: AppConfig;
     try {
@@ -781,18 +1029,20 @@ export function createApp(deps: AppDeps) {
     const route: Route = ROUTES[name];
     let loaded: { session: SessionData; state: AppState } | null = null;
     let dirty = false;
+    // Kept outside the try so a late failure can still clear the route's cookies and release a session it had issued.
+    let routeCtx: Ctx | null = null;
     const clearAll = () => [clearCookie(names.session, production), clearCookie(names.state, production)];
 
     try {
       assertCsrf(request, config.allowedOrigins, { markerOnGet: route.markerOnGet });
       if (route.auth) loaded = loadSession(request.headers.get("cookie"), { secret: config.sessionSecret, production, nowMs });
 
-      const backend = createBackendClient({ baseUrl: config.apiUrl, bootstrapToken: config.bootstrapToken, fetch: deps.fetch });
+      const backend = createBackendClient({ baseUrl: config.apiUrl, bootstrapToken: config.bootstrapToken, identityToken: config.google?.identityToken, fetch: deps.fetch });
       const ctx: Ctx = {
         request,
         params,
         config,
-        deps: { ...deps, uploadsInFlight },
+        deps: { ...deps, uploadsInFlight, oidc },
         backend,
         nowMs,
         session: loaded?.session as SessionData,
@@ -801,19 +1051,40 @@ export function createApp(deps: AppDeps) {
           dirty = true;
         },
         issued: null,
+        issuedState: null,
+        cookies: [],
+        trustedRedirect: null,
       };
+      routeCtx = ctx;
       const result = await route.run(ctx);
 
       const cookies: string[] = [];
       if (ctx.issued) {
         cookies.push(sessionCookie(ctx.issued, config.sessionSecret, production, nowMs));
-        cookies.push(stateCookie(emptyState(ctx.issued.householdId), ctx.issued, config.sessionSecret, production, nowMs));
+        cookies.push(stateCookie(ctx.issuedState ?? emptyState(ctx.issued.householdId), ctx.issued, config.sessionSecret, production, nowMs));
       } else if (dirty && loaded) {
         cookies.push(stateCookie(ctx.state, loaded.session, config.sessionSecret, production, nowMs));
       }
+      cookies.push(...ctx.cookies);
+      if (result.redirect !== undefined) {
+        // A route can only redirect inside /app or to the Google URL it just discovered. Anything else is a bug: 500, class name logged.
+        if (!redirectAllowed(result.redirect, ctx.trustedRedirect)) throw new RedirectRefused();
+        return redirectResponse(result.redirect, cookies);
+      }
       return jsonResponse(result.status, result.body, cookies);
     } catch (error) {
-      if (error instanceof AppError && error.clearSession) return errorResponse(error, clearAll());
+      // A route may have set cookies (the sign-in flow cookie clear) or issued a backend session before something threw.
+      // The cookies still go out, and a session that will never reach the browser is released on the backend, best effort.
+      const routeCookies = routeCtx?.cookies ?? [];
+      const orphan = routeCtx?.issued?.token;
+      if (orphan) {
+        try {
+          await routeCtx?.backend.revokeSession(orphan);
+        } catch {
+          // Nothing more can be done here; the session expires on its own.
+        }
+      }
+      if (error instanceof AppError && error.clearSession) return errorResponse(error, [...clearAll(), ...routeCookies]);
       // Keep what was already created on the backend (a case, a started OCR job) recorded, so it is never orphaned.
       // This holds for an unexpected failure too: a later step may throw after a backend side effect.
       let kept: string[] = [];
@@ -822,10 +1093,10 @@ export function createApp(deps: AppDeps) {
       } catch {
         kept = [];
       }
-      if (error instanceof AppError) return errorResponse(error, kept);
+      if (error instanceof AppError) return errorResponse(error, [...kept, ...routeCookies]);
       // Unknown failure: log the error name only. Never the message, which could carry a body fragment.
       console.error("app-bff: unexpected failure", error instanceof Error ? error.name : "unknown");
-      return errorResponse(appError(500, "INTERNAL", { retryable: false }), kept);
+      return errorResponse(appError(500, "INTERNAL", { retryable: false }), [...kept, ...routeCookies]);
     }
   }
 

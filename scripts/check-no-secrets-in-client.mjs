@@ -7,7 +7,7 @@ import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
 const root = process.argv[2] ?? join(process.cwd(), ".next", "static");
-const SECRET_NAMES = ["COVERSAATH_BOOTSTRAP_TOKEN", "APP_SESSION_SECRET", "COVERSAATH_API_URL", "APP_DEV_IDENTITY"];
+const SECRET_NAMES = ["COVERSAATH_BOOTSTRAP_TOKEN", "APP_SESSION_SECRET", "COVERSAATH_API_URL", "APP_DEV_IDENTITY", "COVERSAATH_IDENTITY_TOKEN", "GOOGLE_OIDC_CLIENT_SECRET"];
 const MIN_VALUE_LENGTH = 8; // avoids false positives on values like "true"
 
 if (!existsSync(root)) {

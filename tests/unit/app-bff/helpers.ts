@@ -8,6 +8,7 @@ import type { EnvSource } from "@/server/app/env";
 export const FAKE_BOOTSTRAP = "fake-bootstrap-token-0123456789abcdefABCDEF";
 export const FAKE_SECRET = "fake-session-secret-0123456789-abcdefghijklmnop";
 export const FAKE_BACKEND_TOKEN = "fake-backend-session-token-ZZZZZZZZZZZZZZZZZZZZ";
+export const FAKE_IDENTITY_TOKEN = "fake-identity-credential-0123456789abcdefABCDEF";
 export const ORIGIN = "http://localhost:3000";
 export const API = "http://backend.test";
 
@@ -39,6 +40,8 @@ export function createFakeBackend() {
   const revoked = new Set<string>();
   const grants = new Map<string, unknown>();
   const sessions = new Map<string, { householdId: string; adultId: string; memberId: string }>();
+  /** (issuer, subject) -> principal, for POST /api/v1/identity-sessions. Keyed by the pair only, as the real backend does. */
+  const identities = new Map<string, { householdId: string; adultId: string; memberId: string }>();
   sessions.set(FAKE_BACKEND_TOKEN, { householdId: "household-1", adultId: "adult-1", memberId: "member-1" });
   let seq = 0;
   let sessionSeq = 0;
@@ -58,6 +61,8 @@ export function createFakeBackend() {
     idPrefix: "",
     /** Put in front of every OCR job id, for the same reason. */
     jobIdPrefix: "",
+    /** When set, starting a NEW reading job fails like this (for example 503 OCR_PROVIDER_DISABLED). An existing job is still returned. */
+    ocrStartFailure: null as null | { status: number; code: string },
   };
 
   const fetch: FetchLike = async (url, init) => {
@@ -80,6 +85,27 @@ export function createFakeBackend() {
 
     const authHeader = headers.authorization ?? "";
     const path = parsed.pathname;
+    if (method === "POST" && path === "/api/v1/identity-sessions") {
+      if (authHeader !== `Bearer ${FAKE_IDENTITY_TOKEN}`) return json(401, { error: { code: "AUTHENTICATION_REQUIRED", message: "Valid authentication is required." } });
+      const input = body as { issuer?: unknown; subject?: unknown; displayName?: unknown };
+      if (input.issuer !== "https://accounts.google.com" || typeof input.subject !== "string" || !input.subject || typeof input.displayName !== "string" || !input.displayName) {
+        return json(400, { error: { code: "INVALID_REQUEST", message: "Invalid request." } });
+      }
+      const key = `${input.issuer}\n${input.subject}`;
+      const existing = identities.get(key);
+      sessionSeq += 1;
+      const principal = existing ?? { householdId: `household-${sessionSeq}`, adultId: `adult-${sessionSeq}`, memberId: `member-${sessionSeq}` };
+      identities.set(key, principal);
+      const sessionToken = `fake-identity-session-token-${String(sessionSeq).padStart(8, "0")}`;
+      sessions.set(sessionToken, principal);
+      return json(existing ? 200 : 201, {
+        returning: Boolean(existing),
+        household: { id: principal.householdId },
+        adultId: principal.adultId,
+        memberId: principal.memberId,
+        session: { token: sessionToken, sessionId: `session-${sessionSeq}`, adultUserId: principal.adultId, expiresAt: new Date(Date.now() + 3600_000).toISOString() },
+      });
+    }
     if (method === "POST" && path === "/api/v1/households") {
       if (authHeader !== `Bearer ${FAKE_BOOTSTRAP}`) return json(401, { error: { code: "AUTHENTICATION_REQUIRED", message: "Valid authentication is required." } });
       const owner = (body as { owner: { displayName: string } }).owner;
@@ -119,7 +145,7 @@ export function createFakeBackend() {
       }
       const consents = [...grants.entries()].map(([id, grant]) => {
         const body = grant as { grantedToActor?: string; scopes: unknown[]; householdId: string };
-        return { id, purpose: "document_processing", grantedToActor: body.grantedToActor ?? null, noticeVersion: "v", evidenceMethod: "typed", grantedAt: "2026-10-21T00:00:00.000Z", expiresAt: null, revokedAt: null, status: "active", scopes: body.scopes };
+        return { id, purpose: "document_processing", grantedToActor: body.grantedToActor ?? null, noticeVersion: "v", evidenceMethod: "typed", grantedAt: "2026-10-21T00:00:00.000Z", expiresAt: null, revokedAt: null, status: (grant as { __status?: string }).__status ?? "active", scopes: body.scopes };
       });
       return json(200, { householdId: principal.householdId, consents, truncated: false });
     }
@@ -167,6 +193,10 @@ export function createFakeBackend() {
     }
     const ocrStart = path.match(/^\/api\/v1\/documents\/([^/]+)\/ocr-jobs$/);
     if (method === "POST" && ocrStart) {
+      // Like the real createOrGetJob: a document that already has a job gets that job back, so no second provider call happens.
+      const existingJob = [...jobs.values()].find((candidate) => candidate.documentId === ocrStart[1]);
+      if (existingJob) return json(202, { job: existingJob });
+      if (control.ocrStartFailure) return json(control.ocrStartFailure.status, { error: { code: control.ocrStartFailure.code, message: "x" } });
       const job = { id: `${control.jobIdPrefix}ocr-${++seq}`, documentId: ocrStart[1], status: "processing", errorCode: null, pageCount: null };
       jobs.set(job.id, job);
       return json(202, { job });
@@ -186,15 +216,16 @@ export function createFakeBackend() {
     return json(404, { error: { code: "ROUTE_NOT_FOUND", message: "Versioned backend route not found." } });
   };
 
-  return { fetch, calls, control, documents, grants, revoked, jobs };
+  return { fetch, calls, control, documents, grants, revoked, jobs, identities };
 }
 
-export function makeApp(options: { env?: EnvSource; backend?: FakeBackend; now?: () => number; limit?: number } = {}) {
+export function makeApp(options: { env?: EnvSource; backend?: FakeBackend; now?: () => number; limit?: number; oidcFetch?: FetchLike } = {}) {
   const backend = options.backend ?? createFakeBackend();
   const env = options.env ?? baseEnv();
   const app: App = createApp({
     env: () => env,
     fetch: backend.fetch,
+    oidcFetch: options.oidcFetch,
     now: options.now ?? (() => Date.now()),
     rateLimiter: createRateLimiter({ limit: options.limit ?? 100 }),
   });

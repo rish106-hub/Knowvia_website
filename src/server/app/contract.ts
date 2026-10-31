@@ -27,7 +27,8 @@ export type NextAction = (typeof NEXT_ACTIONS)[number];
 export const CONSENT_SCOPE_NAMES = ["collect", "ocr_sarvam", "question_gemini"] as const;
 export type ConsentScope = (typeof CONSENT_SCOPE_NAMES)[number];
 
-// google, microsoft, apple and phone_otp are typed stubs: every one answers 501 IDENTITY_NOT_IMPLEMENTED (identity.ts).
+// microsoft, apple and phone_otp are typed stubs: every one answers 501 IDENTITY_NOT_IMPLEMENTED (identity.ts). google is a
+// real redirect sign-in (V1b) when configured and a 501 stub otherwise; it is never started by posting an email.
 export const IDENTITY_PROVIDERS = ["dev", "otp", "magic_link", "oidc", "google", "microsoft", "apple", "phone_otp"] as const;
 export type IdentityProviderKind = (typeof IDENTITY_PROVIDERS)[number];
 
@@ -153,7 +154,12 @@ export const connectorViewSchema = z.object({
 });
 export type ConnectorView = z.infer<typeof connectorViewSchema>;
 
-export const connectorListSchema = z.object({ demo: z.boolean(), connectors: z.array(connectorViewSchema) });
+export const connectorListSchema = z.object({
+  demo: z.boolean(),
+  connectors: z.array(connectorViewSchema),
+  /** Which sign-in methods this deployment offers. Absent means the development form only. */
+  signIn: z.object({ google: z.boolean(), dev: z.boolean() }).optional(),
+});
 export type ConnectorList = z.infer<typeof connectorListSchema>;
 
 // ---- permissions (what the person has allowed, from the backend list; no raw scopes, no household id) ----

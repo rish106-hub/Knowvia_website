@@ -7,7 +7,7 @@ import { createCipheriv, createDecipheriv, hkdfSync, randomBytes } from "node:cr
 export const ENVELOPE_VERSION = "v1";
 const SALT = "knowvia-app-cookie-salt-v1";
 
-export type CookieKind = "session" | "state";
+export type CookieKind = "session" | "state" | "oidc";
 export type OpenResult<T> =
   | { ok: true; value: T }
   | { ok: false; reason: "invalid" | "expired" };

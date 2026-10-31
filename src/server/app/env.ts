@@ -14,6 +14,19 @@ export class AppConfigError extends Error {
 
 export type EnvSource = Record<string, string | undefined>;
 
+/** Real Google sign-in (V1b). Present only when all four settings are set and valid; otherwise the feature is off. */
+export type GoogleOidcConfig = {
+  clientId: string;
+  /** Server-only. Never sent to a browser, never logged. */
+  clientSecret: string;
+  /** Where Google sends the person back: must be this app's callback route. */
+  redirectUrl: string;
+  /** Server credential for POST /api/v1/identity-sessions (the backend's KNOWVIA_IDENTITY_TOKEN). Server-only. */
+  identityToken: string;
+};
+
+export const GOOGLE_CALLBACK_PATH = "/api/app/auth/google/callback";
+
 export type AppConfig =
   | { enabled: false }
   | {
@@ -23,6 +36,8 @@ export type AppConfig =
       bootstrapToken: string;
       sessionSecret: string;
       devIdentity: boolean;
+      /** Null unless GOOGLE_OIDC_CLIENT_ID, GOOGLE_OIDC_CLIENT_SECRET, APP_OIDC_REDIRECT_URL and COVERSAATH_IDENTITY_TOKEN are all set. */
+      google: GoogleOidcConfig | null;
       /** Synthetic demo data and demo-only controls. Never allowed in production. */
       demoData: boolean;
       allowedOrigins: string[];
@@ -41,6 +56,25 @@ const apiUrl = z
   .url()
   .refine((value) => /^https?:\/\//i.test(value))
   .transform((value) => value.replace(/\/+$/, ""));
+
+const oidcClientId = z.string().min(8).max(256).regex(/^[\x21-\x7e]+$/);
+const oidcClientSecret = z.string().min(8).max(512).regex(/^[\x21-\x7e]+$/);
+
+/**
+ * The callback URL must be this app's own callback route on an allowed origin, with no query or fragment, and https
+ * outside development (a code in a query over plain http is readable on the wire).
+ */
+function validRedirectUrl(value: string, production: boolean, allowedOrigins: string[]): boolean {
+  try {
+    const url = new URL(value);
+    if (url.username || url.password || url.search || url.hash) return false;
+    if (url.pathname !== GOOGLE_CALLBACK_PATH) return false;
+    if (production ? url.protocol !== "https:" : url.protocol !== "https:" && url.protocol !== "http:") return false;
+    return allowedOrigins.includes(url.origin);
+  } catch {
+    return false;
+  }
+}
 
 function originOf(value: string): string | null {
   try {
@@ -82,6 +116,28 @@ export function loadAppConfig(source: EnvSource = process.env): AppConfig {
   }
   if (origins.size === 0) bad.push("NEXT_PUBLIC_SITE_URL or APP_ALLOWED_ORIGINS");
 
+  // Google sign-in is off unless all four settings are present. Present but malformed is a configuration error (names only).
+  let google: GoogleOidcConfig | null = null;
+  const googleSettings = {
+    GOOGLE_OIDC_CLIENT_ID: source.GOOGLE_OIDC_CLIENT_ID?.trim(),
+    GOOGLE_OIDC_CLIENT_SECRET: source.GOOGLE_OIDC_CLIENT_SECRET?.trim(),
+    APP_OIDC_REDIRECT_URL: source.APP_OIDC_REDIRECT_URL?.trim(),
+    COVERSAATH_IDENTITY_TOKEN: source.COVERSAATH_IDENTITY_TOKEN?.trim(),
+  };
+  if (Object.values(googleSettings).every(Boolean)) {
+    const id = oidcClientId.safeParse(googleSettings.GOOGLE_OIDC_CLIENT_ID);
+    const clientSecret = oidcClientSecret.safeParse(googleSettings.GOOGLE_OIDC_CLIENT_SECRET);
+    const identity = bootstrapToken.safeParse(googleSettings.COVERSAATH_IDENTITY_TOKEN);
+    if (!id.success) bad.push("GOOGLE_OIDC_CLIENT_ID");
+    if (!clientSecret.success) bad.push("GOOGLE_OIDC_CLIENT_SECRET");
+    // The backend refuses an identity credential equal to the bootstrap token, so fail here too.
+    if (!identity.success || googleSettings.COVERSAATH_IDENTITY_TOKEN === source.COVERSAATH_BOOTSTRAP_TOKEN?.trim()) bad.push("COVERSAATH_IDENTITY_TOKEN");
+    if (!validRedirectUrl(googleSettings.APP_OIDC_REDIRECT_URL as string, production, [...origins])) bad.push("APP_OIDC_REDIRECT_URL");
+    if (id.success && clientSecret.success && identity.success && !bad.some((name) => name === "COVERSAATH_IDENTITY_TOKEN" || name === "APP_OIDC_REDIRECT_URL")) {
+      google = { clientId: id.data, clientSecret: clientSecret.data, redirectUrl: googleSettings.APP_OIDC_REDIRECT_URL as string, identityToken: identity.data };
+    }
+  }
+
   const hopsRaw = source.APP_TRUSTED_PROXY_HOPS?.trim() ?? "";
   const trustedProxyHops = hopsRaw === "" ? 0 : Number(hopsRaw);
   if (!Number.isInteger(trustedProxyHops) || trustedProxyHops < 0 || trustedProxyHops > 5) bad.push("APP_TRUSTED_PROXY_HOPS");
@@ -94,6 +150,7 @@ export function loadAppConfig(source: EnvSource = process.env): AppConfig {
     bootstrapToken: token.data,
     sessionSecret: secret.data,
     devIdentity,
+    google,
     demoData,
     allowedOrigins: [...origins],
     trustedProxyHops,

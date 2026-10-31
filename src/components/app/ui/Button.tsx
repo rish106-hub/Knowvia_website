@@ -41,9 +41,21 @@ export function Button({ variant = "primary", size = "md", icon, block, busy, cl
   );
 }
 
-type ButtonLinkProps = Common & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & { href: string };
+type ButtonLinkProps = Common & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
+  href: string;
+  /** A plain <a> for a full page load: use it for a link into an API route (a sign-in redirect), never next/link. */
+  native?: boolean;
+};
 
-export function ButtonLink({ variant = "primary", size = "md", icon, block, className, href, children, ...rest }: ButtonLinkProps) {
+export function ButtonLink({ variant = "primary", size = "md", icon, block, className, href, native, children, ...rest }: ButtonLinkProps) {
+  if (native) {
+    return (
+      <a {...rest} href={href} className={classes(variant, size, block, className)}>
+        {icon}
+        {children}
+      </a>
+    );
+  }
   return (
     <Link {...rest} href={href} className={classes(variant, size, block, className)}>
       {icon}

@@ -156,7 +156,7 @@ export class FakeBff {
       this.caseId ??= "case-1";
       return this.json(route, created ? 201 : 200, { caseId: this.caseId, created });
     }
-    if (key === "GET /connectors") return this.json(route, 200, { demo: false, connectors: [UPLOAD_CONNECTOR] });
+    if (key === "GET /connectors") return this.json(route, 200, { demo: false, connectors: [UPLOAD_CONNECTOR], signIn: { google: false, dev: true } });
     if (key === "GET /consents") return this.json(route, 200, { permissions: this.consents.map(permissionOf), truncated: false });
     if (key === "POST /consents/:cid/revoke") return this.revokeById(route, path.split("/")[2]);
     if (key === "POST /consents") return this.grant(route, JSON.parse(request.postData() ?? "{}"));
