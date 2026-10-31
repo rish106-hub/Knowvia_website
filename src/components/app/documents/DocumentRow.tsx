@@ -10,7 +10,7 @@ import { errorCopy, type ErrorCopy } from "../shell/error-copy";
 import { asApiError, useApp } from "../shell/session-context";
 import { Button, ConfirmDialog, Notice, StatusBadge } from "../ui";
 import { formatBytes, formatWhen } from "./format";
-import { documentActions, documentKindLabel, primaryActionLabel, stageInfo } from "./stage";
+import { documentActions, documentKindLabel, primaryActionLabel, stageDescription, stageInfo } from "./stage";
 import type { StalledReason } from "./useStagePolling";
 
 type RowError = { copy: ErrorCopy; retry?: () => void };
@@ -141,7 +141,7 @@ export function DocumentRow({ doc, localName, stalled, onRestartPolling }: Props
 
       <p className="kva-p kva-small" role="status">
         {info.indeterminate ? <CircleNotch size={18} weight="bold" className="kva-spin" aria-hidden="true" style={{ verticalAlign: "-3px", marginRight: 6 }} /> : null}
-        {info.description}
+        {stageDescription(doc)}
       </p>
 
       {stalled && doc.stage === "processing" ? (

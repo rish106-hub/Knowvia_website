@@ -22,6 +22,8 @@ export type ComposeInput = {
   /** True only for the response to the upload itself. Later reads report awaiting_checks. */
   justUploaded?: boolean;
   structuring?: "running" | "finished" | "failed" | null;
+  /** documentScan.mode from the backend integrations report. Only "disabled" changes the view; unknown or absent changes nothing. */
+  scanMode?: string | null;
 };
 
 export function composeDocumentView(input: ComposeInput): DocumentView {
@@ -47,6 +49,8 @@ export function composeDocumentView(input: ComposeInput): DocumentView {
       stage = input.justUploaded ? "received" : "awaiting_checks";
       nextAction = "wait";
       note = "scan_state_not_visible";
+      // A later read of a document that is still waiting, with scanning reported as switched off: it will not progress.
+      if (!input.justUploaded && input.scanMode === "disabled") note = "scan_disabled";
       break;
     default: {
       // accepted

@@ -1,6 +1,7 @@
 // Wording for permissions that exist, and for withdrawing them. Pure: unit tested in tests/unit/app-ui.
-// DRAFT: all of this needs legal review before launch.
-import type { ConsentView, DocumentView } from "@/lib/app-contract";
+// DRAFT: all of this needs legal review before launch. The store-documents lines describe the backend: revoking the
+// collect grant marks every document uploaded under it for deletion (tests/unit/app-ui/blocks.test.ts ties the wording to that).
+import type { ConsentView, DocumentView, PermissionKind } from "@/lib/app-contract";
 import { documentKindLabel } from "../documents/stage";
 
 export function consentTitle(consent: ConsentView, documents: DocumentView[]): string {
@@ -17,9 +18,9 @@ export function consentTitle(consent: ConsentView, documents: DocumentView[]): s
 export function revokeExplanation(consent: ConsentView): string[] {
   if (consent.scope === "collect") {
     return [
-      "CoverSaath stops storing new PDFs for you and will ask again before you add another.",
+      "CoverSaath stops storing PDFs for you and will ask again before you add another.",
+      "The PDFs you added under this permission will be deleted, together with the text and answers CoverSaath built from them.",
       "Withdrawing also erases answers CoverSaath worked out using this permission.",
-      "PDFs you already added are not removed by this. Delete a PDF from the Documents page to remove it.",
     ];
   }
   if (consent.scope === "ocr_sarvam") {
@@ -32,4 +33,12 @@ export function revokeExplanation(consent: ConsentView): string[] {
     "CoverSaath stops using these documents to answer your questions.",
     "Withdrawing erases the answers already given from them.",
   ];
+}
+
+/** The same promise as revokeExplanation, for the backend permission list (kinds instead of scopes). Draft wording. */
+export function permissionRevokeExplanation(kind: PermissionKind): string[] {
+  if (kind === "store_documents") return revokeExplanation({ scope: "collect" } as ConsentView);
+  if (kind === "read_document") return revokeExplanation({ scope: "ocr_sarvam" } as ConsentView);
+  if (kind === "answer_questions") return revokeExplanation({ scope: "question_gemini" } as ConsentView);
+  return ["CoverSaath stops using this permission.", "CoverSaath will not use it for anything new."];
 }

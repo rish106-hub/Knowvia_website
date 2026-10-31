@@ -48,6 +48,9 @@ const BY_CODE: Record<string, Omit<ErrorCopy, "action"> & { action?: ErrorAction
     action: "none",
   },
   DOCUMENT_NOT_FOUND: { title: "Document not found", message: "It may have been deleted. Reload to see what is there now.", action: "reload" },
+  CONNECTOR_NOT_AVAILABLE: { title: "Not available yet", message: "This way of adding documents is not available yet.", action: "none" },
+  CONNECTOR_NOT_FOUND: { title: "Not found", message: "That way of adding documents does not exist.", action: "none" },
+  VOICE_INTAKE_NOT_IMPLEMENTED: { title: "Not available yet", message: "Speaking to CoverSaath is not available yet.", action: "none" },
   CONSENT_NOT_FOUND: { title: "Permission not found", message: "It may already be withdrawn. Reload to see the current list.", action: "reload" },
   CONSENT_REQUIRED: { title: "Permission needed", message: "This step needs your permission first. Allow it, then try again.", action: "reload" },
   CONSENT_SCOPE_REQUIRED: {

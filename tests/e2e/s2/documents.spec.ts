@@ -231,7 +231,7 @@ test.describe("upload", () => {
 test.describe("stages", () => {
   const cases = [
     ["received", "Received", "Received. Security checks come next."],
-    ["awaiting_checks", "Waiting for checks", "Waiting for security checks. This can take a while."],
+    ["awaiting_checks", "Waiting for checks", "Waiting for security checks. This usually needs no action."],
     ["awaiting_ocr_consent", "Needs your permission", "needs your permission"],
     ["processing", "Reading", "Reading this PDF."],
     ["readable", "Readable", "Nothing has been checked or confirmed from it yet."],
@@ -458,7 +458,7 @@ test.describe("delete and revoke", () => {
     }
   });
 
-  test("withdrawing a permission says what stops and that derived answers are erased, then updates the list", async ({ page }) => {
+  test("taking a permission back says what stops and that derived answers are erased, then updates the list", async ({ page }) => {
     const doc = docAt("readable");
     const bff = new FakeBff({
       documents: [doc],
@@ -473,14 +473,16 @@ test.describe("delete and revoke", () => {
     await expect(list.locator("li")).toHaveCount(2);
     await expect(list.getByText("Draft wording, pending legal review").first()).toBeVisible();
 
-    await page.getByRole("button", { name: /Withdraw permission: Read policy schedule/ }).click();
-    const dialog = page.getByRole("dialog", { name: "Withdraw this permission?" });
+    await page.getByRole("button", { name: /Take this back: Read 1 document with the reading service/ }).click();
+    const dialog = page.getByRole("dialog", { name: "Take this permission back?" });
     await expect(dialog).toContainText("stops sending this PDF to the reading service");
     await expect(dialog).toContainText("erases the text and answers CoverSaath derived from this PDF");
-    await dialog.getByRole("button", { name: "Withdraw permission" }).click();
+    await dialog.getByRole("button", { name: "Take it back" }).click();
     await expect(dialog).toHaveCount(0);
     await expect(list.locator("li")).toHaveCount(1);
-    expect(JSON.parse(bff.callsTo("POST /consents/revoke")[0].body!.toString())).toEqual({ scope: "ocr_sarvam", documentId: doc.id });
+    // Revoke by id: the path carries the consent id, the body carries nothing.
+    expect(bff.callsTo("POST /consents/:cid/revoke")[0].path).toBe("/consents/grant-ocr-1/revoke");
+    expect(bff.callsTo("POST /consents/:cid/revoke")).toHaveLength(1);
 
     // Revoked consent: the document asks for permission again.
     await page.getByRole("navigation", { name: "App" }).getByRole("link", { name: "Documents" }).click();

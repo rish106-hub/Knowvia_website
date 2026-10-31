@@ -50,6 +50,10 @@ export function createFakeBackend() {
     expireTokens: false,
     /** The real backend answers 403 FIELD_ACCESS_REQUIRED on list/get once the collect permission is withdrawn. */
     fieldAccessDenied: false,
+    /** Cases the backend lists for the household (newest first), for the lost-case recovery. */
+    cases: [] as Array<{ id: string; status: string; createdAt: string }>,
+    /** documentScan.mode in the integrations report. */
+    scanMode: "clamd" as string,
   };
 
   const fetch: FetchLike = async (url, init) => {
@@ -99,6 +103,21 @@ export function createFakeBackend() {
     if (method === "GET" && householdMatch) {
       if (householdMatch[1] !== principal.householdId) return json(404, { error: { code: "HOUSEHOLD_NOT_FOUND", message: "Household not found." } });
       return json(200, { household: { id: principal.householdId }, viewerRole: "owner", members: [{ id: principal.memberId, displayName: "Owner Synthetic", memberKind: "adult", relationshipLabel: null, policiesFound: 0 }] });
+    }
+    if (method === "GET" && path === "/api/v1/integrations") {
+      return json(200, { providers: {}, hrms: { status: "on_hold", intake: "manual_upload_only" }, intake: [], documentScan: { mode: control.scanMode }, note: "Configuration status only." });
+    }
+    const listMatch = path.match(/^\/api\/v1\/households\/([^/]+)\/(cases|consents)$/);
+    if (method === "GET" && listMatch) {
+      if (listMatch[1] !== principal.householdId) return json(404, { error: { code: "HOUSEHOLD_NOT_FOUND", message: "Household not found." } });
+      if (listMatch[2] === "cases") {
+        return json(200, { householdId: principal.householdId, cases: control.cases.map((c) => ({ id: c.id, triggerType: "planned_care", status: c.status, emergencyMode: false, createdAt: c.createdAt, updatedAt: c.createdAt })), truncated: false });
+      }
+      const consents = [...grants.entries()].map(([id, grant]) => {
+        const body = grant as { grantedToActor?: string; scopes: unknown[]; householdId: string };
+        return { id, purpose: "document_processing", grantedToActor: body.grantedToActor ?? null, noticeVersion: "v", evidenceMethod: "typed", grantedAt: "2026-10-21T00:00:00.000Z", expiresAt: null, revokedAt: null, status: "active", scopes: body.scopes };
+      });
+      return json(200, { householdId: principal.householdId, consents, truncated: false });
     }
     if (method === "POST" && path === "/api/v1/cases") return json(201, { id: "case-1" });
     if (method === "POST" && path === "/api/v1/consents") {

@@ -18,7 +18,7 @@ export const DOCUMENT_STAGES = [
 ] as const;
 export type DocumentStage = (typeof DOCUMENT_STAGES)[number];
 
-export const DOCUMENT_KINDS = ["policy_wording", "policy_schedule", "endorsement"] as const;
+export const DOCUMENT_KINDS = ["member_card", "policy_wording", "policy_schedule", "endorsement"] as const;
 export type DocumentKind = (typeof DOCUMENT_KINDS)[number];
 
 export const NEXT_ACTIONS = ["none", "wait", "grant_ocr_consent", "start_ocr", "retry_ocr", "delete"] as const;
@@ -27,7 +27,8 @@ export type NextAction = (typeof NEXT_ACTIONS)[number];
 export const CONSENT_SCOPE_NAMES = ["collect", "ocr_sarvam", "question_gemini"] as const;
 export type ConsentScope = (typeof CONSENT_SCOPE_NAMES)[number];
 
-export const IDENTITY_PROVIDERS = ["dev", "otp", "magic_link", "oidc"] as const;
+// google, microsoft, apple and phone_otp are typed stubs: every one answers 501 IDENTITY_NOT_IMPLEMENTED (identity.ts).
+export const IDENTITY_PROVIDERS = ["dev", "otp", "magic_link", "oidc", "google", "microsoft", "apple", "phone_otp"] as const;
 export type IdentityProviderKind = (typeof IDENTITY_PROVIDERS)[number];
 
 export const TRIGGER_TYPES = [
@@ -65,8 +66,10 @@ export const documentViewSchema = z.object({
   /**
    * `scan_state_not_visible` on awaiting_checks: the backend cannot tell "scanning" from "scan disabled",
    * so the UI must not promise a completion time.
+   * `scan_disabled` on awaiting_checks: the backend integrations report says document scanning is switched off, so the
+   * document will stay unread. Only set when that report was read.
    */
-  note: z.enum(["scan_state_not_visible"]).nullable(),
+  note: z.enum(["scan_state_not_visible", "scan_disabled"]).nullable(),
 });
 export type DocumentView = z.infer<typeof documentViewSchema>;
 
@@ -116,6 +119,65 @@ export const overviewSchema = z.object({
   consents: z.array(consentViewSchema),
 });
 export type Overview = z.infer<typeof overviewSchema>;
+
+// ---- connectors (descriptors only; mirrors CoverSaath src/contracts/intake-connectors.js) ----
+
+export const CONNECTOR_IDS = [
+  "upload",
+  "camera",
+  "email_forward",
+  "gmail",
+  "outlook",
+  "insurer_portal",
+  "hr_portal",
+  "digilocker",
+  "whatsapp",
+  "voice",
+] as const;
+export type ConnectorId = (typeof CONNECTOR_IDS)[number];
+
+export const CONNECTOR_AVAILABILITY = ["available", "stub", "later"] as const;
+export type ConnectorAvailability = (typeof CONNECTOR_AVAILABILITY)[number];
+
+export const connectorViewSchema = z.object({
+  id: z.enum(CONNECTOR_IDS),
+  kind: z.string(),
+  label: z.string(),
+  availability: z.enum(CONNECTOR_AVAILABILITY),
+  intakeChannel: z.enum(CONNECTOR_IDS),
+  consentPurpose: z.enum(["document_processing", "voice_intake"]),
+  scopesRequested: z.array(z.string()),
+  dataReturned: z.array(z.string()),
+  /** Ends in `-draft-legal-review`: the notice for this connector is not written yet. */
+  noticeKey: z.string(),
+});
+export type ConnectorView = z.infer<typeof connectorViewSchema>;
+
+export const connectorListSchema = z.object({ demo: z.boolean(), connectors: z.array(connectorViewSchema) });
+export type ConnectorList = z.infer<typeof connectorListSchema>;
+
+// ---- permissions (what the person has allowed, from the backend list; no raw scopes, no household id) ----
+
+export const PERMISSION_KINDS = ["store_documents", "read_document", "answer_questions", "other"] as const;
+export type PermissionKind = (typeof PERMISSION_KINDS)[number];
+
+export const permissionViewSchema = z.object({
+  /** The backend consent id. The revoke-by-id route takes this. Useless without the session. */
+  id: z.string(),
+  kind: z.enum(PERMISSION_KINDS),
+  /** DRAFT wording, needs legal review. */
+  label: z.string(),
+  grantedAt: z.string(),
+  expiresAt: z.string().nullable(),
+  status: z.enum(["active", "expired", "revoked"]),
+  /** Documents this permission is limited to. Empty for the store-documents permission. */
+  documentIds: z.array(z.string()),
+  noticeStatus: z.literal("draft_needs_legal_review"),
+});
+export type PermissionView = z.infer<typeof permissionViewSchema>;
+
+export const permissionListSchema = z.object({ permissions: z.array(permissionViewSchema), truncated: z.boolean() });
+export type PermissionList = z.infer<typeof permissionListSchema>;
 
 export const errorBodySchema = z.object({
   error: z.object({

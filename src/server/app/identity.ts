@@ -47,10 +47,19 @@ function notImplemented(kind: IdentityProviderKind): IdentityProvider {
 export const otpIdentityProvider = notImplemented("otp");
 export const magicLinkIdentityProvider = notImplemented("magic_link");
 export const oidcIdentityProvider = notImplemented("oidc");
+// Typed stubs. Google is replaced by a real provider later (run V1b); the others stay stubs.
+export const googleIdentityProvider = notImplemented("google");
+export const microsoftIdentityProvider = notImplemented("microsoft");
+export const appleIdentityProvider = notImplemented("apple");
+export const phoneOtpIdentityProvider = notImplemented("phone_otp");
 
 export function resolveIdentityProvider(kind: IdentityProviderKind, { devIdentity }: { devIdentity: boolean }): IdentityProvider {
   if (kind === "dev") return devIdentity ? devIdentityProvider : notImplemented("dev");
   if (kind === "otp") return otpIdentityProvider;
   if (kind === "magic_link") return magicLinkIdentityProvider;
-  return oidcIdentityProvider;
+  if (kind === "oidc") return oidcIdentityProvider;
+  if (kind === "google") return googleIdentityProvider;
+  if (kind === "microsoft") return microsoftIdentityProvider;
+  if (kind === "apple") return appleIdentityProvider;
+  return phoneOtpIdentityProvider;
 }

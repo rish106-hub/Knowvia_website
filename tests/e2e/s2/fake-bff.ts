@@ -1,7 +1,22 @@
 // A stateful fake of the /api/app BFF for the S2 specs. No real backend, no real BFF logic: page.route answers every
 // call, so these tests prove the UI against the CONTRACT (src/server/app/contract.ts), not the BFF or CoverSaath.
 import type { Page, Route } from "@playwright/test";
-import type { ConsentNotice, ConsentView, DocumentStage, DocumentView, NextAction, Overview, SessionView } from "../../../src/lib/app-contract";
+import type { ConsentNotice, ConsentView, DocumentStage, DocumentView, NextAction, Overview, PermissionView, SessionView } from "../../../src/lib/app-contract";
+
+const UPLOAD_CONNECTOR = {
+  id: "upload", kind: "device", label: "Upload a file", availability: "available", intakeChannel: "upload",
+  consentPurpose: "document_processing", scopesRequested: ["document:collect"], dataReturned: ["document_bytes"], noticeKey: "upload-draft-legal-review",
+} as const;
+
+/** The labelled permission the BFF would build from a backend consent (same wording as handler.ts permissionLabel). */
+function permissionOf(consent: ConsentView): PermissionView {
+  const n = consent.documentIds.length;
+  const documents = `${n} ${n === 1 ? "document" : "documents"}`;
+  const kind = consent.scope === "collect" ? "store_documents" : consent.scope === "ocr_sarvam" ? "read_document" : "answer_questions";
+  const label =
+    kind === "store_documents" ? "Keep the PDFs you add" : kind === "read_document" ? `Read ${documents} with the reading service (OCR)` : `Use ${documents} to answer your questions`;
+  return { id: consent.grantId, kind, label, grantedAt: consent.grantedAt, expiresAt: null, status: "active", documentIds: consent.documentIds, noticeStatus: "draft_needs_legal_review" };
+}
 
 export type ErrorSpec = { status: number; code: string; retryable?: boolean; fields?: string[] } | "abort";
 export type Call = { method: string; path: string; key: string; headers: Record<string, string>; body: Buffer | null };
@@ -109,7 +124,11 @@ export class FakeBff {
     const url = new URL(request.url());
     const path = url.pathname.replace(/^\/api\/app/, "");
     const method = request.method();
-    const pattern = path.replace(/^\/cases\/[^/]+/, "/cases/:id").replace(/^\/documents\/[^/]+/, "/documents/:id");
+    const pattern = path
+      .replace(/^\/cases\/[^/]+/, "/cases/:id")
+      .replace(/^\/documents\/[^/]+/, "/documents/:id")
+      .replace(/^\/consents\/(?!notices$|revoke$)[^/]+\/revoke$/, "/consents/:cid/revoke")
+      .replace(/^\/connectors\/[^/]+\/grant$/, "/connectors/:cid/grant");
     const key = `${method} ${pattern}`;
     this.calls.push({ method, path, key, headers: request.headers(), body: request.postDataBuffer() });
 
@@ -120,7 +139,7 @@ export class FakeBff {
       return this.error(route, spec.status, spec.code, spec.retryable ?? false, spec.fields);
     }
 
-    const needsSession = !(path === "/session" || path === "/consents/notices");
+    const needsSession = !(path === "/session" || path === "/consents/notices" || path === "/connectors");
     if (needsSession && this.expired) return this.error(route, 401, "SESSION_EXPIRED", false);
     if (needsSession && !this.signedIn) return this.error(route, 401, "SESSION_REQUIRED", false);
 
@@ -137,6 +156,9 @@ export class FakeBff {
       this.caseId ??= "case-1";
       return this.json(route, created ? 201 : 200, { caseId: this.caseId, created });
     }
+    if (key === "GET /connectors") return this.json(route, 200, { demo: false, connectors: [UPLOAD_CONNECTOR] });
+    if (key === "GET /consents") return this.json(route, 200, { permissions: this.consents.map(permissionOf), truncated: false });
+    if (key === "POST /consents/:cid/revoke") return this.revokeById(route, path.split("/")[2]);
     if (key === "POST /consents") return this.grant(route, JSON.parse(request.postData() ?? "{}"));
     if (key === "POST /consents/revoke") return this.revoke(route, JSON.parse(request.postData() ?? "{}"));
     if (key === "POST /cases/:id/documents") return this.upload(route, request.headers());
@@ -186,6 +208,17 @@ export class FakeBff {
       this.documents = this.documents.map((doc) => (doc.id === body.documentId && doc.stage === "awaiting_ocr_consent" ? { ...doc, nextAction: "start_ocr" } : doc));
     }
     return this.json(route, existing ? 200 : 201, { consent, reused: Boolean(existing) });
+  }
+
+  /** Mirrors consents.revokeById: the backend forgets the grant; taking back the storage permission marks documents for deletion. */
+  private revokeById(route: Route, id: string) {
+    const consent = this.consents.find((c) => c.grantId === id);
+    if (!consent) return this.error(route, 404, "CONSENT_NOT_FOUND", false);
+    this.consents = this.consents.filter((c) => c.grantId !== id);
+    const reset = (doc: DocumentView) => docAt(doc.stage === "readable" ? "awaiting_ocr_consent" : doc.stage, { id: doc.id, byteSize: doc.byteSize, documentKind: doc.documentKind, uploadedAt: doc.uploadedAt });
+    if (consent.scope === "ocr_sarvam") this.documents = this.documents.map((doc) => (consent.documentIds.includes(doc.id) ? reset(doc) : doc));
+    if (consent.scope === "collect") this.documents = this.documents.map((doc) => docAt("deleting", { id: doc.id, byteSize: doc.byteSize, documentKind: doc.documentKind, uploadedAt: doc.uploadedAt }));
+    return this.json(route, 200, { revoked: 1 });
   }
 
   private revoke(route: Route, body: { scope: ConsentView["scope"]; documentId?: string; documentIds?: string[] }) {

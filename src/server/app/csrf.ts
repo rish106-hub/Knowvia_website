@@ -8,7 +8,12 @@ const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
 export function assertCsrf(request: Request, allowedOrigins: string[], { markerOnGet = false }: { markerOnGet?: boolean } = {}): void {
   if (SAFE_METHODS.has(request.method.toUpperCase())) {
-    if (markerOnGet && request.headers.get("x-knowvia-app") !== "1") throw appError(403, "CSRF_BLOCKED");
+    if (markerOnGet) {
+      if (request.headers.get("x-knowvia-app") !== "1") throw appError(403, "CSRF_BLOCKED");
+      // Browsers leave Origin off a same-origin GET, so an absent Origin passes; one that is present must be an app origin.
+      const origin = request.headers.get("origin");
+      if (origin !== null && !allowedOrigins.includes(origin)) throw appError(403, "CSRF_BLOCKED");
+    }
     return;
   }
   const origin = request.headers.get("origin");

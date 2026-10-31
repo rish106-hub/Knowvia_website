@@ -74,6 +74,45 @@ export type BackendOcrJob = z.infer<typeof ocrJob>;
 const ocrEnvelope = z.object({ job: ocrJob }).loose();
 
 const caseRecord = z.object({ id: z.string() }).loose();
+
+// GET /api/v1/households/{id}/cases (run C). Newest first. Extra fields are ignored.
+const caseListItem = z
+  .object({
+    id: z.string(),
+    triggerType: z.string().nullish(),
+    status: z.string(),
+    emergencyMode: z.boolean().nullish(),
+    createdAt: z.string().nullish(),
+    updatedAt: z.string().nullish(),
+  })
+  .loose();
+const caseList = z.object({ cases: z.array(caseListItem), truncated: z.boolean().optional() }).loose();
+export type BackendCaseSummary = z.infer<typeof caseListItem>;
+
+// GET /api/v1/households/{id}/consents (run C). The scopes are read here and turned into a label; they never leave the BFF.
+const consentScopeRecord = z
+  .object({
+    resourceType: z.string().nullish(),
+    resourceId: z.string().nullish(),
+    action: z.string().nullish(),
+    dataCategory: z.string().nullish(),
+    recipient: z.string().nullish(),
+  })
+  .loose();
+const consentListItem = z
+  .object({
+    id: z.string(),
+    purpose: z.string().nullish(),
+    grantedToActor: z.string().nullish(),
+    grantedAt: z.string(),
+    expiresAt: z.string().nullish(),
+    revokedAt: z.string().nullish(),
+    status: z.enum(["active", "expired", "revoked"]),
+    scopes: z.array(consentScopeRecord),
+  })
+  .loose();
+const consentList = z.object({ consents: z.array(consentListItem), truncated: z.boolean().optional() }).loose();
+export type BackendConsentRecord = z.infer<typeof consentListItem>;
 const grantRecord = z.object({ id: z.string() }).loose();
 
 export type ConsentGrantBody = {
@@ -269,7 +308,18 @@ export function createBackendClient(options: BackendClientOptions) {
       await send({ method: "POST", path: `/api/v1/consents/${enc(grantId)}/revoke`, token, json: { reason: reason ?? null } });
     },
 
+    /** Every consent the signed-in adult has given in this household, newest first. Capped by the backend at 100. */
+    async listConsents(token: string, householdId: string, limit = 100): Promise<{ consents: BackendConsentRecord[]; truncated: boolean }> {
+      const body = parse(consentList, await send({ method: "GET", path: `/api/v1/households/${enc(householdId)}/consents?limit=${limit}`, token }));
+      return { consents: body.consents, truncated: body.truncated === true };
+    },
+
     // --- cases ---
+    /** The cases this adult opened in this household, newest first. */
+    async listCases(token: string, householdId: string, limit = 50): Promise<{ cases: BackendCaseSummary[]; truncated: boolean }> {
+      const body = parse(caseList, await send({ method: "GET", path: `/api/v1/households/${enc(householdId)}/cases?limit=${limit}`, token }));
+      return { cases: body.cases, truncated: body.truncated === true };
+    },
     async createCase(token: string, body: { householdId: string; subjectMemberId: string; triggerType: string }): Promise<{ id: string }> {
       return parse(caseRecord, await send({ method: "POST", path: "/api/v1/cases", token, json: body }));
     },

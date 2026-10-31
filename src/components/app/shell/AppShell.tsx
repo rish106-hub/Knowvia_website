@@ -60,6 +60,7 @@ function Chrome({ children }: { children: ReactNode }) {
               <nav className="kva-nav" aria-label="App">
                 {link("/app", "Home")}
                 {link("/app/documents", "Documents")}
+                {link("/app/permissions", "Permissions")}
               </nav>
               <div className="kva-nav">
                 <button type="button" onClick={() => void onSignOut()} aria-disabled={signingOut || undefined}>

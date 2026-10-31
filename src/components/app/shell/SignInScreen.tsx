@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { AppApiError, appFetch } from "@/lib/app-client";
-import type { SessionView } from "@/lib/app-contract";
+import type { IdentityProviderKind, SessionView } from "@/lib/app-contract";
+import { useConnectors } from "../blocks/useConnectors";
 import { Button, ButtonLink, Field, Notice } from "../ui";
 import { errorCopy, isSignInUnavailable } from "./error-copy";
 import { asApiError, useApp } from "./session-context";
@@ -11,6 +12,16 @@ import { asApiError, useApp } from "./session-context";
 export type SignInReason = "expired" | "signed_out" | null;
 
 type Failure = { kind: "unavailable" } | { kind: "error"; error: AppApiError };
+
+// Demo builds only. Each of these is a typed stub: the BFF answers 501 IDENTITY_NOT_IMPLEMENTED. Real users never see them.
+// The address is a reserved synthetic one, sent only because the request shape needs an email; the stub ignores it.
+const STUB_SIGN_INS: ReadonlyArray<{ provider: IdentityProviderKind; label: string }> = [
+  { provider: "google", label: "Continue with Google" },
+  { provider: "microsoft", label: "Continue with Microsoft" },
+  { provider: "apple", label: "Continue with Apple" },
+  { provider: "phone_otp", label: "Use my mobile number" },
+];
+const STUB_EMAIL = "stub@example.test";
 
 export function SignInScreen({ reason }: { reason: SignInReason }) {
   const { state, signedIn } = useApp();
@@ -22,6 +33,9 @@ export function SignInScreen({ reason }: { reason: SignInReason }) {
   const [emailError, setEmailError] = useState<string | null>(null);
 
   const justSignedIn = useRef(false);
+  const connectors = useConnectors();
+  const demo = connectors.status === "ready" && connectors.data.demo;
+  const [stubNotice, setStubNotice] = useState<string | null>(null);
 
   // A signed-in visitor has no business here (unless we just signed them in and are already navigating on).
   useEffect(() => {
@@ -49,12 +63,27 @@ export function SignInScreen({ reason }: { reason: SignInReason }) {
       });
       justSignedIn.current = true;
       signedIn(session);
-      router.push("/app/documents");
+      // More than one way to add a document (demo builds): show them. Otherwise go straight to the upload panel.
+      router.push(demo ? "/app/connect" : "/app/documents");
     } catch (caught) {
       const error = asApiError(caught);
       if (isSignInUnavailable(error)) setFailure({ kind: "unavailable" });
       else if (error.code === "INVALID_REQUEST") setEmailError("That email address was not accepted. Check it and try again.");
       else setFailure({ kind: "error", error });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onStub(provider: IdentityProviderKind) {
+    if (busy) return;
+    setBusy(true);
+    setStubNotice(null);
+    try {
+      await appFetch<SessionView>("/session", { method: "POST", json: { provider, email: STUB_EMAIL } });
+    } catch (caught) {
+      const error = asApiError(caught);
+      setStubNotice(isSignInUnavailable(error) ? "That sign-in is not available yet. This demo preview only shows where it will go." : errorCopy(error).message);
     } finally {
       setBusy(false);
     }
@@ -110,6 +139,19 @@ export function SignInScreen({ reason }: { reason: SignInReason }) {
           <Button type="submit" block busy={busy}>
             Continue with development sign-in
           </Button>
+          {demo ? (
+            <div className="kva-stack" data-testid="stub-sign-ins">
+              <p className="kva-p kva-small kva-muted">Demo preview only. None of these works yet.</p>
+              {STUB_SIGN_INS.map((stub) => (
+                <Button key={stub.provider} variant="secondary" block busy={busy} onClick={() => void onStub(stub.provider)}>
+                  {stub.label}
+                </Button>
+              ))}
+              <div role="status" aria-live="polite">
+                {stubNotice ? <Notice tone="info" live="off">{stubNotice}</Notice> : null}
+              </div>
+            </div>
+          ) : null}
         </form>
       )}
     </>

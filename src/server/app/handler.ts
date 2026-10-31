@@ -2,8 +2,9 @@
 // so it is testable without Next. The Next route files in src/app/api/app/** are thin wrappers (see runtime.ts).
 // PROVISIONAL: identity (D1) and topology (D2) are OPEN. Verified against a FAKE backend only.
 import { z } from "zod";
-import { createBackendClient, type BackendClient, type FetchLike } from "./backend-client";
-import { buildConsentGrant, CONSENT_NOTICES } from "./consent-scopes";
+import { createBackendClient, type BackendClient, type BackendConsentRecord, type FetchLike } from "./backend-client";
+import { findConnector, listConnectors } from "./connectors";
+import { buildConsentGrant, CONSENT_NOTICES, GEMINI_RECIPIENT, SARVAM_RECIPIENT } from "./consent-scopes";
 import {
   askQuestionRequestSchema,
   catalogueReviewRequestSchema,
@@ -16,6 +17,8 @@ import {
   type ConsentView,
   type DocumentView,
   type Overview,
+  type PermissionKind,
+  type PermissionView,
   type SessionView,
 } from "./contract";
 import { assertCsrf } from "./csrf";
@@ -152,6 +155,25 @@ function toConsentView(consent: StateConsent): ConsentView {
   return { scope: consent.scope, grantId: consent.id, documentIds: consent.docs, grantedAt: consent.at, noticeStatus: "draft_needs_legal_review" };
 }
 
+/**
+ * documentScan.mode from the backend integrations report, or null when it cannot be read. This only decides which words
+ * the UI shows for a document that is still waiting for checks, so a failure to read it must not break the screen.
+ */
+async function readScanMode(ctx: Ctx): Promise<string | null> {
+  try {
+    const parsed = z.object({ documentScan: z.object({ mode: z.string() }).loose() }).loose().safeParse(await ctx.backend.getIntegrations(ctx.session.token));
+    return parsed.success ? parsed.data.documentScan.mode : null;
+  } catch (error) {
+    if (error instanceof AppError) {
+      if (error.clearSession) throw error;
+      return null;
+    }
+    throw error;
+  }
+}
+
+const needsScanMode = (documents: Array<{ status: string }>) => documents.some((document) => document.status === "received_pending_checks");
+
 const CONSENT_LOST_CODES = new Set(["CONSENT_REQUIRED", "CONSENT_SCOPE_REQUIRED", "OCR_AUTHORIZATION_REQUIRED", "DOCUMENT_NOT_OCR_READY"]);
 
 /** Lists the case documents and composes UI stages, refreshing each known OCR job (idempotent, read-like). */
@@ -167,6 +189,7 @@ async function loadDocumentViews(ctx: Ctx, caseId: string): Promise<{ documents:
     const inventory = await backend.getDeletionInventory(session.token, caseId);
     return { documents: inventory.documents.map((document) => composeDocumentView({ document, ocrJob: null, ocrConsent: false })), restricted: true };
   }
+  const scanMode = needsScanMode(list.documents) ? await readScanMode(ctx) : null;
   const documents = await Promise.all(
     list.documents.map(async (document) => {
       const grant = findConsent(state, "ocr_sarvam", document.id);
@@ -181,7 +204,7 @@ async function loadDocumentViews(ctx: Ctx, caseId: string): Promise<{ documents:
           else if (!(error instanceof AppError && error.code === "OCR_JOB_NOT_FOUND")) throw error;
         }
       }
-      return composeDocumentView({ document, ocrJob, ocrConsent });
+      return composeDocumentView({ document, ocrJob, ocrConsent, scanMode });
     }),
   );
   return { documents, restricted: false };
@@ -205,6 +228,79 @@ function addConsent(ctx: Ctx, consent: StateConsent) {
 
 function dropConsent(ctx: Ctx, id: string) {
   ctx.state.consents = ctx.state.consents.filter((c) => c.id !== id);
+  ctx.markState();
+}
+
+const SAFE_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
+
+function permissionKind(record: BackendConsentRecord): PermissionKind {
+  const hasRecipient = (recipient: string) => record.grantedToActor === recipient || record.scopes.some((scope) => scope.recipient === recipient);
+  if (hasRecipient(SARVAM_RECIPIENT)) return "read_document";
+  if (hasRecipient(GEMINI_RECIPIENT)) return "answer_questions";
+  if (record.scopes.some((scope) => scope.resourceType === "document" && scope.action === "collect")) return "store_documents";
+  return "other";
+}
+
+/** DRAFT wording, needs legal review. */
+function permissionLabel(kind: PermissionKind, documentCount: number): string {
+  const documents = `${documentCount} ${documentCount === 1 ? "document" : "documents"}`;
+  if (kind === "store_documents") return "Keep the PDFs you add";
+  if (kind === "read_document") return documentCount > 0 ? `Read ${documents} with the reading service (OCR)` : "Read a document with the reading service (OCR)";
+  if (kind === "answer_questions") return documentCount > 0 ? `Use ${documents} to answer your questions` : "Use documents to answer your questions";
+  return "A permission you gave earlier";
+}
+
+/** Turns a backend consent into a labelled view. The raw scopes, recipients and household id stay in the BFF. */
+function toPermissionView(record: BackendConsentRecord): PermissionView {
+  const kind = permissionKind(record);
+  const documentIds = [
+    ...new Set(
+      record.scopes
+        .filter((scope) => scope.resourceType === "document" && typeof scope.resourceId === "string" && SAFE_ID.test(scope.resourceId))
+        .map((scope) => scope.resourceId as string),
+    ),
+  ];
+  return {
+    id: record.id,
+    kind,
+    label: permissionLabel(kind, documentIds.length),
+    grantedAt: record.grantedAt,
+    expiresAt: record.expiresAt ?? null,
+    status: record.status,
+    documentIds,
+    noticeStatus: "draft_needs_legal_review",
+  };
+}
+
+/** After a revoke (or a backend "already gone"): forget the grant here and the OCR jobs that depended on it. */
+function forgetConsent(ctx: Ctx, consentId: string) {
+  const known = ctx.state.consents.find((c) => c.id === consentId);
+  dropConsent(ctx, consentId);
+  // The backend erases derived data when consent is revoked (backend invariant, not verified here).
+  if (known?.scope === "ocr_sarvam") for (const doc of known.docs) delete ctx.state.ocrJobs[doc];
+  // Taking back the store-documents permission (the last one) marks every document uploaded under it for deletion on the
+  // backend, so nothing document-scoped is worth keeping here: no OCR job, no reading or question grant.
+  if (known?.scope === "collect" && !ctx.state.consents.some((c) => c.scope === "collect")) {
+    ctx.state.ocrJobs = {};
+    ctx.state.consents = ctx.state.consents.filter((c) => c.scope === "collect");
+  }
+}
+
+/** A signed-in adult whose state cookie lost the case: take the newest case that is still open from the backend. */
+async function adoptOpenCase(ctx: Ctx): Promise<void> {
+  let cases;
+  try {
+    ({ cases } = await ctx.backend.listCases(ctx.session.token, ctx.session.householdId));
+  } catch (error) {
+    // Recovery is a convenience: if the list cannot be read, carry on with no case rather than failing the whole overview.
+    if (error instanceof AppError && !error.clearSession) return;
+    throw error;
+  }
+  const open = cases
+    .filter((candidate) => candidate.status !== "closed" && candidate.status !== "revoked" && SAFE_ID.test(candidate.id))
+    .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
+  if (open.length === 0) return;
+  ctx.state.caseId = open[0].id;
   ctx.markState();
 }
 
@@ -276,6 +372,7 @@ const ROUTES = {
       const parsedMatrix = householdMatrix.safeParse(await ctx.backend.getHousehold(session.token, session.householdId));
       if (!parsedMatrix.success) throw appError(502, "BACKEND_BAD_RESPONSE", { retryable: false });
       const matrix = parsedMatrix.data;
+      if (!state.caseId) await adoptOpenCase(ctx);
       const loaded = state.caseId ? await loadDocumentViews(ctx, state.caseId) : { documents: [], restricted: false };
       const documents = loaded.documents;
       const overview: Overview = {
@@ -314,7 +411,56 @@ const ROUTES = {
     },
   },
 
+  // --- connectors (descriptors only; nothing here contacts a provider) ---
+  "connectors.list": {
+    auth: false,
+    async run(ctx) {
+      return { status: 200, body: { demo: ctx.config.demoData, connectors: listConnectors(ctx.config.demoData) } };
+    },
+  },
+  "connectors.grant": {
+    auth: true,
+    async run(ctx) {
+      const connector = findConnector(pathId(ctx, "connectorId"));
+      if (!connector) throw appError(404, "CONNECTOR_NOT_FOUND", { retryable: false });
+      // NOT_IMPLEMENTED: no connector grants anything yet. Uploads go through the document route, not through here.
+      throw appError(501, "CONNECTOR_NOT_AVAILABLE", { retryable: false });
+    },
+  },
+  "voice.intake": {
+    auth: false,
+    async run() {
+      // NOT_IMPLEMENTED: no audio is accepted, stored or sent anywhere.
+      throw appError(501, "VOICE_INTAKE_NOT_IMPLEMENTED", { retryable: false });
+    },
+  },
+
   // --- consent ---
+  "consents.list": {
+    auth: true,
+    markerOnGet: true,
+    async run(ctx) {
+      const { consents, truncated } = await ctx.backend.listConsents(ctx.session.token, ctx.session.householdId);
+      // Only what can still be taken back. Newest first, as the backend returns it.
+      return { status: 200, body: { permissions: consents.filter((record) => record.status === "active").map(toPermissionView), truncated } };
+    },
+  },
+  "consents.revokeById": {
+    auth: true,
+    async run(ctx) {
+      const consentId = pathId(ctx, "consentId");
+      try {
+        // The backend checks that this adult is the subject and has write access to the household (404 CONSENT_NOT_FOUND otherwise).
+        await ctx.backend.revokeConsent(ctx.session.token, consentId, "user_revoked");
+      } catch (error) {
+        // Not found on the backend: the record here is stale, so forget it, but still tell the caller it was not found.
+        if (error instanceof AppError && error.code === "CONSENT_NOT_FOUND") forgetConsent(ctx, consentId);
+        throw error;
+      }
+      forgetConsent(ctx, consentId);
+      return { status: 200, body: { revoked: 1 } };
+    },
+  },
   "consents.notices": {
     auth: false,
     async run() {
@@ -426,7 +572,8 @@ const ROUTES = {
           else if (!(error instanceof AppError && error.code === "OCR_JOB_NOT_FOUND")) throw error;
         }
       }
-      return { status: 200, body: { document: composeDocumentView({ document, ocrJob, ocrConsent }) } };
+      const scanMode = needsScanMode([document]) ? await readScanMode(ctx) : null;
+      return { status: 200, body: { document: composeDocumentView({ document, ocrJob, ocrConsent, scanMode }) } };
     },
   },
   "documents.delete": {

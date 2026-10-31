@@ -14,7 +14,17 @@ export type StageInfo = {
   indeterminate: boolean;
 };
 
-export const AWAITING_CHECKS_TEXT = "Waiting for security checks. This can take a while.";
+export const AWAITING_CHECKS_TEXT = "Waiting for security checks. This usually needs no action.";
+
+/** DRAFT, needs legal review. Shown when the backend reports that scanning is switched off (DocumentView.note = scan_disabled). */
+export const SCAN_OFF_TEXT =
+  "Security checks are switched off on this preview. Your document is stored safely but cannot be read yet. You can delete it at any time.";
+
+/** The sentence under a document row. Only awaiting_checks differs from stageInfo(): it can say that scanning is off. */
+export function stageDescription(doc: Pick<DocumentView, "stage" | "note">): string {
+  if (doc.stage === "awaiting_checks") return doc.note === "scan_disabled" ? SCAN_OFF_TEXT : AWAITING_CHECKS_TEXT;
+  return stageInfo(doc.stage).description;
+}
 
 const STAGES: Record<DocumentStage, StageInfo> = {
   received: { label: "Received", tone: "pending", description: "Received. Security checks come next.", indeterminate: false },
@@ -58,12 +68,14 @@ export function stageInfo(stage: DocumentStage): StageInfo {
 }
 
 const KIND_LABELS: Record<DocumentKind, string> = {
+  member_card: "Health card (e-card)",
   policy_wording: "Policy wording",
   policy_schedule: "Policy schedule",
   endorsement: "Endorsement",
 };
 
 export const KIND_CHOICES: ReadonlyArray<{ value: DocumentKind; label: string; hint: string }> = [
+  { value: "member_card", label: "Health card (e-card)", hint: "The card from your insurer or employer. It shows your member number." },
   { value: "policy_schedule", label: "Policy schedule", hint: "The summary page: who is covered, the sum insured, dates." },
   { value: "policy_wording", label: "Policy wording", hint: "The full terms and conditions." },
   { value: "endorsement", label: "Endorsement", hint: "A change added to a policy after it was issued." },

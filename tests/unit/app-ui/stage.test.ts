@@ -23,7 +23,7 @@ describe("stageInfo", () => {
   });
 
   it("awaiting_checks has no ETA and says so plainly", () => {
-    expect(stageInfo("awaiting_checks").description).toBe("Waiting for security checks. This can take a while.");
+    expect(stageInfo("awaiting_checks").description).toBe("Waiting for security checks. This usually needs no action.");
     expect(AWAITING_CHECKS_TEXT).toBe(stageInfo("awaiting_checks").description);
     expect(stageInfo("awaiting_checks").description).not.toMatch(/\d|minute|second|soon/i);
   });

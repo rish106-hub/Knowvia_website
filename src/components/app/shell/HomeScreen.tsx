@@ -57,7 +57,7 @@ function HomeInner({ overview }: { overview: Overview }) {
         </div>
       </section>
 
-      <PermissionsPanel overview={overview} />
+      <PermissionsPanel />
     </>
   );
 }

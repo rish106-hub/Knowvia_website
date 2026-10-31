@@ -3,6 +3,10 @@
 export type {
   AskQuestionRequest,
   CatalogueReviewRequest,
+  ConnectorAvailability,
+  ConnectorId,
+  ConnectorList,
+  ConnectorView,
   ConsentNotice,
   ConsentScope,
   ConsentView,
@@ -19,6 +23,9 @@ export type {
   NextAction,
   Overview,
   PassThrough,
+  PermissionKind,
+  PermissionList,
+  PermissionView,
   RevokeConsentRequest,
   SessionView,
 } from "../server/app/contract";
