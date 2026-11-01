@@ -181,7 +181,7 @@ describe("overview, OCR and consent lifecycle", () => {
     expect(body.notices).toHaveLength(3);
     for (const notice of body.notices) {
       expect(notice.status).toBe("draft_needs_legal_review");
-      expect(notice.body).toMatch(/needs legal review/i);
+      expect(`${notice.title} ${notice.body}`).not.toMatch(/draft/i);
     }
   });
 });

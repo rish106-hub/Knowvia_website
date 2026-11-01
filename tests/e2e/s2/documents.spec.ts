@@ -24,13 +24,13 @@ test.describe("empty and consent", () => {
     await expect(page.getByText(/email you|notify|invite|encrypted|JPG|PNG/i)).toHaveCount(0);
   });
 
-  test("the collect notice comes from the BFF, is marked draft, and there is no bundled terms checkbox", async ({ page }) => {
+  test("the collect notice comes from the BFF and there is no bundled terms checkbox", async ({ page }) => {
     const bff = new FakeBff({ documents: [] });
     await open(page, bff);
     const notice = page.locator('[data-consent-scope="collect"]');
     await expect(notice.getByRole("heading", { name: "Store your PDF" })).toBeVisible();
-    await expect(notice).toContainText("Draft: Knowvia keeps the PDF you add");
-    await expect(notice.getByText("Draft wording, pending legal review")).toBeVisible();
+    await expect(notice).toContainText("Knowvia keeps the PDF you add");
+    await expect(notice.locator("[data-draft-mark]")).toHaveCount(0);
     await expect(page.getByRole("checkbox")).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Allow and add this PDF" })).toBeVisible();
     // Consent is never granted just by looking at the page.
@@ -294,7 +294,6 @@ test.describe("reading (OCR)", () => {
     const dialog = page.getByRole("dialog", { name: "Let Knowvia read this PDF?" });
     await expect(dialog).toBeVisible();
     await expect(dialog.getByRole("heading", { name: "Read this PDF with an outside service" })).toBeVisible();
-    await expect(dialog.getByText("Draft wording, pending legal review")).toBeVisible();
     await expect(dialog.getByText("This permission covers this one PDF.")).toBeVisible();
     expect(bff.callsTo("POST /consents")).toHaveLength(0);
     await dialog.getByRole("button", { name: "Allow and read this PDF" }).click();
@@ -471,7 +470,6 @@ test.describe("delete and revoke", () => {
     await page.goto("/app");
     const list = page.locator("#kva-permissions-h + p + p + p + ul, section[aria-labelledby='kva-permissions-h'] ul");
     await expect(list.locator("li")).toHaveCount(2);
-    await expect(list.getByText("Draft wording, pending legal review").first()).toBeVisible();
 
     await page.getByRole("button", { name: /Withdraw permission: Read policy schedule/ }).click();
     const dialog = page.getByRole("dialog", { name: "Withdraw this permission?" });

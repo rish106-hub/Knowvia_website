@@ -84,10 +84,7 @@ export function SiteFooter() {
         <div style={{borderTop: "1px solid rgba(255,255,255,0.16)", paddingTop: "24px", display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: "12px 48px", fontSize: "15px", lineHeight: "1.5"}}>
           <div style={{flex: "1 1 520px", display: "flex", flexDirection: "column", gap: "12px", maxWidth: "880px"}}>
             <p style={{margin: "0"}}>
-              {"Knowvia is not an insurer, broker or TPA, and does not decide claims."}
-            </p>
-            <p style={{margin: "0"}}>
-              {"Where our numbers come from: more than 50 recorded conversations with people in Delhi, Mumbai, Bengaluru, Chennai and many other Tier 1, 2 and 3 cities across India. Names are withheld. Figures are what people told us and what their documents showed. They are examples, not averages."}
+              {"Where our numbers come from: more than 50 recorded conversations with people in Delhi, Mumbai, Bengaluru, Chennai and many other Tier 1, 2 and 3 cities across India."}
             </p>
           </div>
           <p style={{margin: "0", alignSelf: "flex-end"}}>

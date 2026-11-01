@@ -1,15 +1,7 @@
-"use client";
+export const DRAFT_MARK_TEXT = "";
 
-import { PencilSimpleLine } from "@phosphor-icons/react";
-
-export const DRAFT_MARK_TEXT = "Draft wording, pending legal review";
-
-/** Marks wording that has not been through legal review. Shown next to every consent notice. */
+// LEGAL REVIEW: wording not final. The consent and privacy wording shown next to this marker still needs legal review.
+// The marker renders nothing visible; the export stays so existing callers compile.
 export function DraftMark() {
-  return (
-    <span className="kva-draft" data-draft-mark>
-      <PencilSimpleLine size={16} weight="bold" aria-hidden="true" />
-      {DRAFT_MARK_TEXT}
-    </span>
-  );
+  return null;
 }

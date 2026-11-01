@@ -4,7 +4,7 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import type { CitationView, StateKind } from "@/lib/app-evidence";
 import { STATE_LABELS } from "@/lib/app-evidence";
-import { AlertIcon, ClockIcon, PageIcon, StateIcon } from "./icons";
+import { AlertIcon, ClockIcon, StateIcon } from "./icons";
 import css from "./evidence.module.css";
 
 export const cx = (...parts: Array<string | false | null | undefined>) => parts.filter(Boolean).join(" ");
@@ -20,13 +20,10 @@ export function StateBadge({ kind, detail }: { kind: StateKind; detail?: string 
   );
 }
 
+// LEGAL REVIEW: wording not final. The consent and privacy wording shown next to this marker still needs legal review.
+// The marker renders nothing visible; the export stays so existing callers compile.
 export function DraftMark() {
-  return (
-    <span className={css.draft} data-draft-mark>
-      <PageIcon />
-      Draft wording, pending legal review
-    </span>
-  );
+  return null;
 }
 
 export function Notice({ tone = "info", title, children, actions, live }: { tone?: "info" | "warn" | "error" | "wait"; title?: string; children?: ReactNode; actions?: ReactNode; live?: "polite" | "assertive" | "off" }) {

@@ -21,9 +21,6 @@ export function OnboardingCoverMobile() {
             {"Knowvia"}
           </span>
         </div>
-        <span style={{display: "inline-flex", alignItems: "center", height: "28px", padding: "0 10px", borderRadius: "6px", background: "#E6EFEC", color: "#163F42", fontSize: "15px", fontWeight: "600"}}>
-          {"Example"}
-        </span>
       </div>
       <div style={{padding: "24px 20px 32px", display: "flex", flexDirection: "column", gap: "16px"}}>
         <h1 style={{margin: "0", fontFamily: "var(--font-display), 'Iowan Old Style', Georgia, serif", fontWeight: "400", fontSize: "32px", lineHeight: "1.15", letterSpacing: "-0.01em", color: "#163F42"}}>

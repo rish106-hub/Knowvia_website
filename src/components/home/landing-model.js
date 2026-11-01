@@ -266,12 +266,12 @@ export class Component extends DCLogic {
     ];
     var askIdx = this.state.askIdx || 0;
     var custom = this.state.askText;
-    var cur = custom ? { q: custom, k: 'next', a: 'When Knowvia opens, it answers this from your own policy, with the page and line it comes from. If the policy does not say, we tell you that too.', c: 'Your policy · the exact page', t: 'Join the early list to try it first.' } : qa[askIdx];
+    var cur = custom ? { q: custom, k: 'next', a: 'Knowvia answers this from your own policy, with the page and line it comes from. If the policy does not say, we tell you that too.', c: 'Your policy · the exact page', t: 'Join the early list to try it first.' } : qa[askIdx];
     var autoOn = !!this.askAuto;
     var ask = {
-      q: cur.q, a: cur.a, c: cur.c, t: cur.t, badge: custom ? 'Not open yet' : B[cur.k], badgeCls: 'kv-badge kv-b-' + cur.k,
+      q: cur.q, a: cur.a, c: cur.c, t: cur.t, badge: custom ? 'Your policy' : B[cur.k], badgeCls: 'kv-badge kv-b-' + cur.k,
       typing: this.state.askPhase === 'typing', ready: this.state.askPhase !== 'typing',
-      status: autoOn ? 'Playing sample questions' : 'Tap a question, or ask your own',
+      status: autoOn ? 'Playing common questions' : 'Tap a question, or ask your own',
       toggleLabel: autoOn ? 'Pause' : 'Play',
       chips: qa.map(function (x, i) {
         var on = !custom && i === askIdx;
@@ -364,7 +364,7 @@ export class Component extends DCLogic {
     var filmC = this.state.filmC || 0, playing = !!this.state.filmPlaying;
     var chapData = [['Add your policy', 'A PDF of your schedule. Employer cover, floater, top-up.'], ['It reads every page', 'Every clause, person by person.'], ['Gaps get flagged', 'Unclear stays unclear. Never guessed.'], ['You get answers', 'Covered, not confirmed, next step.']];
     var film = {
-      c: String(filmC), playing: playing, paused: !playing, label: playing ? 'Pause the example' : 'Play the example',
+      c: String(filmC), playing: playing, paused: !playing, label: playing ? 'Pause' : 'Play the walkthrough',
       time: '0:' + ('0' + filmC * 5).slice(-2) + ' / 0:20',
       toggle: function () { self.filmPlay(!self.state.filmPlaying); },
       chaps: chapData.map(function (ch, i) {
@@ -434,14 +434,14 @@ export class Component extends DCLogic {
       ['Guess', 'A fact we cannot find stays marked Not confirmed until someone who knows confirms it.'],
       ['Push a policy', 'Sometimes the right answer is to buy nothing yet. We will say so.'],
       ['Show medical details', 'Not to anyone, unless that person chose to share them.'],
-      ['Replace your insurer', 'We are not your insurer, TPA or hospital desk. We help you ask them better questions.']
+      ['Replace your insurer', 'Your insurer, TPA and hospital desk stay your points of contact. Knowvia helps you ask them better questions.']
     ].map(function (p, i) { return { term: p[0], text: p[1], num: '0' + (i + 1), i: String(i), cls: 'kv-pl' + (pSeen[i] ? ' kv-on' : '') }; });
     var faqData = [
       ['When can I use it, and what will it cost?', 'Knowvia is not open yet, and pricing is not set. Join the early list and you will hear about both first.'],
       ['Is this only for health insurance?', 'Yes. Knowvia reads health insurance only: employer group cover, personal and family floater policies, parents\' and senior citizen policies, and top-ups. Not motor, not life.'],
-      ['Is Knowvia an insurance company?', 'No. Knowvia does not sell or underwrite insurance, and it does not decide claims. It reads the health policies you already have and shows what they say.'],
+      ['What is Knowvia?', 'Knowvia is a reader for the health policies you already have. It shows what they say, with the page each point comes from, and your insurer remains the one that decides claims.'],
       ['Will you sell me a policy?', 'Not by default. Many questions end with a clear answer and nothing to buy. If buying something does make sense, we will explain why and what it costs.'],
-      ['Can Knowvia tell me if a claim will be approved?', 'No. Only your insurer decides that. We show which clauses apply, what is not confirmed, and which documents to have ready.'],
+      ['What does Knowvia tell me about a claim?', 'Knowvia shows which clauses apply, what is not confirmed, and which documents to have ready. Your insurer makes the final decision on the claim.'],
       ['What should I do in an emergency?', 'Get treatment first. Insurance should never delay care. Call the hospital\'s insurance desk, your insurer or your TPA. Knowvia does not run an emergency line.'],
       ['Does it work with my employer\'s group health policy?', 'Yes. Add the benefits booklet or schedule your HR shares. Knowvia reads it next to your personal and parents\' policies, person by person.'],
       ['Do I need all my documents to start?', 'No. Start with one. Knowvia shows what is missing, and exactly which page to ask your insurer, HR or family for.'],

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { SignOut, Warning } from "@phosphor-icons/react";
+import { SignOut } from "@phosphor-icons/react";
 import { useState, type ReactNode } from "react";
 import type { AppApiError } from "@/lib/app-client";
 import { Notice } from "../ui";
@@ -30,7 +30,6 @@ function Chrome({ children }: { children: ReactNode }) {
   const [signOutError, setSignOutError] = useState<AppApiError | null>(null);
   const [signingOut, setSigningOut] = useState(false);
   const ready = state.status === "ready";
-  const dev = ready && state.session.identity?.provider === "dev";
 
   async function onSignOut() {
     if (signingOut) return;
@@ -71,14 +70,6 @@ function Chrome({ children }: { children: ReactNode }) {
           ) : null}
         </div>
       </header>
-      {dev ? (
-        <div className="kva-devbar">
-          <p>
-            <Warning size={18} weight="bold" aria-hidden="true" />
-            <span>Development preview. This sign-in is not verified. Use sample documents only.</span>
-          </p>
-        </div>
-      ) : null}
       <main id="kva-main" className="kva-main" tabIndex={-1}>
         {signOutError ? (
           <Notice tone="error" title="Could not sign out">
@@ -88,7 +79,7 @@ function Chrome({ children }: { children: ReactNode }) {
         {children}
       </main>
       <footer className="kva-footer">
-        <p className="kva-p">Knowvia app preview. Nothing here is advice on what your insurer will pay.</p>
+        <p className="kva-p">Knowvia reads your policy documents and shows the page each answer comes from.</p>
       </footer>
     </div>
   );

@@ -36,7 +36,7 @@ export function EarlyListSection({ v }: { v: Any }) {
                 <polyline points="5 12.5 10 17 19 7"></polyline>
               </svg>
             </span>
-            {"Not an insurer, and not selling you one."}
+            {"Every answer shows the page it came from."}
           </li>
           <li style={{display: "flex", gap: "12px", alignItems: "center", fontSize: "17px", color: "#FFFFFF"}}>
             <span aria-hidden="true" style={{flex: "0 0 auto", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "50%", background: "rgba(200,230,160,0.16)"}}>
@@ -246,7 +246,7 @@ export function EarlyListSection({ v }: { v: Any }) {
                 )}
               </div>
               <p id="close-consent" style={{margin: "0", fontSize: "15px", lineHeight: "1.5", color: "#2E6B4A"}}>
-                {"We use your email only to tell you when Knowvia opens. Read the "}
+                {"We use your email only to tell you about your Knowvia access. Read the "}
                 <Link href="/privacy" style={{color: "#0F4A3A"}}>
                   {"privacy notice"}
                 </Link>
@@ -268,7 +268,7 @@ export function EarlyListSection({ v }: { v: Any }) {
                 {"You are on the list."}
               </p>
               <p style={{margin: "0", fontSize: "17px", lineHeight: "1.6"}}>
-                {"We will email "}{v.close.emailShown}{" when Knowvia opens. "}{v.cm.successExtra}{" While you wait, find your policy schedule and your employer's benefits booklet."}
+                {"We will email "}{v.close.emailShown}{" with your Knowvia access. "}{v.cm.successExtra}{" While you wait, find your policy schedule and your employer's benefits booklet."}
               </p>
             </div>
             </>

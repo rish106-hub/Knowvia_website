@@ -48,8 +48,8 @@ export type PreviewView = {
 };
 
 const BANNERS: Record<Preview["assessmentState"], Banner> = {
-  evidence_summary_available: { tone: "summary", title: "Here is what your documents establish", body: "This is a summary of the documents, not a decision on any claim." },
-  conditional_evidence_summary: { tone: "partial", title: "Some of it is documented, some is still open", body: "What is missing could change the answer. Nothing here is a claim decision." },
+  evidence_summary_available: { tone: "summary", title: "Here is what your documents establish", body: "This is a summary of what the documents say, with the page each point comes from." },
+  conditional_evidence_summary: { tone: "partial", title: "Some of it is documented, some is still open", body: "What is missing could change the answer. Add it to firm this up." },
   insufficient_evidence: { tone: "empty", title: "Your documents do not settle this yet", body: "Nothing has been confirmed that answers your question. That is not the same as being excluded." },
   conflicting_evidence: { tone: "conflict", title: "Your documents disagree on something that matters", body: "We are not choosing between them. This needs a person to check the cited text." },
   source_revalidation_required: { tone: "recover", title: "A document behind this needs reading again", body: "It changed, was deleted, or permission ended. Read it again to see what it says now." },
