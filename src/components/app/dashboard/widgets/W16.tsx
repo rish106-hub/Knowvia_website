@@ -2,11 +2,12 @@
 
 import { ArrowRight, CheckCircle } from "@phosphor-icons/react";
 import { ButtonLink } from "../../ui";
-import { Card, type WidgetProps } from "../parts";
+import { Card, useAddHref, type WidgetProps } from "../parts";
 import css from "../dashboard.module.css";
 
 /** W16: what we still need, in order: e-card, policy schedule, policy wording. */
 export function W16({ state, data }: WidgetProps<"w16">) {
+  const addHref = useAddHref();
   if (state === "full") {
     return (
       <Card title="What we still need" widget="w16" state={state}>
@@ -26,7 +27,7 @@ export function W16({ state, data }: WidgetProps<"w16">) {
         ))}
       </ol>
       <div>
-        <ButtonLink href="/app/documents" size="sm" variant="secondary" icon={<ArrowRight size={18} weight="bold" aria-hidden="true" />}>
+        <ButtonLink href={addHref} size="sm" variant="secondary" icon={<ArrowRight size={18} weight="bold" aria-hidden="true" />}>
           Add documents
         </ButtonLink>
       </div>

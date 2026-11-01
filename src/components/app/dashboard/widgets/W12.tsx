@@ -2,7 +2,7 @@
 
 import { ArrowRight, CheckCircle, Hourglass } from "@phosphor-icons/react";
 import { ButtonLink } from "../../ui";
-import { Card, type WidgetProps } from "../parts";
+import { Card, useAddHref, type WidgetProps } from "../parts";
 import css from "../dashboard.module.css";
 
 /**
@@ -10,6 +10,7 @@ import css from "../dashboard.module.css";
  * Documents screen, so the button goes there. Nothing is a deadline and nothing counts down.
  */
 export function W12({ state, data }: WidgetProps<"w12">) {
+  const addHref = useAddHref();
   if (state === "empty" || data.action === "none") {
     return (
       <Card title="Do this next" widget="w12" state={state}>
@@ -35,7 +36,7 @@ export function W12({ state, data }: WidgetProps<"w12">) {
     <Card title="Do this next" widget="w12" state={state} tone="act">
       <p className={css.actTitle}>{data.label}</p>
       <div>
-        <ButtonLink href="/app/documents" icon={<ArrowRight size={20} weight="bold" aria-hidden="true" />}>
+        <ButtonLink href={data.action === "add_document" ? addHref : "/app/documents"} icon={<ArrowRight size={20} weight="bold" aria-hidden="true" />}>
           Go to documents
         </ButtonLink>
       </div>

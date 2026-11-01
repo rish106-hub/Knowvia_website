@@ -171,7 +171,19 @@
 @keyframes expand { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .careLink, .callButton, .disclosure { transition-duration: 0s; transition-delay: 0s; }
+  .careLink, .callButton, .disclosure, .detailLink, .backLink { transition-duration: 0s; transition-delay: 0s; }
   .careLink:active, .callButton:active, .disclosure:active { transform: none; }
   .arcDone, .passagesBody { animation: none; }
 }
+
+/* ---- links and page frames added in W-B2 ---- */
+.detailLink { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; min-height: 44px; color: var(--kv-harbour) !important; font-weight: 600; text-decoration: none; }
+.detailLink:hover { color: var(--kv-tide) !important; text-decoration: underline; }
+.backLink { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; min-height: 44px; color: var(--kv-harbour) !important; font-weight: 600; text-decoration: none; }
+.backLink:hover { color: var(--kv-tide) !important; }
+.demoBanner { margin: 0; padding: 10px 14px; border-radius: 10px; background: var(--kv-gold-tint); color: var(--kv-gold-ink); border: 1.5px dashed var(--kv-gold-ink); font-weight: 600; }
+.pageNarrow { display: flex; flex-direction: column; gap: 24px; min-width: 0; font-size: 17px; line-height: 1.5; }
+.pageTitle { margin: 0; font-family: var(--kv-font-display); font-weight: 600; font-size: 30px; line-height: 1.12; color: var(--kv-tide); text-wrap: balance; }
+.passageList { display: flex; flex-direction: column; gap: 12px; }
+.tickLine { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--kv-paper); border: 1px solid var(--kv-border); font-weight: 600; color: var(--kv-tide); }
+.actionRow { display: flex; flex-wrap: wrap; gap: 12px; }

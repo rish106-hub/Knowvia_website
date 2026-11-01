@@ -2,14 +2,17 @@
 
 import Link from "next/link";
 import { Siren } from "@phosphor-icons/react";
-import type { DashboardView, Overview, PassagesView } from "@/lib/app-contract";
+import type { ReactNode } from "react";
+import type { AppApiError } from "@/lib/app-client";
+import type { DashboardTopic, DashboardView, Overview, PassagesView } from "@/lib/app-contract";
 import { PermissionWithdrawnNotice } from "../documents/PermissionWithdrawnNotice";
 import { useStagePolling } from "../documents/useStagePolling";
 import { errorCopy } from "../shell/error-copy";
 import { useApp } from "../shell/session-context";
 import { Button, Notice } from "../ui";
 import { useDashboard } from "./useDashboard";
-import { refreshKey, widgetLayout, type EntryMode, type WidgetId } from "./view-model";
+import { AddHrefContext } from "./parts";
+import { addDocumentsHref, refreshKey, topicHref, widgetLayout, type EntryMode, type WidgetId } from "./view-model";
 import { W01 } from "./widgets/W01";
 import { W02 } from "./widgets/W02";
 import { W03 } from "./widgets/W03";
@@ -53,8 +56,41 @@ export function DashboardScreen({ overview, mode = "P" }: { overview: Overview; 
     );
   }
 
+  return (
+    <AddHrefContext.Provider value={addDocumentsHref(overview)}>
+      <DashboardBody
+        view={view}
+        mode={mode}
+        loadPassages={loadPassages}
+        onError={onError}
+        onRetry={retry}
+        error={error}
+        detailHref={topicHref}
+        top={<PermissionWithdrawnNotice overview={overview} />}
+      />
+    </AddHrefContext.Provider>
+  );
+}
+
+type BodyProps = {
+  view: DashboardView;
+  mode: EntryMode;
+  loadPassages?: (query: string) => Promise<PassagesView>;
+  onError: (error: unknown) => boolean;
+  onRetry: () => void;
+  /** The last refresh failed; `view` is then an older answer. */
+  error?: AppApiError | null;
+  detailHref?: (topic: DashboardTopic) => string;
+  /** Notices that sit under the header (for example the permission-withdrawn notice). */
+  top?: ReactNode;
+};
+
+/** The laid-out dashboard for a view the BFF (or the demo fixtures) composed. No fetching here. */
+export function DashboardBody({ view, mode, loadPassages, onError, onRetry, error = null, detailHref, top }: BodyProps) {
   const layout = widgetLayout(view, mode);
-  const render = (id: WidgetId) => <WidgetSlot key={id} id={id} view={view} prominent={mode === "E"} loadPassages={loadPassages} onError={onError} onRetry={retry} />;
+  const render = (id: WidgetId) => (
+    <WidgetSlot key={id} id={id} view={view} prominent={mode === "E"} loadPassages={loadPassages} onError={onError} onRetry={onRetry} detailHref={detailHref} />
+  );
 
   return (
     <div className={css.page} data-mode={mode}>
@@ -69,14 +105,14 @@ export function DashboardScreen({ overview, mode = "P" }: { overview: Overview; 
         </Link>
       </header>
 
-      <PermissionWithdrawnNotice overview={overview} />
+      {top}
       {view.scanNotice ? (
         <Notice tone="warning" title="Document checks are switched off" live="off">
           {view.scanNotice}
         </Notice>
       ) : null}
       {error ? (
-        <Notice tone="warning" title="This page may be out of date" live="off" actions={<Button size="sm" variant="secondary" onClick={retry}>Try again</Button>}>
+        <Notice tone="warning" title="This page may be out of date" live="off" actions={<Button size="sm" variant="secondary" onClick={onRetry}>Try again</Button>}>
           {errorCopy(error).message}
         </Notice>
       ) : null}
@@ -101,13 +137,15 @@ function WidgetSlot({
   loadPassages,
   onError,
   onRetry,
+  detailHref,
 }: {
   id: WidgetId;
   view: DashboardView;
   prominent: boolean;
-  loadPassages: (query: string) => Promise<PassagesView>;
+  loadPassages?: (query: string) => Promise<PassagesView>;
   onError: (error: unknown) => boolean;
   onRetry: () => void;
+  detailHref?: (topic: DashboardTopic) => string;
 }) {
   const w = view.widgets;
   switch (id) {
@@ -140,6 +178,6 @@ function WidgetSlot({
     case "w16":
       return <W16 {...w.w16} />;
     case "w17":
-      return <W17 {...w.w17} loadPassages={view.caseId ? loadPassages : undefined} onError={onError} onRetry={onRetry} />;
+      return <W17 {...w.w17} loadPassages={view.caseId ? loadPassages : undefined} onError={onError} onRetry={onRetry} detailHref={detailHref} />;
   }
 }

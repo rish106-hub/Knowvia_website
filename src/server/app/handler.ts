@@ -22,6 +22,7 @@ import {
   type SessionView,
 } from "./contract";
 import { assertCsrf } from "./csrf";
+import { buildDemoDashboard, isDemoScenario } from "./demo-data";
 import { buildDashboardView, toPassagesView, toReadFactsView, type ReadFactsInput } from "./dashboard-view";
 import { composeDocumentView } from "./document-view";
 import { AppConfigError, loadAppConfig, type AppConfig, type EnvSource } from "./env";
@@ -705,6 +706,16 @@ const ROUTES = {
       const { overview, scanMode } = await loadOverview(ctx);
       const [permissions, readFacts] = await Promise.all([loadPermissions(ctx), loadReadFacts(ctx, overview)]);
       return { status: 200, body: buildDashboardView({ overview, consents: permissions.consents, permissionsStatus: permissions.status, permissionsTruncated: permissions.truncated, scanMode, readFacts }) };
+    },
+  },
+  // Synthetic dashboards for looking at every state without real data. No session, no backend. Only while APP_DEMO_DATA is on
+  // (env.ts refuses it in production); otherwise it answers exactly like a path that does not exist.
+  "demo.get": {
+    auth: false,
+    async run(ctx) {
+      const scenario = ctx.params.scenario;
+      if (!ctx.config.demoData || !isDemoScenario(scenario)) throw appError(404, "NOT_FOUND", { retryable: false });
+      return { status: 200, body: buildDemoDashboard(scenario) };
     },
   },
   "integrations.get": {

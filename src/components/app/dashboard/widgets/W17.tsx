@@ -1,6 +1,7 @@
 "use client";
 
-import { CaretDown, CaretUp, MagnifyingGlass } from "@phosphor-icons/react";
+import Link from "next/link";
+import { ArrowRight, CaretDown, CaretUp, MagnifyingGlass } from "@phosphor-icons/react";
 import { useEffect, useId, useRef, useState } from "react";
 import type { AppApiError } from "@/lib/app-client";
 import type { DashboardTopicView, PassagesView } from "@/lib/app-contract";
@@ -18,6 +19,8 @@ type Props = WidgetProps<"w17"> & {
   /** Returns true when the error was a session error (the app signs out and redirects). */
   onError?: (error: unknown) => boolean;
   onRetry?: () => void;
+  /** Where a topic's own page is (S12). Absent: no link (the demo has no such page). */
+  detailHref?: (topic: DashboardTopicView["topic"]) => string;
 };
 
 /**
@@ -25,7 +28,7 @@ type Props = WidgetProps<"w17"> & {
  * characters or fewer) and "See where your documents mention this". All of it is read by a rule and not checked.
  * Branches: empty ("Not read yet" chips), partial/full (values), conflicting (both values and "Your documents disagree").
  */
-export function W17({ state, data, loadPassages, onError, onRetry }: Props) {
+export function W17({ state, data, loadPassages, onError, onRetry, detailHref }: Props) {
   const notice = data.readback === "ok" ? null : READBACK_COPY[data.readback];
   const excluded = data.readback === "ok" ? excludedLines(data.excluded) : [];
   return (
@@ -51,7 +54,7 @@ export function W17({ state, data, loadPassages, onError, onRetry }: Props) {
       <ul className={css.topics}>
         {data.topics.map((topic) => (
           <li key={topic.topic}>
-            <TopicCard topic={topic} loadPassages={loadPassages} onError={onError} />
+            <TopicCard topic={topic} loadPassages={loadPassages} onError={onError} detailHref={detailHref} />
           </li>
         ))}
       </ul>
@@ -59,7 +62,7 @@ export function W17({ state, data, loadPassages, onError, onRetry }: Props) {
   );
 }
 
-function TopicCard({ topic, loadPassages, onError }: { topic: DashboardTopicView; loadPassages: Props["loadPassages"]; onError: Props["onError"] }) {
+function TopicCard({ topic, loadPassages, onError, detailHref }: { topic: DashboardTopicView; loadPassages: Props["loadPassages"]; onError: Props["onError"]; detailHref: Props["detailHref"] }) {
   const body = topicBody(topic);
   const headId = useId();
   return (
@@ -87,11 +90,17 @@ function TopicCard({ topic, loadPassages, onError }: { topic: DashboardTopicView
       ) : null}
 
       {loadPassages && topicCanShowPassages(topic) ? <Passages topic={topic} loadPassages={loadPassages} onError={onError} /> : null}
+      {detailHref && topic.enabled ? (
+        <Link href={detailHref(topic.topic)} className={css.detailLink}>
+          Open {topic.title.toLowerCase()} on its own page
+          <ArrowRight size={18} weight="bold" aria-hidden="true" />
+        </Link>
+      ) : null}
     </article>
   );
 }
 
-function Group({ group }: { group: ValueGroup }) {
+export function Group({ group }: { group: ValueGroup }) {
   return (
     <div className={css.group}>
       <span className={css.lab}>{group.label}</span>

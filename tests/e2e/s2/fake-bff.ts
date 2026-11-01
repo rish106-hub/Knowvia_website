@@ -1,7 +1,7 @@
 // A stateful fake of the /api/app BFF for the S2 specs. No real backend, no real BFF logic: page.route answers every
 // call, so these tests prove the UI against the CONTRACT (src/server/app/contract.ts), not the BFF or CoverSaath.
 import type { Page, Route } from "@playwright/test";
-import { buildDashboardView } from "../../../src/server/app/dashboard-view";
+import { buildDashboardView, type ReadFactsInput } from "../../../src/server/app/dashboard-view";
 import type { ConsentNotice, ConsentView, DocumentStage, DocumentView, NextAction, Overview, PermissionView, SessionView } from "../../../src/lib/app-contract";
 
 const UPLOAD_CONNECTOR = {
@@ -57,6 +57,8 @@ export type Options = {
   consents?: ConsentView[];
   /** Stages a refresh walks through for a processing document before it settles. Default: one more poll, then readable. */
   refreshScript?: Record<string, DocumentStage[]>;
+  /** What the dashboard read-back says. Default: nothing read yet. */
+  readFacts?: ReadFactsInput;
 };
 
 export class FakeBff {
@@ -71,6 +73,7 @@ export class FakeBff {
   private failures = new Map<string, ErrorSpec[]>();
   private refreshScript: Record<string, DocumentStage[]>;
   private seq = 0;
+  private readFacts: ReadFactsInput;
 
   constructor(options: Options = {}) {
     this.signedIn = options.signedIn ?? true;
@@ -80,6 +83,7 @@ export class FakeBff {
     this.documents = options.documents ?? [];
     this.consents = options.consents ?? [];
     this.refreshScript = options.refreshScript ?? {};
+    this.readFacts = options.readFacts ?? { status: "none" };
   }
 
   /** Make the next `times` calls to `key` (for example "POST /cases/:id/documents") fail. */
@@ -153,7 +157,15 @@ export class FakeBff {
     if (key === "GET /overview") return this.json(route, 200, this.overview());
     // The dashboard is composed by the real BFF function from this fake's own overview and permissions (no read-back).
     if (key === "GET /dashboard") {
-      return this.json(route, 200, buildDashboardView({ overview: this.overview(), consents: this.consents.map(permissionOf), scanMode: null, readFacts: { status: "none" } }));
+      return this.json(route, 200, buildDashboardView({ overview: this.overview(), consents: this.consents.map(permissionOf), scanMode: null, readFacts: this.readFacts }));
+    }
+    if (key === "GET /cases/:id/passages") {
+      return this.json(route, 200, {
+        label: "passage_not_answer",
+        notice: "These are passages from your documents, not an answer or a claim decision.",
+        passages: [{ clauseId: "clause-1", documentId: "doc-1", page: 2, kind: "clause", title: "Room rent", snippet: "Room rent: 1% of the sum insured per day." }],
+        excluded: [],
+      });
     }
     if (key === "GET /consents/notices") return this.json(route, 200, { notices: NOTICES });
     if (key === "POST /cases") {

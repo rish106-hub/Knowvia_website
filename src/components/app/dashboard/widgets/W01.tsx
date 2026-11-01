@@ -3,12 +3,13 @@
 import { ArrowRight, Check, Circle, Question } from "@phosphor-icons/react";
 import { ButtonLink } from "../../ui";
 import { ringArcs } from "../view-model";
-import { Card, type WidgetProps } from "../parts";
+import { Card, useAddHref, type WidgetProps } from "../parts";
 import css from "../dashboard.module.css";
 
 /** W01: setup progress, n of 5, from the person's own items. Empty says "Add your e-card first". Never a percentage. */
 export function W01({ state, data }: WidgetProps<"w01">) {
   const arcs = ringArcs(data.total, data.done);
+  const addHref = useAddHref();
   if (state === "empty") {
     return (
       <Card title="Setup" widget="w01" state={state} tone="act">
@@ -16,7 +17,7 @@ export function W01({ state, data }: WidgetProps<"w01">) {
           <h3 className={css.heroTitle}>{data.emptyLabel ?? "Add your e-card first"}</h3>
           <p className={css.muted}>Your health card or e-card is the quickest way to start. Then add your policy schedule and wording.</p>
           <div>
-            <ButtonLink href="/app/documents" icon={<ArrowRight size={20} weight="bold" aria-hidden="true" />}>
+            <ButtonLink href={addHref} icon={<ArrowRight size={20} weight="bold" aria-hidden="true" />}>
               Add your e-card
             </ButtonLink>
           </div>

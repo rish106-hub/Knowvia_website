@@ -1,7 +1,7 @@
 // Pure helpers behind the dashboard widgets (run W-B1). No React, no I/O, no clock: unit tested in tests/unit/app-ui.
 // All new wording here is DRAFT, FOR LEGAL AND MEDICAL REVIEW. Nothing here is a score, a percentage, a countdown or a
 // streak: the only numbers are counts of the person's own items, and values read from their own documents.
-import type { DashboardTopicView, DashboardValue, DashboardView, Overview, ReadbackExcludedReason, ReadbackStatus } from "@/lib/app-contract";
+import type { ConsentView, DashboardTopic, DashboardTopicView, DashboardValue, DashboardView, Overview, ReadbackExcludedReason, ReadbackStatus } from "@/lib/app-contract";
 import { documentKindLabel } from "../documents/stage";
 
 // ---------- entry mode ----------
@@ -174,4 +174,34 @@ export function passagesPath(caseId: string | null, query: string): string | nul
 
 export function permissionCountWords(count: number): string {
   return count === 0 ? "No documents named" : count === 1 ? "Covers 1 document" : `Covers ${count} documents`;
+}
+
+// ---------- topics (S12) ----------
+
+/** The six topics, in dashboard order. Mirrors DASHBOARD_TOPICS in the BFF contract (a unit test keeps the two in step). */
+export const TOPIC_IDS = ["sum_insured", "room_rent", "co_payment", "waiting_period", "pre_authorisation", "policy_period"] as const satisfies readonly DashboardTopic[];
+
+/** True only for one of the six topics. Anything else, including inherited object keys, is false. */
+export function isTopicId(value: unknown): value is DashboardTopic {
+  return typeof value === "string" && (TOPIC_IDS as readonly string[]).includes(value);
+}
+
+export const topicHref = (topic: DashboardTopic) => `/app/policies/${topic}`;
+
+// ---------- S04 keep-my-document consent ----------
+
+export const KEEP_HREF = "/app/keep";
+export const DOCUMENTS_HREF = "/app/documents";
+
+/** Has the person already allowed CoverSaath to keep the PDFs they add? (the "collect" permission) */
+export const holdsKeepConsent = (consents: ReadonlyArray<Pick<ConsentView, "scope">>): boolean => consents.some((consent) => consent.scope === "collect");
+
+/** Where "Add ..." links go: Documents once the keep permission is held, otherwise the keep-my-document screen first. */
+export const addDocumentsHref = (overview: Pick<Overview, "consents">): string => (holdsKeepConsent(overview.consents) ? DOCUMENTS_HREF : KEEP_HREF);
+
+// ---------- S14 readiness ----------
+
+/** "3 of 6 ticked". The ticks are the person's own, kept in this screen's memory only. Never a percentage. */
+export function tickedWords(ticked: number, total: number): string {
+  return `${ticked} of ${total} ticked`;
 }

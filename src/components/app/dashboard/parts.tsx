@@ -1,7 +1,7 @@
 "use client";
 
 // Small shared pieces for the widgets: the card frame, the draft mark and the passage card.
-import { useId, type ReactNode } from "react";
+import { createContext, useContext, useId, type ReactNode } from "react";
 import type { DashboardView } from "@/lib/app-contract";
 import css from "./dashboard.module.css";
 
@@ -9,7 +9,6 @@ import css from "./dashboard.module.css";
 export type WidgetProps<K extends keyof DashboardView["widgets"]> = DashboardView["widgets"][K];
 
 export const REVIEW_TEXT = "DRAFT · FOR LEGAL AND MEDICAL REVIEW";
-export const PASSAGE_LABEL = "Passage from your document, not an answer";
 
 export function ReviewMark() {
   return (
@@ -47,16 +46,11 @@ export function Card({ title, widget, state, children, aside, tone = "plain", cl
   );
 }
 
-/** "Page N", a muted left rule, and the label that says this is a passage and not an answer. */
-export function PassageCard({ page, heading, children }: { page: number | null; heading?: string | null; children: ReactNode }) {
-  return (
-    <figure className={css.passage}>
-      <figcaption className={css.passageHead}>
-        <span className={css.passagePage}>{page === null ? "Page not known" : `Page ${page}`}</span>
-        {heading ? <span className={css.passageTitle}>{heading}</span> : null}
-      </figcaption>
-      <blockquote className={css.passageText}>{children}</blockquote>
-      <p className={css.passageLabel}>{PASSAGE_LABEL}</p>
-    </figure>
-  );
-}
+export { PassageCard, PASSAGE_LABEL } from "../policy/PassageCard";
+
+/**
+ * Where "Add ..." links go. Normally the Documents screen. For someone who has not yet allowed CoverSaath to keep their PDFs
+ * it is the keep-my-document screen (S04), which asks once and then continues to Documents.
+ */
+export const AddHrefContext = createContext("/app/documents");
+export const useAddHref = () => useContext(AddHrefContext);

@@ -3,7 +3,7 @@
 import { ArrowRight, Phone } from "@phosphor-icons/react";
 import { ButtonLink } from "../../ui";
 import { StateChip } from "../StateChip";
-import { Card, ReviewMark, type WidgetProps } from "../parts";
+import { Card, ReviewMark, useAddHref, type WidgetProps } from "../parts";
 import css from "../dashboard.module.css";
 
 /**
@@ -12,6 +12,7 @@ import css from "../dashboard.module.css";
  */
 export function W14({ state, data, prominent = false }: WidgetProps<"w14"> & { prominent?: boolean }) {
   const saved = data.eCard.saved;
+  const addHref = useAddHref();
   return (
     <Card title="If someone needs care now" widget="w14" state={state} tone={prominent ? "calm" : "plain"} className={prominent ? css.cardEmergency : undefined}>
       <div className={css.callBand}>
@@ -29,7 +30,7 @@ export function W14({ state, data, prominent = false }: WidgetProps<"w14"> & { p
         </div>
         {saved ? <p className={css.muted}>Look at the card itself for the helpline number and your member number.</p> : <p className={css.muted}>Add it now so it is here when you need it.</p>}
         <div>
-          <ButtonLink href="/app/documents" size="sm" variant="secondary" icon={<ArrowRight size={18} weight="bold" aria-hidden="true" />}>
+          <ButtonLink href={saved ? "/app/documents" : addHref} size="sm" variant="secondary" icon={<ArrowRight size={18} weight="bold" aria-hidden="true" />}>
             {saved ? "Open Documents" : "Add your e-card"}
           </ButtonLink>
         </div>
