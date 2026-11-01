@@ -1,6 +1,7 @@
 // Builds the real backend consent scope shapes from the client's named scope. PROVISIONAL.
 // Shapes copied from CoverSaath tests/support/household-api-harness.mjs (branch block4/household-reasoning) and
-// src/contracts/policy-evidence.js. All notice text below is DRAFT and NEEDS LEGAL REVIEW. Never final wording.
+// src/contracts/policy-evidence.js.
+// LEGAL REVIEW: wording not final. All notice text below needs legal review; `status` keeps that machine-readable.
 import type { ConsentGrantBody } from "./backend-client";
 import type { ConsentNotice, ConsentScope } from "./contract";
 
@@ -13,22 +14,22 @@ export const CONSENT_NOTICES: ConsentNotice[] = [
     scope: "collect",
     version: NOTICE_VERSION,
     status: "draft_needs_legal_review",
-    title: "Keep your policy documents (DRAFT)",
-    body: "DRAFT, needs legal review. You allow Knowvia to store the policy PDFs you add so you can read them here.",
+    title: "Keep your policy documents",
+    body: "You allow Knowvia to store the policy PDFs you add so you can read them here.",
   },
   {
     scope: "ocr_sarvam",
     version: NOTICE_VERSION,
     status: "draft_needs_legal_review",
-    title: "Read this document with a reading service (DRAFT)",
-    body: "DRAFT, needs legal review. You allow this one document to be sent to a text-reading service so Knowvia can read it.",
+    title: "Read this document with a reading service",
+    body: "You allow this one document to be sent to a text-reading service so Knowvia can read it.",
   },
   {
     scope: "question_gemini",
     version: NOTICE_VERSION,
     status: "draft_needs_legal_review",
-    title: "Answer questions from these documents (DRAFT)",
-    body: "DRAFT, needs legal review. You allow text from the listed documents to be sent to an AI model to answer your questions with quotes.",
+    title: "Answer questions from these documents",
+    body: "You allow text from the listed documents to be sent to an AI model to answer your questions with quotes.",
   },
 ];
 

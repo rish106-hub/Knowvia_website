@@ -72,7 +72,7 @@ export function RoomTeaser({ v }: { v: Any }) {
               </svg>
             </button>
             <p style={{margin: "0", fontSize: "15px", lineHeight: "1.5", color: "#7A5207"}}>
-              {"Illustration: ₹5,00,000 cover, room limit 1% a day, 4 nights. Rules differ by policy."}
+              {"₹5,00,000 cover, room limit 1% a day, 4 nights. Rules differ by policy."}
             </p>
           </div>
           <button className="kv-rt-card" type="button" onClick={() => setOpen(true)} aria-label="Open the room test">

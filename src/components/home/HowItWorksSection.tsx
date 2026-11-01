@@ -17,16 +17,13 @@ export function HowItWorksSection({ v }: { v: Any }) {
               playsInline
               preload="metadata"
               poster="/demo/knowvia-demo-poster.png"
-              aria-label="Silent walkthrough of Knowvia on a synthetic family and policy: add a policy, give consent, and see what the document says."
+              aria-label="Walkthrough of Knowvia: add a policy, give consent, and see what the document says."
               style={{display: "block", width: "100%", height: "auto", aspectRatio: "16 / 10", background: "#163F42"}}
             >
               <source src="/demo/knowvia-demo.webm" type="video/webm" />
               {"Your browser cannot play this video."}
             </video>
           </div>
-          <p style={{margin: "12px 0 0", padding: "0 18px 0 max(18px,var(--kv-edge))", fontSize: "14px", lineHeight: "1.5", color: "#55696D"}}>
-            {"Synthetic demo. The family, insurer and policy are made up."}
-          </p>
         </div>
         {" "}
         <div style={{display: "flex", flexDirection: "column", gap: "28px"}}>
@@ -38,7 +35,7 @@ export function HowItWorksSection({ v }: { v: Any }) {
               {"See three answers for every person."}
             </h2>
             <p className="kv-lede kv-reveal kv-d120" style={{color: "#55696D", maxWidth: "40ch"}}>
-              {"When Knowvia opens, add the health policies you already have. It reads them person by person, and shows its working."}
+              {"Add the health policies you already have. It reads them person by person, and shows its working."}
             </p>
           </div>
           <div style={{display: "flex", flexDirection: "column", borderTop: "1px solid #CFDCDA"}}>

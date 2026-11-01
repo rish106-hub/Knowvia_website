@@ -37,7 +37,7 @@ export function OnboardingStart() {
           <label htmlFor="o1-id" style={{fontSize: "15px", fontWeight: "600", letterSpacing: "0.01em"}}>
             {"Email or phone"}
           </label>
-          <input id="o1-id" type="text" autoComplete="username" defaultValue="you@example.in" style={{height: "56px", boxSizing: "border-box", padding: "0 16px", border: "1px solid #7B918E", borderRadius: "10px", background: "#FFFFFF", font: "inherit", fontSize: "17px", color: "#1A3034"}} />
+          <input id="o1-id" type="text" autoComplete="username" defaultValue="you@email.com" style={{height: "56px", boxSizing: "border-box", padding: "0 16px", border: "1px solid #7B918E", borderRadius: "10px", background: "#FFFFFF", font: "inherit", fontSize: "17px", color: "#1A3034"}} />
           <p style={{margin: "0", fontSize: "15px", lineHeight: "1.45", color: "#55696D"}}>
             {"If you use a phone number, enter the 10 digits without the country code."}
           </p>

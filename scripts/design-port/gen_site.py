@@ -169,10 +169,10 @@ for f, name, route, title in ONB:
     if route is not None:
         path = 'src/app/onboarding' + ('/' + route if route else '') + '/page.tsx'
         write(path, f'import type {{ Metadata }} from "next";\nimport {{ {name} }} from "@/components/onboarding/{name}";\n\n'
-              f'export const metadata: Metadata = {{ title: {json.dumps(title + " | Onboarding preview", ensure_ascii=False)}, robots: {{ index: false, follow: false }} }};\n\n'
+              f'export const metadata: Metadata = {{ title: {json.dumps(title, ensure_ascii=False)}, robots: {{ index: false, follow: false }} }};\n\n'
               f'export default function Page() {{\n  return <{name} />;\n}}\n')
 write('src/app/onboarding/your-cover/page.tsx', 'import type { Metadata } from "next";\nimport { OnboardingCoverDesktop } from "@/components/onboarding/OnboardingCoverDesktop";\nimport { OnboardingCoverMobile } from "@/components/onboarding/OnboardingCoverMobile";\n\n'
-      'export const metadata: Metadata = { title: "Your family’s cover | Onboarding preview", robots: { index: false, follow: false } };\n\n'
+      'export const metadata: Metadata = { title: "Your family’s cover", robots: { index: false, follow: false } };\n\n'
       'export default function Page() {\n  return (\n    <>\n      <div className="kv-only-mobile"><OnboardingCoverMobile /></div>\n      <div className="kv-only-desktop"><OnboardingCoverDesktop /></div>\n    </>\n  );\n}\n')
 
 # shared design stylesheet (the artboard <style> block, fonts mapped to next/font variables)

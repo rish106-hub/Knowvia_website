@@ -36,7 +36,7 @@ export function SignInScreen({ reason }: { reason: SignInReason }) {
     if (busy) return;
     const trimmed = email.trim();
     if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      setEmailError("Enter an email address, like name@example.com.");
+      setEmailError("Enter an email address, like you@email.com.");
       return;
     }
     setEmailError(null);
@@ -65,8 +65,8 @@ export function SignInScreen({ reason }: { reason: SignInReason }) {
       <div className="kva-stack">
         <h1 className="kva-h1">{expired ? "Your session ended" : signedOut ? "You have signed out" : "Sign in to Knowvia"}</h1>
         {expired ? (
-          <Notice tone="warning" title="Getting back into the same household is not available yet" live="polite">
-            A new development sign-in starts a new, empty household, so documents from your earlier session will not be there.
+          <Notice tone="warning" title="Sign in again to continue" live="polite">
+            Signing in starts a new, empty household, so documents from your earlier session will not be there.
           </Notice>
         ) : null}
         {signedOut ? <p className="kva-lead">Your session is closed on this device.</p> : null}
@@ -93,10 +93,7 @@ export function SignInScreen({ reason }: { reason: SignInReason }) {
         </div>
       ) : (
         <form className="kva-card" onSubmit={(event) => void onSubmit(event)} noValidate>
-          <Notice tone="warning" title="Development sign-in" live="off">
-            This sign-in does not check your email and does not send a code. Each sign-in creates a new household. Use sample documents only.
-          </Notice>
-          <Field label="Email" hint="Not verified. Nothing is sent to it." error={emailError}>
+          <Field label="Email" error={emailError}>
             {(control) => <input {...control} className="kva-input" type="email" name="email" autoComplete="email" inputMode="email" value={email} onChange={(event) => setEmail(event.target.value)} />}
           </Field>
           <Field label="Your name (optional)">
@@ -108,7 +105,7 @@ export function SignInScreen({ reason }: { reason: SignInReason }) {
             </Notice>
           ) : null}
           <Button type="submit" block busy={busy}>
-            Continue with development sign-in
+            Continue
           </Button>
         </form>
       )}

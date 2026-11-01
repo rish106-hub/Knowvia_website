@@ -27,11 +27,11 @@ test.describe("empty and consent", () => {
     expect(fake.count("POST /cases/:id/questions")).toBe(0);
   });
 
-  test("consent missing: draft notice with the review marker, plain statement, then grant and read", async ({ page }) => {
+  test("consent missing: notice, plain statement, then grant and read", async ({ page }) => {
     const fake = new FakeCover();
     await open(page, fake);
     await expect(page.getByRole("heading", { name: "Before we read your document" })).toBeVisible();
-    await expect(page.locator("[data-draft-mark]").first()).toHaveText(/Draft wording, pending legal review/);
+    await expect(page.getByText(/Draft wording|pending legal review/)).toHaveCount(0);
     await expect(main(page)).toContainText("text from it to Gemini");
     await expect(main(page)).toContainText("the answer made from your document is erased");
     await expect(main(page)).toContainText("Answer questions from these documents");
@@ -152,7 +152,7 @@ test.describe("evidence states", () => {
     await expect(room).toContainText("Policy wording, Page 4");
     await expect(main(page)).toContainText("We have not confirmed which policy your document belongs to.");
     await expect(main(page)).toContainText("No clause labelled endorsement");
-    await expect(main(page)).toContainText("not a claim decision");
+    await expect(main(page)).toContainText("quotes the page it comes from");
     await expect(main(page)).toContainText("Some personal details in this text are hidden for privacy.");
   });
 

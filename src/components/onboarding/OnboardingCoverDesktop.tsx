@@ -23,9 +23,6 @@ export function OnboardingCoverDesktop() {
           </span>
         </div>
         <div style={{display: "flex", alignItems: "center", gap: "16px"}}>
-          <span style={{display: "inline-flex", alignItems: "center", height: "28px", padding: "0 10px", borderRadius: "6px", background: "#E6EFEC", color: "#163F42", fontSize: "15px", fontWeight: "600"}}>
-            {"Example"}
-          </span>
           <Link href="/onboarding/add-policies" style={{display: "inline-flex", alignItems: "center", height: "44px", padding: "0 20px", borderRadius: "999px", border: "2px solid #176F69", color: "#176F69", fontSize: "16px", fontWeight: "600", textDecoration: "none"}}>
             {"Add a policy"}
           </Link>

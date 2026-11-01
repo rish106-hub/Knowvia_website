@@ -41,9 +41,6 @@ export function FamilyQuote() {
               <span style={{fontSize: "17px", fontWeight: "600"}}>
                 {"M., 29, Bengaluru"}
               </span>
-              <span style={{fontSize: "15px", lineHeight: "1.45", color: "#C9DDD9"}}>
-                {"Research participant. Recorded conversation, 5 September 2026. Name withheld."}
-              </span>
             </span>
           </figcaption>
         </figure>

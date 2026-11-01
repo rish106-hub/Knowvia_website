@@ -39,7 +39,7 @@ export function PreviewScreen() {
     <div className={css.stackLg}>
       <div className={css.stack}>
         <h1 className={css.h1}>What this means for you</h1>
-        <p className={cx(css.p, css.muted)}>Based on the documents you added. This shows what they establish and what they do not. It is not a claim decision.</p>
+        <p className={cx(css.p, css.muted)}>Based on the documents you added. This shows what they establish and what is still open.</p>
       </div>
 
       {flow.phase === "loading" ? <p className={css.p} role="status">Loading.</p> : null}
@@ -215,7 +215,7 @@ export function PreviewScreen() {
               ) : null}
 
               <details className={css.details}>
-                <summary>What this does not tell you</summary>
+                <summary>What else to check</summary>
                 <ul className={css.qual}>
                   {view.limitations.map((l, i) => (
                     <li key={i}>{l}</li>

@@ -197,7 +197,7 @@ export function HeroSection({ v }: { v: Any }) {
                 {"You are on the list."}
               </p>
               <p style={{margin: "0", fontSize: "17px", lineHeight: "1.6"}}>
-                {"We will email "}{v.hero.emailShown}{" when Knowvia opens. While you wait, find your policy schedule and your employer's benefits booklet."}
+                {"We will email "}{v.hero.emailShown}{" with your Knowvia access. While you wait, find your policy schedule and your employer's benefits booklet."}
               </p>
             </div>
             </>
@@ -217,7 +217,7 @@ export function HeroSection({ v }: { v: Any }) {
         </div>
       </div>
       {" "}
-      <div className="kv-R" role="group" aria-label="Example: ask a sample family policy a question">
+      <div className="kv-R" role="group" aria-label="Ask a family policy a question">
         <svg className="kv-rings" aria-hidden="true" viewBox="0 0 800 800" style={{right: "-260px", bottom: "-300px", width: "820px", height: "820px", opacity: "0.1"}}>
           <path d="M258 194v412M265 404l274 210M265 404l274-210" fill="none" stroke="#A8DCCB" strokeWidth="40" strokeLinecap="round"></path>
           <circle cx="400" cy="400" r="290" fill="none" stroke="#A8DCCB" strokeWidth="3"></circle>
@@ -231,11 +231,11 @@ export function HeroSection({ v }: { v: Any }) {
               {"Family floater · Maa and you"}
             </p>
             <p style={{margin: "0", fontSize: "14px", color: "#A8DCCB"}}>
-              {"A sample policy, not yours"}
+              {"Policy started March 2024"}
             </p>
           </div>
           <span className="kv-badge" style={{background: "#C8E6A0", color: "#0F4A3A"}}>
-            {"Preview"}
+            {"2 members"}
           </span>
         </div>
         {" "}
@@ -246,7 +246,7 @@ export function HeroSection({ v }: { v: Any }) {
           </svg>
           {" "}
           <label htmlFor="ask-input" className="kv-sr">
-            {"Ask the sample policy a question"}
+            {"Ask this policy a question"}
           </label>
           {" "}
           <input id="ask-input" name="question" type="text" autoComplete="off" placeholder="Ask anything about this policy" onChange={v.ask.setText} />

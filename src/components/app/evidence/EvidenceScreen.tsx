@@ -161,7 +161,7 @@ export function EvidenceScreen() {
             {view.notices.map((n, i) => (
               <p key={i} className={cx(css.p, css.small, css.muted)}>{n}</p>
             ))}
-            <p className={cx(css.p, css.small, css.muted)}>This reads your document. It is not a claim decision, and it does not say what your insurer will pay.</p>
+            <p className={cx(css.p, css.small, css.muted)}>Knowvia reads what your document says and quotes the page it comes from.</p>
           </div>
 
           <section className={css.next} aria-labelledby="kve-next-h">

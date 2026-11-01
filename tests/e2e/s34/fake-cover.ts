@@ -16,7 +16,7 @@ const NOTICE = {
   version: "draft-v0-needs-legal-review",
   status: "draft_needs_legal_review",
   title: "Answer questions from these documents",
-  body: "Draft: text from the listed documents is sent to a language model service to answer your question with quotes.",
+  body: "Text from the listed documents is sent to a language model service to answer your question with quotes.",
 };
 
 const SESSION = { authenticated: true, expiresAt: "2026-10-22T20:00:00.000Z", householdId: "hh-synth-1", adultId: ADULT_ID, memberId: "mem-synth-owner", identity: { provider: "dev", provisional: true } };

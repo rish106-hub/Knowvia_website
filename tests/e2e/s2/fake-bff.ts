@@ -7,9 +7,9 @@ export type ErrorSpec = { status: number; code: string; retryable?: boolean; fie
 export type Call = { method: string; path: string; key: string; headers: Record<string, string>; body: Buffer | null };
 
 export const NOTICES: ConsentNotice[] = [
-  { scope: "collect", version: "draft-v0-needs-legal-review", status: "draft_needs_legal_review", title: "Store your PDF", body: "Draft: Knowvia keeps the PDF you add so it can be checked and read for your case.\n\nYou can withdraw this at any time." },
-  { scope: "ocr_sarvam", version: "draft-v0-needs-legal-review", status: "draft_needs_legal_review", title: "Read this PDF with an outside service", body: "Draft: this PDF is sent to an outside OCR provider to turn its pages into text." },
-  { scope: "question_gemini", version: "draft-v0-needs-legal-review", status: "draft_needs_legal_review", title: "Answer questions from your documents", body: "Draft: selected documents are sent to a language model service to answer your question." },
+  { scope: "collect", version: "draft-v0-needs-legal-review", status: "draft_needs_legal_review", title: "Store your PDF", body: "Knowvia keeps the PDF you add so it can be checked and read for your case.\n\nYou can withdraw this at any time." },
+  { scope: "ocr_sarvam", version: "draft-v0-needs-legal-review", status: "draft_needs_legal_review", title: "Read this PDF with an outside service", body: "This PDF is sent to an outside OCR provider to turn its pages into text." },
+  { scope: "question_gemini", version: "draft-v0-needs-legal-review", status: "draft_needs_legal_review", title: "Answer questions from your documents", body: "Selected documents are sent to a language model service to answer your question." },
 ];
 
 let counter = 0;
