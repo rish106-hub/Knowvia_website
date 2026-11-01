@@ -128,6 +128,29 @@ const consentList = z.object({ consents: z.array(consentListItem), truncated: z.
 export type BackendConsentRecord = z.infer<typeof consentListItem>;
 const grantRecord = z.object({ id: z.string() }).loose();
 
+// GET /api/v1/cases/{id}/read-facts and /passages (run V3a/V3b). Parsed leniently on purpose: only the envelope is required
+// (the label is checked). Every inner value is `unknown` here and is narrowed, bounded and allow-listed in dashboard-view.ts,
+// so a small change in the backend's field semantics never breaks the screen and an unknown field never reaches the browser.
+const READBACK_LIST_CAP = 200;
+const readFactsEnvelope = z
+  .object({
+    label: z.literal("read_not_checked"),
+    notice: z.unknown().optional(),
+    documents: z.array(z.unknown()).max(READBACK_LIST_CAP),
+    excluded: z.array(z.unknown()).max(READBACK_LIST_CAP).optional(),
+  })
+  .loose();
+const passagesEnvelope = z
+  .object({
+    label: z.literal("passage_not_answer"),
+    notice: z.unknown().optional(),
+    passages: z.array(z.unknown()).max(READBACK_LIST_CAP),
+    excluded: z.array(z.unknown()).max(READBACK_LIST_CAP).optional(),
+  })
+  .loose();
+export type BackendReadFacts = z.infer<typeof readFactsEnvelope>;
+export type BackendPassages = z.infer<typeof passagesEnvelope>;
+
 export type ConsentGrantBody = {
   householdId: string;
   subjectAdultId: string;
@@ -418,6 +441,17 @@ export function createBackendClient(options: BackendClientOptions) {
       send({ method: "POST", path: `/api/v1/documents/${enc(documentId)}/structuring-runs`, token, json: body }),
     getStructuring: (token: string, documentId: string, workflowRunId: string): Promise<Json> =>
       send({ method: "GET", path: `/api/v1/documents/${enc(documentId)}/structuring-runs?workflowRunId=${enc(workflowRunId)}`, token }),
+
+    // --- read-back (503 READBACK_DISABLED while the backend switch is off) ---
+    async getReadFacts(token: string, caseId: string): Promise<BackendReadFacts> {
+      return parse(readFactsEnvelope, await send({ method: "GET", path: `/api/v1/cases/${enc(caseId)}/read-facts`, token }));
+    },
+    /** The query is sent and never logged. `limit` is forwarded only when the caller gave one. */
+    async searchPassages(token: string, caseId: string, query: { q: string; limit?: number }): Promise<BackendPassages> {
+      const params = new URLSearchParams({ q: query.q });
+      if (query.limit !== undefined) params.set("limit", String(query.limit));
+      return parse(passagesEnvelope, await send({ method: "GET", path: `/api/v1/cases/${enc(caseId)}/passages?${params}`, token }));
+    },
 
     // --- questions, catalogue, preview ---
     askQuestion: (

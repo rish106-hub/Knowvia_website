@@ -185,6 +185,212 @@ export type PermissionView = z.infer<typeof permissionViewSchema>;
 export const permissionListSchema = z.object({ permissions: z.array(permissionViewSchema), truncated: z.boolean() });
 export type PermissionList = z.infer<typeof permissionListSchema>;
 
+// ---- read-back and dashboard (run V5) ----
+// What the person's documents say, as read by a rule. Never a claim decision. Only three evidence states exist here: the
+// backend caps read-back at "extracted_unverified", and this BFF has no "verified" state at all.
+
+export const EVIDENCE_STATES = ["extracted_unverified", "conflicting", "unknown"] as const;
+export type EvidenceState = (typeof EVIDENCE_STATES)[number];
+
+/** DRAFT wording, needs legal review. */
+export const EVIDENCE_CHIP_LABELS: Record<EvidenceState, string> = {
+  extracted_unverified: "Read, not checked",
+  conflicting: "Your documents disagree",
+  unknown: "Not found yet",
+};
+
+export const DASHBOARD_TOPICS = ["sum_insured", "room_rent", "co_payment", "waiting_period", "pre_authorisation", "policy_period"] as const;
+export type DashboardTopic = (typeof DASHBOARD_TOPICS)[number];
+
+export const READBACK_EXCLUDED_REASONS = ["not_read", "reading_permission_withdrawn", "reading_permission_expired", "superseded"] as const;
+export type ReadbackExcludedReason = (typeof READBACK_EXCLUDED_REASONS)[number];
+
+const excludedSchema = z.object({ documentId: z.string(), reason: z.enum(READBACK_EXCLUDED_REASONS) });
+
+/** GET /api/app/cases/{caseId}/read-facts: the backend body reduced to the fields below. Unknown backend fields never pass. */
+export const readFactsViewSchema = z.object({
+  label: z.literal("read_not_checked"),
+  notice: z.string(),
+  documents: z.array(
+    z.object({
+      documentId: z.string(),
+      documentKind: z.string(),
+      fields: z.array(
+        z.object({
+          field: z.string(),
+          topic: z.string().nullable(),
+          value: z.string().nullable(),
+          state: z.enum(EVIDENCE_STATES),
+          page: z.number().nullable(),
+          quote: z.string().nullable(),
+        }),
+      ),
+    }),
+  ),
+  excluded: z.array(excludedSchema),
+});
+export type ReadFactsView = z.infer<typeof readFactsViewSchema>;
+
+/** GET /api/app/cases/{caseId}/passages?q=: passages are text from the person's document, not an answer. */
+export const passagesViewSchema = z.object({
+  label: z.literal("passage_not_answer"),
+  notice: z.string(),
+  passages: z.array(
+    z.object({
+      clauseId: z.string(),
+      documentId: z.string(),
+      page: z.number().nullable(),
+      kind: z.string(),
+      title: z.string().nullable(),
+      snippet: z.string(),
+    }),
+  ),
+  excluded: z.array(excludedSchema),
+});
+export type PassagesView = z.infer<typeof passagesViewSchema>;
+
+export const evidenceChipSchema = z.object({ state: z.enum(EVIDENCE_STATES), label: z.string() });
+export type EvidenceChip = z.infer<typeof evidenceChipSchema>;
+
+export const dashboardValueSchema = z.object({
+  field: z.string(),
+  label: z.string(),
+  value: z.string(),
+  state: z.enum(["extracted_unverified", "conflicting"]),
+  chip: evidenceChipSchema,
+  page: z.number().nullable(),
+  /** 160 characters or fewer, cut by the backend and again here. */
+  quote: z.string().nullable(),
+  documentId: z.string(),
+  documentKind: z.string(),
+});
+export type DashboardValue = z.infer<typeof dashboardValueSchema>;
+
+export const READBACK_STATUSES = ["ok", "off", "unavailable", "none"] as const;
+export type ReadbackStatus = (typeof READBACK_STATUSES)[number];
+
+export const dashboardTopicSchema = z.object({
+  topic: z.enum(DASHBOARD_TOPICS),
+  title: z.string(),
+  /** DRAFT, FOR LEGAL AND MEDICAL REVIEW. */
+  explainer: z.string(),
+  /** False until at least one document has been read back: the chip is then not shown and the card says "Not read yet". */
+  enabled: z.boolean(),
+  chip: evidenceChipSchema.nullable(),
+  values: z.array(dashboardValueSchema),
+  /** `one_value`: the backend reports a disagreement inside one document but gives only one of the values. `no_value`: none is given. */
+  conflictDetail: z.enum(["both_values", "one_value", "no_value"]).nullable(),
+  /** The query for "See where your documents mention this" (GET .../passages?q=). */
+  passageQuery: z.string(),
+});
+export type DashboardTopicView = z.infer<typeof dashboardTopicSchema>;
+
+export const WIDGET_STATES = ["empty", "partial", "full", "conflicting"] as const;
+export type WidgetState = (typeof WIDGET_STATES)[number];
+
+export const DASHBOARD_KINDS = ["member_card", "policy_schedule", "policy_wording"] as const;
+export type DashboardKind = (typeof DASHBOARD_KINDS)[number];
+
+const kindItem = z.object({ kind: z.enum(DASHBOARD_KINDS), label: z.string() });
+
+export const dashboardViewSchema = z.object({
+  caseId: z.string().nullable(),
+  documentsAccess: z.enum(["full", "permission_withdrawn"]),
+  /** `unavailable`: the permission list could not be read, so nothing is claimed about permissions. `truncated`: the list was cut short. */
+  permissions: z.object({ status: z.enum(["ok", "unavailable"]), truncated: z.boolean() }),
+  /** Present only when scanning is switched off and a document is waiting for its checks. */
+  scanNotice: z.string().nullable(),
+  /** DRAFT copy throughout: FOR LEGAL AND MEDICAL REVIEW. */
+  copyStatus: z.literal("draft_needs_medical_and_legal_review"),
+  widgets: z.object({
+    w01: z.object({
+      state: z.enum(["empty", "partial", "full"]),
+      data: z.object({
+        done: z.number(),
+        total: z.literal(5),
+        emptyLabel: z.string().nullable(),
+        /** `known` is false for a step that could not be checked right now (the permission list was unavailable); it is not counted as done. */
+        steps: z.array(z.object({ id: z.enum(["member_card", "policy_schedule", "policy_wording", "document_read", "reading_permission"]), label: z.string(), done: z.boolean(), known: z.boolean() })),
+      }),
+    }),
+    w07: z.object({ state: z.enum(["empty", "partial", "full"]), data: z.object({ kinds: z.array(kindItem.extend({ present: z.boolean(), count: z.number() })) }) }),
+    w15: z.object({
+      state: z.enum(["empty", "partial", "full"]),
+      data: z.object({
+        documents: z.array(
+          z.object({
+            documentId: z.string(),
+            documentKind: z.string(),
+            uploadedAt: z.string().nullable(),
+            stage: z.enum(DOCUMENT_STAGES),
+            label: z.string(),
+            pagesLabel: z.string().nullable(),
+          }),
+        ),
+      }),
+    }),
+    w16: z.object({ state: z.enum(["empty", "partial", "full"]), data: z.object({ missing: z.array(kindItem), fullLabel: z.string().nullable() }) }),
+    w17: z.object({
+      state: z.enum(WIDGET_STATES),
+      data: z.object({
+        readback: z.enum(READBACK_STATUSES),
+        notice: z.string().nullable(),
+        excluded: z.array(excludedSchema),
+        topics: z.array(dashboardTopicSchema),
+      }),
+    }),
+    w04: z.object({
+      state: z.enum(WIDGET_STATES),
+      data: z.object({
+        /** About the policy end date only: "Read, not checked", "Your documents disagree" or "Not found yet". Null until a document is read. */
+        chip: evidenceChipSchema.nullable(),
+        /** The policy_period values (policy_period_start and policy_period_end). Two entries for one field when the documents disagree. */
+        values: z.array(dashboardValueSchema),
+        /** Always false: a date read from a document is never stored as confirmed. */
+        stored: z.literal(false),
+      }),
+    }),
+    w12: z.object({
+      state: z.enum(["empty", "full"]),
+      data: z.object({
+        action: z.enum(["none", "wait", "grant_ocr_consent", "start_ocr", "retry_ocr", "add_document"]),
+        label: z.string(),
+        documentId: z.string().nullable(),
+        documentKind: z.string().nullable(),
+      }),
+    }),
+    w13: z.object({
+      state: z.enum(["empty", "full"]),
+      data: z.object({ status: z.enum(["ok", "unavailable"]), truncated: z.boolean(), items: z.array(z.object({ kind: z.enum(PERMISSION_KINDS), label: z.string(), documentCount: z.number() })) }),
+    }),
+    w14: z.object({
+      state: z.literal("full"),
+      data: z.object({
+        tel: z.literal("tel:112"),
+        callLabel: z.string(),
+        helplineNote: z.string(),
+        eCard: z.object({ saved: z.boolean(), documentId: z.string().nullable() }),
+      }),
+    }),
+    w09: z.object({
+      state: z.literal("full"),
+      data: z.object({
+        items: z.array(z.object({ id: z.string(), label: z.string(), source: z.enum(["your_files", "general_list"]) })),
+        /** Ticks are not stored anywhere. The screen says so. */
+        ticksStored: z.literal(false),
+        note: z.string(),
+      }),
+    }),
+    /** Model-backed widgets: nothing is shown until an answer exists. */
+    w02: z.object({ state: z.literal("unknown"), reason: z.literal("needs_answer") }),
+    w03: z.object({ state: z.literal("unknown"), reason: z.literal("needs_answer") }),
+    w05: z.object({ state: z.literal("unknown"), reason: z.literal("needs_answer") }),
+    w06: z.object({ state: z.literal("unknown"), reason: z.literal("needs_answer") }),
+    w11: z.object({ state: z.literal("unknown"), reason: z.literal("needs_answer") }),
+  }),
+});
+export type DashboardView = z.infer<typeof dashboardViewSchema>;
+
 export const errorBodySchema = z.object({
   error: z.object({
     code: z.string(),

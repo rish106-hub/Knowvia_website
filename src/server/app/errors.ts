@@ -48,6 +48,7 @@ const MESSAGES: Record<string, string> = {
   OCR_PROVIDER_DISABLED: "Reading documents is not available yet.",
   OCR_PROVIDER_NOT_CONFIGURED: "Reading documents is not available yet.",
   EVIDENCE_DISABLED: "Questions about your documents are not available yet.",
+  READBACK_DISABLED: "Showing what your documents say is not switched on yet.",
   POLICY_EVIDENCE_UNAVAILABLE: "These documents have not been read yet.",
   UPLOAD_IN_PROGRESS: "Another upload is still in progress. Wait for it to finish.",
   BACKEND_UNREACHABLE: "The service is not reachable. Try again.",
@@ -71,7 +72,7 @@ const GENERIC_BY_STATUS = (status: number) => {
 export const isTransientStatus = (status: number) => status === 408 || status === 429 || status >= 500;
 
 // A feature that is switched off or not configured is not fixed by trying again, whatever the HTTP status.
-const NOT_RETRYABLE_CODES = new Set(["OCR_PROVIDER_DISABLED", "OCR_PROVIDER_NOT_CONFIGURED", "EVIDENCE_DISABLED", "DOCUMENT_STORAGE_NOT_CONFIGURED"]);
+const NOT_RETRYABLE_CODES = new Set(["OCR_PROVIDER_DISABLED", "OCR_PROVIDER_NOT_CONFIGURED", "EVIDENCE_DISABLED", "READBACK_DISABLED", "DOCUMENT_STORAGE_NOT_CONFIGURED"]);
 
 export class AppError extends Error {
   readonly status: number;

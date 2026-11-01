@@ -22,13 +22,14 @@ import {
   type SessionView,
 } from "./contract";
 import { assertCsrf } from "./csrf";
+import { buildDashboardView, toPassagesView, toReadFactsView, type ReadFactsInput } from "./dashboard-view";
 import { composeDocumentView } from "./document-view";
 import { AppConfigError, loadAppConfig, type AppConfig, type EnvSource } from "./env";
 import { AppError, appError, errorBody } from "./errors";
 import { resolveIdentityProvider, signInWithVerifiedGoogleIdentity } from "./identity";
 import { createGoogleOidc, OidcError, safeEqual, type GoogleOidc } from "./oidc-google";
 import { randomBytes } from "node:crypto";
-import { clientKey, type RateLimiter } from "./rate-limit";
+import { clientKey, createRateLimiter, type RateLimiter } from "./rate-limit";
 import {
   clearCookie,
   cookieNames,
@@ -66,7 +67,7 @@ export type AppDeps = {
   rateLimiter: RateLimiter;
 };
 
-type InternalDeps = AppDeps & { uploadsInFlight: Map<string, number>; oidc: GoogleOidc };
+type InternalDeps = AppDeps & { uploadsInFlight: Map<string, number>; oidc: GoogleOidc; passagesLimiter: RateLimiter };
 
 type EnabledConfig = Extract<AppConfig, { enabled: true }>;
 /** `redirect` makes the pipeline answer 302 with no body. It must be an /app path or the discovered Google authorization URL. */
@@ -215,7 +216,7 @@ const CONSENT_LOST_CODES = new Set(["CONSENT_REQUIRED", "CONSENT_SCOPE_REQUIRED"
 const GRANT_GONE_CODES = new Set(["CONSENT_REQUIRED", "CONSENT_SCOPE_REQUIRED", "OCR_AUTHORIZATION_REQUIRED"]);
 
 /** Lists the case documents and composes UI stages, refreshing each known OCR job (idempotent, read-like). */
-async function loadDocumentViews(ctx: Ctx, caseId: string): Promise<{ documents: DocumentView[]; restricted: boolean }> {
+async function loadDocumentViews(ctx: Ctx, caseId: string): Promise<{ documents: DocumentView[]; restricted: boolean; scanMode: string | null }> {
   const { backend, session, state } = ctx;
   let list;
   try {
@@ -225,7 +226,7 @@ async function loadDocumentViews(ctx: Ctx, caseId: string): Promise<{ documents:
     // see and delete what is held, so fall back to the consent-independent deletion inventory.
     if (!(error instanceof AppError && error.code === "FIELD_ACCESS_REQUIRED")) throw error;
     const inventory = await backend.getDeletionInventory(session.token, caseId);
-    return { documents: inventory.documents.map((document) => composeDocumentView({ document, ocrJob: null, ocrConsent: false })), restricted: true };
+    return { documents: inventory.documents.map((document) => composeDocumentView({ document, ocrJob: null, ocrConsent: false })), restricted: true, scanMode: null };
   }
   const scanMode = needsScanMode(list.documents) ? await readScanMode(ctx) : null;
   const documents = await Promise.all(
@@ -247,7 +248,7 @@ async function loadDocumentViews(ctx: Ctx, caseId: string): Promise<{ documents:
       return composeDocumentView({ document, ocrJob, ocrConsent, scanMode });
     }),
   );
-  return { documents, restricted: false };
+  return { documents, restricted: false, scanMode };
 }
 
 /**
@@ -398,6 +399,74 @@ const householdMatrix = z
     ),
   })
   .loose();
+
+/** The overview the screens start from, plus the scan mode read while composing it. Shared by overview.get and dashboard.get. */
+async function loadOverview(ctx: Ctx): Promise<{ overview: Overview; scanMode: string | null }> {
+  const { session, state } = ctx;
+  const parsedMatrix = householdMatrix.safeParse(await ctx.backend.getHousehold(session.token, session.householdId));
+  if (!parsedMatrix.success) throw appError(502, "BACKEND_BAD_RESPONSE", { retryable: false });
+  const matrix = parsedMatrix.data;
+  if (!state.caseId) await adoptOpenCase(ctx);
+  const loaded = state.caseId ? await loadDocumentViews(ctx, state.caseId) : { documents: [], restricted: false, scanMode: null };
+  const overview: Overview = {
+    session: { expiresAt: session.expiresAt },
+    household: { id: session.householdId, viewerRole: matrix.viewerRole ?? null },
+    owner: { adultId: session.adultId, memberId: session.memberId },
+    members: matrix.members.map((m) => ({
+      id: m.id,
+      displayName: m.displayName,
+      memberKind: m.memberKind ?? null,
+      relationshipLabel: m.relationshipLabel ?? null,
+      policiesFound: m.policiesFound ?? 0,
+    })),
+    cases: state.caseId ? [{ id: state.caseId }] : [],
+    documents: loaded.documents,
+    documentsAccess: loaded.restricted ? "permission_withdrawn" : "full",
+    consents: state.consents.map(toConsentView),
+  };
+  return { overview, scanMode: loaded.scanMode };
+}
+
+/**
+ * The person's active permissions for the dashboard. Like the read-back this is a convenience: only an ended session fails the
+ * screen. Any other failure gives `unavailable`, which the dashboard shows as "could not check" and never as "not held".
+ */
+async function loadPermissions(ctx: Ctx): Promise<{ status: "ok" | "unavailable"; consents: PermissionView[]; truncated: boolean }> {
+  try {
+    const { consents, truncated } = await ctx.backend.listConsents(ctx.session.token, ctx.session.householdId);
+    return { status: "ok", consents: consents.filter((record) => record.status === "active").map(toPermissionView), truncated };
+  } catch (error) {
+    if (!(error instanceof AppError)) throw error;
+    if (error.clearSession) throw error;
+    return { status: "unavailable", consents: [], truncated: false };
+  }
+}
+
+/**
+ * Read-back routes name a case in the path. If this session already knows its case, any other id is refused here (404, no backend
+ * call). A session that has lost its case (cookie) forwards the id, and the backend's household ownership check decides.
+ */
+function assertOwnCase(ctx: Ctx, caseId: string): void {
+  if (ctx.state.caseId && ctx.state.caseId !== caseId) throw appError(404, "CASE_NOT_FOUND");
+}
+
+/**
+ * What the dashboard knows about the values read from the person's documents. The read-back is a convenience on the
+ * dashboard, so any failure except an ended session degrades to "not read yet" instead of failing the whole screen.
+ * `off` is the backend switch (503 READBACK_DISABLED); everything else that goes wrong is `unavailable`.
+ */
+async function loadReadFacts(ctx: Ctx, overview: Overview): Promise<ReadFactsInput> {
+  const caseId = overview.cases[0]?.id;
+  if (!caseId || overview.documents.length === 0) return { status: "none" };
+  if (overview.documentsAccess === "permission_withdrawn") return { status: "unavailable" };
+  try {
+    return { status: "ok", data: toReadFactsView(await ctx.backend.getReadFacts(ctx.session.token, caseId)) };
+  } catch (error) {
+    if (!(error instanceof AppError)) throw error;
+    if (error.clearSession) throw error;
+    return { status: error.code === "READBACK_DISABLED" ? "off" : "unavailable" };
+  }
+}
 
 const sessionView = (session: SessionData | null): SessionView =>
   session
@@ -626,30 +695,16 @@ const ROUTES = {
     auth: true,
     markerOnGet: true,
     async run(ctx) {
-      const { session, state } = ctx;
-      const parsedMatrix = householdMatrix.safeParse(await ctx.backend.getHousehold(session.token, session.householdId));
-      if (!parsedMatrix.success) throw appError(502, "BACKEND_BAD_RESPONSE", { retryable: false });
-      const matrix = parsedMatrix.data;
-      if (!state.caseId) await adoptOpenCase(ctx);
-      const loaded = state.caseId ? await loadDocumentViews(ctx, state.caseId) : { documents: [], restricted: false };
-      const documents = loaded.documents;
-      const overview: Overview = {
-        session: { expiresAt: session.expiresAt },
-        household: { id: session.householdId, viewerRole: matrix.viewerRole ?? null },
-        owner: { adultId: session.adultId, memberId: session.memberId },
-        members: matrix.members.map((m) => ({
-          id: m.id,
-          displayName: m.displayName,
-          memberKind: m.memberKind ?? null,
-          relationshipLabel: m.relationshipLabel ?? null,
-          policiesFound: m.policiesFound ?? 0,
-        })),
-        cases: state.caseId ? [{ id: state.caseId }] : [],
-        documents,
-        documentsAccess: loaded.restricted ? "permission_withdrawn" : "full",
-        consents: state.consents.map(toConsentView),
-      };
-      return { status: 200, body: overview };
+      return { status: 200, body: (await loadOverview(ctx)).overview };
+    },
+  },
+  "dashboard.get": {
+    auth: true,
+    markerOnGet: true,
+    async run(ctx) {
+      const { overview, scanMode } = await loadOverview(ctx);
+      const [permissions, readFacts] = await Promise.all([loadPermissions(ctx), loadReadFacts(ctx, overview)]);
+      return { status: 200, body: buildDashboardView({ overview, consents: permissions.consents, permissionsStatus: permissions.status, permissionsTruncated: permissions.truncated, scanMode, readFacts }) };
     },
   },
   "integrations.get": {
@@ -897,6 +952,38 @@ const ROUTES = {
     },
   },
 
+  // --- read-back (run V5): what the person's own read documents say. Pass-through of the known fields only. ---
+  // markerOnGet: the passages search derives clauses on first use (an erasable derived store), so both GETs are treated like
+  // writes for CSRF. While the backend switch is off these answer 503 READBACK_DISABLED, which the UI shows as "not read yet".
+  "readFacts.get": {
+    auth: true,
+    markerOnGet: true,
+    async run(ctx) {
+      const caseId = pathId(ctx, "caseId");
+      assertOwnCase(ctx, caseId);
+      return { status: 200, body: toReadFactsView(await ctx.backend.getReadFacts(ctx.session.token, caseId)) };
+    },
+  },
+  "passages.get": {
+    auth: true,
+    markerOnGet: true,
+    async run(ctx) {
+      const caseId = pathId(ctx, "caseId");
+      assertOwnCase(ctx, caseId);
+      const url = new URL(ctx.request.url);
+      // The query is the person's own words: bounded here, forwarded, never logged or echoed back.
+      const rawQ = url.searchParams.get("q") ?? "";
+      const q = rawQ.trim();
+      if (url.searchParams.getAll("q").length !== 1 || q.length < 2 || q.length > 120 || /[\u0000-\u001f\u007f]/.test(rawQ)) throw appError(400, "INVALID_REQUEST", { fields: ["q"] });
+      const rawLimit = url.searchParams.get("limit");
+      if (url.searchParams.getAll("limit").length > 1 || (rawLimit !== null && !/^[0-9]{1,2}$/.test(rawLimit))) throw appError(400, "INVALID_REQUEST", { fields: ["limit"] });
+      const limit = rawLimit === null ? undefined : Number(rawLimit);
+      if (limit !== undefined && (limit < 1 || limit > 10)) throw appError(400, "INVALID_REQUEST", { fields: ["limit"] });
+      ctx.deps.passagesLimiter.check(`passages:${ctx.session.adultId}`, ctx.nowMs);
+      return { status: 200, body: toPassagesView(await ctx.backend.searchPassages(ctx.session.token, caseId, { q, ...(limit === undefined ? {} : { limit }) })) };
+    },
+  },
+
   // --- questions, catalogue, preview (pass-through bodies) ---
   "questions.ask": {
     auth: true,
@@ -1008,6 +1095,9 @@ export function createApp(deps: AppDeps) {
   // Uploads are buffered in memory (up to 15 MiB each), so one signed-in adult may only hold a few open at once.
   const uploadsInFlight = new Map<string, number>();
   // Discovery and signing keys are cached for the life of this app (one per process).
+  // Passages search derives clauses on the backend, so it is limited per signed-in adult. It has its own limiter: sharing the
+  // sign-in limiter would let a few searches lock everyone out of signing in.
+  const passagesLimiter = createRateLimiter({ limit: 30, windowMs: 60_000, globalLimit: 600 });
   const oidc = createGoogleOidc({ fetch: deps.oidcFetch ?? ((input, init) => globalThis.fetch(input, init)), now: deps.now });
   async function handle(name: RouteName, request: Request, params: Record<string, string> = {}): Promise<Response> {
     let config: AppConfig;
@@ -1042,7 +1132,7 @@ export function createApp(deps: AppDeps) {
         request,
         params,
         config,
-        deps: { ...deps, uploadsInFlight, oidc },
+        deps: { ...deps, uploadsInFlight, oidc, passagesLimiter },
         backend,
         nowMs,
         session: loaded?.session as SessionData,
