@@ -1,6 +1,7 @@
 // A stateful fake of the /api/app BFF for the S2 specs. No real backend, no real BFF logic: page.route answers every
 // call, so these tests prove the UI against the CONTRACT (src/server/app/contract.ts), not the BFF or CoverSaath.
 import type { Page, Route } from "@playwright/test";
+import { buildDashboardView } from "../../../src/server/app/dashboard-view";
 import type { ConsentNotice, ConsentView, DocumentStage, DocumentView, NextAction, Overview, PermissionView, SessionView } from "../../../src/lib/app-contract";
 
 const UPLOAD_CONNECTOR = {
@@ -150,6 +151,10 @@ export class FakeBff {
       return this.json(route, 200, { signedOut: true, backendRevoked: true });
     }
     if (key === "GET /overview") return this.json(route, 200, this.overview());
+    // The dashboard is composed by the real BFF function from this fake's own overview and permissions (no read-back).
+    if (key === "GET /dashboard") {
+      return this.json(route, 200, buildDashboardView({ overview: this.overview(), consents: this.consents.map(permissionOf), scanMode: null, readFacts: { status: "none" } }));
+    }
     if (key === "GET /consents/notices") return this.json(route, 200, { notices: NOTICES });
     if (key === "POST /cases") {
       const created = !this.caseId;

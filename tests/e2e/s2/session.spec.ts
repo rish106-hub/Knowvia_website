@@ -104,16 +104,24 @@ test.describe("signed out and sign-in", () => {
     expect(bff.callsTo("DELETE /session")[0].headers["x-knowvia-app"]).toBe("1");
   });
 
-  test("home lists household members read-only, with no add, invite or edit control", async ({ page }) => {
+  test("home is the dashboard: no add, invite or edit control, and no 'Family: Add'", async ({ page }) => {
     const bff = new FakeBff();
     await bff.install(page);
     await page.goto("/app");
-    const people = page.getByTestId("people");
-    await expect(people.getByText("Asha Test")).toBeVisible();
-    await expect(people).toContainText("You, account owner");
-    await expect(page.getByText(/Adding family members and sharing are not available yet/)).toBeVisible();
-    await expect(page.getByRole("button", { name: /add|invite|edit|share/i })).toHaveCount(0);
-    await expect(page.getByRole("link", { name: /add person|invite/i })).toHaveCount(0);
+    await expect(page.getByRole("heading", { level: 1, name: "Your cover, in one place" })).toBeVisible();
+    await expect(page.getByText("Add your e-card first")).toBeVisible();
+    await expect(page.getByRole("button", { name: /invite|edit|share|confirm date/i })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /add person|invite|family/i })).toHaveCount(0);
+    expect(bff.callsTo("GET /dashboard")).toHaveLength(1);
+  });
+
+  test("mode E (?mode=E) opens the dashboard with the emergency card first", async ({ page }) => {
+    const bff = new FakeBff();
+    await bff.install(page);
+    await page.goto("/app?mode=E");
+    const widgets = page.locator("[data-widget]");
+    await expect(widgets.first()).toHaveAttribute("data-widget", "w14");
+    await expect(page.getByRole("link", { name: /Call 112/ })).toHaveAttribute("href", "tel:112");
   });
 
   test("the session check failing offline shows a retry, not a blank page", async ({ page }) => {
@@ -123,6 +131,6 @@ test.describe("signed out and sign-in", () => {
     await page.goto("/app");
     await expect(page.getByText("You look offline")).toBeVisible();
     await page.getByRole("button", { name: "Try again" }).click();
-    await expect(page.getByRole("heading", { level: 1, name: "Your household" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Your cover, in one place" })).toBeVisible();
   });
 });

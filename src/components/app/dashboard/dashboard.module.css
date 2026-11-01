@@ -1,0 +1,177 @@
+/*
+ * S11 dashboard and its widgets (run W-B1). Only --kv-* and --state-* tokens from src/app/tokens.css, no hex colours.
+ * Radius 16 (cards), 10 (controls), 6 (chips). Gap 24 on an 8px grid. Hit targets 44px or more.
+ * One shadow on the screen: the emergency card. Motion: press 120ms, hover 180ms, expand 240ms, settle 420ms
+ * cubic-bezier(0.165, 0.84, 0.44, 1), at most 8px of travel. With prefers-reduced-motion every duration is 0s and
+ * everything shows its final state. Chips carry colour, border style, icon and words.
+ */
+.page {
+  --shadow: 0 18px 50px rgb(22 62 54 / 0.09);
+  --settle: cubic-bezier(0.165, 0.84, 0.44, 1);
+  display: flex; flex-direction: column; gap: 24px; min-width: 0;
+  width: 100%;
+}
+
+.head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.headText { display: flex; flex-direction: column; gap: 8px; flex: 1 1 20rem; min-width: 0; }
+.h1 { margin: 0; font-family: var(--kv-font-display); font-weight: 600; font-size: 32px; line-height: 1.12; letter-spacing: -0.01em; color: var(--kv-tide); text-wrap: balance; }
+@media (min-width: 768px) { .h1 { font-size: 40px; } }
+.lead { margin: 0; color: var(--kv-muted); max-width: 60ch; }
+.careLink {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px;
+  background: var(--kv-tide); color: var(--kv-paper) !important; font-weight: 600; text-decoration: none;
+  transition: background-color 180ms ease, transform 120ms ease;
+}
+.careLink:hover { background: var(--kv-harbour); }
+.careLink:active { transform: translateY(1px); }
+
+.band { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
+.columns { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; align-items: start; }
+.col { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+@media (min-width: 1024px) {
+  .band { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+  .band:has(> :only-child) { grid-template-columns: minmax(0, 1fr); }
+  .columns { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+}
+.foot { margin: 0; font-size: 15px; line-height: 1.45; color: var(--kv-muted); }
+
+/* ---- text helpers ---- */
+.muted { margin: 0; color: var(--kv-muted); font-size: 15px; line-height: 1.45; }
+.strong { margin: 0; font-weight: 600; color: var(--kv-tide); }
+.rowStrong { font-weight: 600; color: var(--kv-tide); }
+.okLine { margin: 0; display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--kv-tide); }
+.okLine svg { flex: none; color: var(--kv-harbour); }
+.unavailable { margin: 0; display: flex; align-items: flex-start; gap: 8px; color: var(--kv-ink); }
+.unavailable svg { flex: none; margin-top: 2px; color: var(--state-unknown); }
+.askLine { margin: 0; font-weight: 600; color: var(--kv-tide); }
+
+/* ---- card ---- */
+.card {
+  display: flex; flex-direction: column; gap: 12px; min-width: 0;
+  padding: 16px; border-radius: 16px; background: var(--kv-paper); border: 1px solid var(--kv-border);
+}
+@media (min-width: 480px) { .card { padding: 20px; } }
+.cardAct { border: 2px solid var(--kv-gold); }
+.cardCalm { border: 2px solid var(--kv-tide); }
+.cardEmergency { box-shadow: var(--shadow); }
+.cardHead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+.lab { margin: 0; font-family: var(--kv-font-body); font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--kv-muted); }
+.cardAct .lab { color: var(--kv-gold-ink); }
+.actTitle { margin: 0; font-size: 19px; font-weight: 700; line-height: 1.25; color: var(--kv-tide); }
+.heroTitle { margin: 0; font-family: var(--kv-font-display); font-weight: 600; font-size: 28px; line-height: 1.15; color: var(--kv-tide); }
+.emptyHero { display: flex; flex-direction: column; gap: 12px; }
+
+/* ---- list rows ---- */
+.rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; border-top: 1px solid var(--kv-border); }
+.row:first-child { border-top: 0; }
+.rowStack { display: flex; flex-direction: column; gap: 4px; padding: 8px 0; border-top: 1px solid var(--kv-border); }
+.rows > .rowStack:first-child { border-top: 0; }
+.tagDone, .tagNone { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 700; padding: 2px 10px; border-radius: 6px; white-space: nowrap; }
+.tagDone { background: var(--kv-paper); color: var(--kv-tide); border: 2px solid var(--kv-harbour); }
+.tagNone { background: var(--kv-mist-deep); color: var(--kv-muted); border: 1.5px solid var(--kv-border); }
+.needList { margin: 0; padding-left: 24px; display: flex; flex-direction: column; gap: 4px; font-weight: 600; color: var(--kv-tide); }
+
+/* ---- W01 ring and steps ---- */
+.ringRow { display: flex; align-items: center; gap: 16px; }
+.ring { flex: none; }
+.arcOpen { stroke: var(--kv-mist-deep); }
+.arcDone { stroke: var(--kv-harbour); animation: tickIn 240ms var(--settle) both; }
+.ringText { font-family: var(--kv-font-display); font-size: 24px; font-weight: 600; fill: var(--kv-tide); }
+.ringCaption { margin: 0; font-weight: 600; color: var(--kv-tide); }
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.stepItem { display: grid; grid-template-columns: 20px 1fr auto; align-items: center; gap: 8px; min-height: 44px; border-top: 1px solid var(--kv-border); color: var(--kv-muted); }
+.stepItem:first-child { border-top: 0; }
+.stepItem[data-done] { color: var(--kv-ink); }
+.stepItem[data-done] svg { color: var(--kv-harbour); }
+.stepWord { font-size: 14px; font-weight: 600; color: var(--kv-muted); }
+@keyframes tickIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+/* ---- chips: colour + border style + icon + words ---- */
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; max-width: 100%; box-sizing: border-box;
+  min-height: 28px; padding: 2px 10px; border-radius: 6px; font-size: 14px; font-weight: 700; line-height: 1.3;
+  background: var(--kv-paper); color: var(--kv-ink); border: 1.5px solid currentColor;
+}
+.chip svg { flex: none; }
+.chipSolid { background: var(--state-confirmed-bg); color: var(--state-confirmed); border: 2px solid var(--state-confirmed); }
+.chipDashed { background: var(--state-unknown-bg); color: var(--state-unknown); border: 1.5px dashed var(--state-unknown); }
+.chipThick { background: var(--state-conflict-bg); color: var(--state-conflict); border: 3px solid var(--state-conflict); padding: 0 8px; }
+.chipDotted { background: var(--state-pending-bg); color: var(--kv-tide); border: 2px dotted var(--state-pending); }
+.chipLine { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+
+/* ---- review mark: wording that is not final ---- */
+.review {
+  display: inline-block; padding: 1px 8px; border-radius: 6px; align-self: flex-start;
+  background: var(--kv-gold-tint); color: var(--kv-gold-ink); border: 1px dashed var(--kv-gold-ink);
+  font-size: 13px; font-weight: 700; line-height: 1.5;
+}
+
+/* ---- W14 emergency card ---- */
+.callBand { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 16px; padding: 16px; border-radius: 16px; background: var(--kv-tide); }
+.callText { margin: 0; flex: 1 1 14rem; color: var(--kv-paper); font-weight: 600; line-height: 1.3; }
+.callButton {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 52px; padding: 8px 20px; border-radius: 999px;
+  background: var(--kv-paper); color: var(--kv-tide) !important; border: 2px solid var(--kv-gold); font-weight: 700; text-decoration: none;
+  transition: background-color 180ms ease, transform 120ms ease;
+}
+.callButton:hover { background: var(--kv-mist-deep); }
+.callButton:active { transform: translateY(1px); }
+
+/* ---- W09 checklist ---- */
+.checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.check { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 6px 14px; border: 1px solid var(--kv-border); border-radius: 10px; background: var(--kv-paper); cursor: pointer; }
+.check:has(input:checked) { border: 2px solid var(--kv-harbour); padding: 5px 13px; }
+.check input { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--kv-harbour); }
+.checkText { display: flex; flex-direction: column; font-weight: 600; }
+
+/* ---- W15 timeline ---- */
+.timeline { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; border-left: 2px solid var(--kv-border); }
+.timelineItem { display: flex; flex-direction: column; gap: 4px; padding-left: 16px; }
+.timelineHead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; }
+
+/* ---- values ---- */
+.valueGrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+@media (min-width: 480px) { .valueGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.valueSingle { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.valueBox { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 8px 10px; border-radius: 10px; background: var(--kv-mist); }
+.valueLarge { font-family: var(--kv-font-display); font-size: 22px; font-weight: 600; line-height: 1.2; color: var(--kv-tide); overflow-wrap: anywhere; }
+.valueText { font-weight: 600; color: var(--kv-tide); overflow-wrap: anywhere; }
+.group { display: flex; flex-direction: column; gap: 6px; }
+
+/* ---- W17 topics ---- */
+.topicsSection { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.sectionTitle { margin: 0; font-family: var(--kv-font-display); font-weight: 600; font-size: 24px; line-height: 1.2; color: var(--kv-tide); }
+.topics { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.topic { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 16px; border-radius: 16px; background: var(--kv-paper); border: 1px solid var(--kv-border); }
+@media (min-width: 480px) { .topic { padding: 20px; } }
+.topicDisagree { border: 3px solid var(--state-conflict); }
+.topicHead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+.topicTitle { margin: 0; font-size: 19px; font-weight: 700; line-height: 1.25; color: var(--kv-tide); }
+.explainer { margin: 0; font-size: 16px; line-height: 1.45; color: var(--kv-ink); }
+
+/* ---- passage card: page number, a muted left rule, and the label that says it is not an answer ---- */
+.passage { margin: 0; display: flex; flex-direction: column; gap: 4px; padding: 8px 12px; border-left: 4px solid var(--kv-muted); background: var(--kv-paper); border-radius: 0 10px 10px 0; min-width: 0; }
+.passageHead { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 14px; font-weight: 700; color: var(--kv-muted); }
+.passagePage { color: var(--kv-tide); }
+.passageTitle { font-weight: 600; }
+.passageText { margin: 0; font-family: var(--kv-font-display); font-size: 17px; line-height: 1.5; color: var(--kv-ink); overflow-wrap: anywhere; }
+.passageLabel { margin: 0; font-size: 13px; font-weight: 600; color: var(--kv-muted); }
+
+.passages { display: flex; flex-direction: column; gap: 8px; }
+.disclosure {
+  display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; min-height: 44px; padding: 0 12px; border-radius: 10px;
+  border: 0; background: transparent; font: inherit; font-size: 16px; font-weight: 600; color: var(--kv-harbour); cursor: pointer; text-align: left;
+  transition: background-color 180ms ease, transform 120ms ease;
+}
+.disclosure:hover { background: var(--kv-mist-deep); color: var(--kv-tide); }
+.disclosure:active { transform: translateY(1px); }
+.passagesBody { display: flex; flex-direction: column; gap: 8px; animation: expand 240ms var(--settle) both; }
+.passagesBody[hidden] { display: none; }
+@keyframes expand { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .careLink, .callButton, .disclosure { transition-duration: 0s; transition-delay: 0s; }
+  .careLink:active, .callButton:active, .disclosure:active { transform: none; }
+  .arcDone, .passagesBody { animation: none; }
+}

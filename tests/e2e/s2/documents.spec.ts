@@ -471,8 +471,9 @@ test.describe("delete and revoke", () => {
       ],
     });
     await bff.install(page);
-    await page.goto("/app");
-    const list = page.locator("#kva-permissions-h + p + p + p + ul, section[aria-labelledby='kva-permissions-h'] ul");
+    // The permissions list moved off Home (W-B1): Home shows a summary, this screen lists and takes back.
+    await page.goto("/app/permissions");
+    const list = page.locator("section[aria-label='Permissions'] ul");
     await expect(list.locator("li")).toHaveCount(2);
     await expect(list.getByText("Draft wording, pending legal review").first()).toBeVisible();
 
@@ -495,7 +496,7 @@ test.describe("delete and revoke", () => {
   test("with no permissions the list says nothing is stored or read", async ({ page }) => {
     const bff = new FakeBff();
     await bff.install(page);
-    await page.goto("/app");
+    await page.goto("/app/permissions");
     await expect(page.getByText("No permissions given yet")).toBeVisible();
   });
 });

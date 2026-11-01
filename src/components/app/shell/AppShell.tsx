@@ -80,7 +80,7 @@ function Chrome({ children }: { children: ReactNode }) {
           </p>
         </div>
       ) : null}
-      <main id="kva-main" className="kva-main" tabIndex={-1}>
+      <main id="kva-main" className={pathname === "/app" ? "kva-main kva-main--wide" : "kva-main"} tabIndex={-1}>
         {signOutError ? (
           <Notice tone="error" title="Could not sign out">
             {errorCopy(signOutError).message}
