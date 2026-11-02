@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Newsreader, Source_Sans_3 } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ConsentAnalytics } from "@/components/analytics/ConsentAnalytics";
 import { site } from "@/lib/site";
 import "./globals.css";
@@ -21,5 +22,5 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#163F42" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en" className={`${newsreader.variable} ${sourceSans.variable}`}><body>{children}<ConsentAnalytics /></body></html>;
+  return <html lang="en" className={`${newsreader.variable} ${sourceSans.variable}`}><body>{children}<ConsentAnalytics /><SpeedInsights /></body></html>;
 }
