@@ -270,6 +270,9 @@ export function EarlyListSection({ v }: { v: Any }) {
               <p style={{margin: "0", fontSize: "17px", lineHeight: "1.6"}}>
                 {"We will email "}{v.close.emailShown}{" with your Knowvia access. "}{v.cm.successExtra}{" While you wait, find your policy schedule and your employer's benefits booklet."}
               </p>
+              <a href={v.close.betaUrl} style={{alignSelf: "flex-start", display: "inline-flex", alignItems: "center", height: "52px", padding: "0 24px", borderRadius: "12px", background: "#0F4A3A", color: "#FFFFFF", fontSize: "17px", fontWeight: "600", textDecoration: "none"}}>
+                {"Try the beta now"}
+              </a>
             </div>
             </>
           )}

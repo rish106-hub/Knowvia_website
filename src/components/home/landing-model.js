@@ -198,6 +198,7 @@ export class Component extends DCLogic {
       error: errors[st] || '',
       buttonLabel: busy ? 'Joining' : (st === 'network' || st === 'server' ? 'Try again' : 'Join the early list'),
       emailShown: email || 'your address',
+      betaUrl: (process.env.NEXT_PUBLIC_BETA_URL || 'https://knowviafrontend.vercel.app/') + (email ? '?email=' + encodeURIComponent(email) + (key === 'close' && self.state.closeName ? '&name=' + encodeURIComponent(self.state.closeName) : '') : ''),
       inputStyle: base + (invalid ? 'border:2px solid #A74335;' : 'border:1px solid #7B918E;'),
       setEmail: function (e) {
         var s = {};
