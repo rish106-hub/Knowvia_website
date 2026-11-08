@@ -13,6 +13,9 @@ a{color:#176F69}a:hover{color:#125A55}
 .kv-btn{transition:background-color 180ms ease-out,transform 180ms ease-out,box-shadow 180ms ease-out}
 .kv-btn:hover{background:#125A55 !important;transform:translateY(-1px);box-shadow:0 10px 24px rgba(18,90,85,0.24)}
 .kv-btn:active{transform:translateY(1px);box-shadow:none}
+.kv-btn-ghost{transition:background-color 180ms ease-out,transform 180ms ease-out}
+.kv-btn-ghost:hover{background:rgba(23,111,105,0.08) !important;transform:translateY(-1px)}
+.kv-btn-ghost:active{transform:translateY(1px)}
 .kv-light{transition:background-color 180ms ease-out,transform 180ms ease-out,box-shadow 180ms ease-out}
 .kv-light:hover{background:#E3F0EE !important;transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,0.22)}
 .kv-lime{transition:background-color 180ms ease-out,transform 180ms ease-out}
