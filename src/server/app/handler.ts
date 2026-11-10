@@ -7,6 +7,7 @@ import { buildConsentGrant, CONSENT_NOTICES } from "./consent-scopes";
 import {
   askQuestionRequestSchema,
   catalogueReviewRequestSchema,
+  confirmPolicyProfileRequestSchema,
   coveragePreviewRequestSchema,
   createCaseRequestSchema,
   createSessionRequestSchema,
@@ -450,6 +451,23 @@ const ROUTES = {
         status: 200,
         body: { caseId: inventory.caseId, documents: inventory.documents.map((document) => composeDocumentView({ document, ocrJob: null, ocrConsent: false })) },
       };
+    },
+  },
+
+  // --- policy profile (identity of a policy, confirmed by its owner) ---
+  "policyProfile.get": {
+    auth: true,
+    async run(ctx) {
+      return { status: 200, body: await ctx.backend.getPolicyProfile(ctx.session.token, pathId(ctx, "documentId")) };
+    },
+  },
+  "policyProfile.confirm": {
+    auth: true,
+    async run(ctx) {
+      const documentId = pathId(ctx, "documentId");
+      const key = idempotencyKey(ctx.request);
+      const body = await readJson(ctx.request, confirmPolicyProfileRequestSchema);
+      return { status: 200, body: await ctx.backend.confirmPolicyProfile(ctx.session.token, documentId, body, key) };
     },
   },
 

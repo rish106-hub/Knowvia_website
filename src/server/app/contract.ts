@@ -177,6 +177,18 @@ export const catalogueReviewRequestSchema = z.object({
 });
 export type CatalogueReviewRequest = z.infer<typeof catalogueReviewRequestSchema>;
 
+/** Owner's statement of what a document is. Every field is optional; the backend decides what is acceptable. */
+export const confirmPolicyProfileRequestSchema = z
+  .object({
+    uin: z.string().trim().min(1).max(40).optional(),
+    insurerCode: z.string().trim().min(1).max(10).optional(),
+    insurerName: z.string().trim().min(1).max(200).optional(),
+    policyName: z.string().trim().min(1).max(200).optional(),
+    expectedVersion: z.number().int().min(0).max(1_000_000),
+  })
+  .strict();
+export type ConfirmPolicyProfileRequest = z.infer<typeof confirmPolicyProfileRequestSchema>;
+
 export const designateConfirmerRequestSchema = z.object({ adultUserId: z.string().min(1).max(128) });
 export type DesignateConfirmerRequest = z.infer<typeof designateConfirmerRequestSchema>;
 

@@ -20,8 +20,33 @@ describe("backend error normalisation", () => {
   });
 
   it("maps 401 to SESSION_EXPIRED when authenticated and to BACKEND_AUTH_FAILED (502) for the bootstrap call", () => {
-    expect(normalizeBackendFailure(401, { error: "x" }, { authenticated: true })).toMatchObject({ status: 401, code: "SESSION_EXPIRED", clearSession: true });
+    expect(normalizeBackendFailure(401, { error: { code: "AUTHENTICATION_REQUIRED", message: "x" } }, { authenticated: true })).toMatchObject({ status: 401, code: "SESSION_EXPIRED", clearSession: true });
     expect(normalizeBackendFailure(401, { error: { code: "AUTHENTICATION_REQUIRED", message: "x" } }, { authenticated: false })).toMatchObject({ status: 502, code: "BACKEND_AUTH_FAILED" });
+  });
+
+  it("does not end the session on a 401 that is not the backend's coded token rejection", () => {
+    for (const body of [{ error: "x" }, null, { error: { code: "SOMETHING_ELSE", message: "x" } }]) {
+      const error = normalizeBackendFailure(401, body, { authenticated: true });
+      expect(error).toMatchObject({ status: 502, code: "BACKEND_AUTH_FAILED", clearSession: false, retryable: true });
+    }
+  });
+
+  it("keeps policy-profile 404, 409 and 422 as plain failures that never clear the session", () => {
+    const cases: Array<[number, string, boolean]> = [
+      [404, "POLICY_PROFILE_NOT_FOUND", false],
+      [409, "POLICY_PROFILE_VERSION_CONFLICT", false],
+      [409, "POLICY_PROFILE_CONFLICTING_FACTS", false],
+      [409, "POLICY_PROFILE_NOT_READY", true],
+      [409, "STRUCTURING_RESTART_REQUIRED", false],
+      [422, "POLICY_PROFILE_INVALID_UIN", false],
+      [400, "POLICY_PROFILE_INVALID", false],
+      [503, "POLICY_FACTS_DISABLED", false],
+    ];
+    for (const [status, code, retryable] of cases) {
+      const error = normalizeBackendFailure(status, { error: { code, message: "internal detail" } }, { authenticated: true });
+      expect(error).toMatchObject({ status, code, retryable, clearSession: false });
+      expect(error.message).not.toContain("internal");
+    }
   });
 
   it("rejects non-application codes and marks 5xx and 429 retryable", () => {
