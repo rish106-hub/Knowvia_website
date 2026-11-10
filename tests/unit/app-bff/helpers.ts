@@ -50,7 +50,10 @@ export function createFakeBackend() {
     expireTokens: false,
     /** The real backend answers 403 FIELD_ACCESS_REQUIRED on list/get once the collect permission is withdrawn. */
     fieldAccessDenied: false,
+    /** Policy profile: version stored for the document (0 = none yet) and whether it is ready to read. */
+    policyProfileReady: true,
   };
+  const profiles = new Map<string, { version: number; statement: Record<string, unknown>; key: string }>();
 
   const fetch: FetchLike = async (url, init) => {
     const parsed = new URL(url);
@@ -157,13 +160,32 @@ export function createFakeBackend() {
       job.errorCode = job.status === "failed" ? "OCR_PROVIDER_FAILED" : null;
       return json(200, { job });
     }
+    const profileMatch = path.match(/^\/api\/v1\/documents\/([^/]+)\/policy-profile(\/confirm)?$/);
+    if (profileMatch) {
+      const docId = profileMatch[1];
+      if (!documents.has(docId)) return json(404, { error: { code: "POLICY_PROFILE_NOT_FOUND", message: "Policy profile was not found." } });
+      if (!control.policyProfileReady) return json(409, { error: { code: "POLICY_PROFILE_NOT_READY", message: "Not ready." } });
+      const stored = profiles.get(docId);
+      const view = () => ({ documentId: docId, sourceVersion: 1, version: profiles.get(docId)?.version ?? 0, totalPages: 3, profile: profiles.get(docId) ? { states: { uin: "reported" }, confirmed: true, confirmedAt: "2026-11-10T00:00:00.000Z" } : null });
+      if (method === "GET" && !profileMatch[2]) {
+        return json(200, { ...view(), textRead: true, proposals: { uin: "SYNTH00001V010101", insurerCode: "SYN", insurerName: null, policyName: null, conflicts: [] } });
+      }
+      if (method === "POST" && profileMatch[2]) {
+        const statement = body as { expectedVersion?: number; uin?: string };
+        if (stored && stored.key === headers["idempotency-key"]) return json(200, view());
+        if (statement.uin && !/^[A-Z0-9]{8,24}$/.test(statement.uin)) return json(422, { error: { code: "POLICY_PROFILE_INVALID_UIN", message: "bad" } });
+        if ((statement.expectedVersion ?? -1) !== (stored?.version ?? 0)) return json(409, { error: { code: "POLICY_PROFILE_VERSION_CONFLICT", message: "stale" } });
+        profiles.set(docId, { version: (stored?.version ?? 0) + 1, statement: statement as Record<string, unknown>, key: headers["idempotency-key"] });
+        return json(200, view());
+      }
+    }
     if (method === "POST" && path === "/api/v1/cases/case-1/questions") {
       return json(201, { answerId: "answer-1", replayed: false, answer: { state: "conditional", sources: [] } });
     }
     return json(404, { error: { code: "ROUTE_NOT_FOUND", message: "Versioned backend route not found." } });
   };
 
-  return { fetch, calls, control, documents, grants, revoked, jobs };
+  return { fetch, calls, control, documents, grants, revoked, jobs, profiles };
 }
 
 export function makeApp(options: { env?: EnvSource; backend?: FakeBackend; now?: () => number; limit?: number } = {}) {

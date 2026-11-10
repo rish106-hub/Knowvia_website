@@ -330,6 +330,19 @@ export function createBackendClient(options: BackendClientOptions) {
     getStructuring: (token: string, documentId: string, workflowRunId: string): Promise<Json> =>
       send({ method: "GET", path: `/api/v1/documents/${enc(documentId)}/structuring-runs?workflowRunId=${enc(workflowRunId)}`, token }),
 
+    // --- policy profile (backend ADR 0024). Pass-through bodies. Confirm repeats safely with its Idempotency-Key. ---
+    getPolicyProfile: (token: string, documentId: string): Promise<Json> =>
+      send({ method: "GET", path: `/api/v1/documents/${enc(documentId)}/policy-profile`, token }),
+    confirmPolicyProfile: (token: string, documentId: string, body: Record<string, unknown>, idempotencyKey: string): Promise<Json> =>
+      send({
+        method: "POST",
+        path: `/api/v1/documents/${enc(documentId)}/policy-profile/confirm`,
+        token,
+        json: body,
+        headers: { "idempotency-key": idempotencyKey },
+        retryOnTransient: true,
+      }),
+
     // --- questions, catalogue, preview ---
     askQuestion: (
       token: string,

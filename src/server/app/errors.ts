@@ -45,6 +45,14 @@ const MESSAGES: Record<string, string> = {
   OCR_PROVIDER_NOT_CONFIGURED: "Reading documents is not available yet.",
   EVIDENCE_DISABLED: "Questions about your documents are not available yet.",
   POLICY_EVIDENCE_UNAVAILABLE: "These documents have not been read yet.",
+  STRUCTURING_RESTART_REQUIRED: "The earlier reading did not finish. Start it again to continue.",
+  POLICY_FACTS_DISABLED: "Confirming policy details is not available yet.",
+  POLICY_PROFILE_NOT_FOUND: "Policy details were not found for this document.",
+  POLICY_PROFILE_VERSION_CONFLICT: "These details changed since you last looked. Reload and check them again.",
+  POLICY_PROFILE_CONFLICTING_FACTS: "The document shows more than one value. Choose the right one to continue.",
+  POLICY_PROFILE_NOT_READY: "This document is not ready yet. Try again shortly.",
+  POLICY_PROFILE_INVALID_UIN: "That product number does not look right.",
+  POLICY_PROFILE_INVALID: "Check the details and try again.",
   UPLOAD_IN_PROGRESS: "Another upload is still in progress. Wait for it to finish.",
   BACKEND_UNREACHABLE: "The service is not reachable. Try again.",
   BACKEND_TIMEOUT: "The service took too long. Try again.",
@@ -67,7 +75,9 @@ const GENERIC_BY_STATUS = (status: number) => {
 export const isTransientStatus = (status: number) => status === 408 || status === 429 || status >= 500;
 
 // A feature that is switched off or not configured is not fixed by trying again, whatever the HTTP status.
-const NOT_RETRYABLE_CODES = new Set(["OCR_PROVIDER_DISABLED", "OCR_PROVIDER_NOT_CONFIGURED", "EVIDENCE_DISABLED", "DOCUMENT_STORAGE_NOT_CONFIGURED"]);
+const NOT_RETRYABLE_CODES = new Set(["OCR_PROVIDER_DISABLED", "OCR_PROVIDER_NOT_CONFIGURED", "EVIDENCE_DISABLED", "DOCUMENT_STORAGE_NOT_CONFIGURED", "POLICY_FACTS_DISABLED"]);
+// Waiting fixes these although the status is a 409.
+const RETRYABLE_CODES = new Set(["POLICY_PROFILE_NOT_READY"]);
 
 export class AppError extends Error {
   readonly status: number;
@@ -81,7 +91,7 @@ export class AppError extends Error {
     this.name = "AppError";
     this.status = init.status;
     this.code = init.code;
-    this.retryable = init.retryable ?? (isTransientStatus(init.status) && !NOT_RETRYABLE_CODES.has(init.code));
+    this.retryable = init.retryable ?? (RETRYABLE_CODES.has(init.code) || (isTransientStatus(init.status) && !NOT_RETRYABLE_CODES.has(init.code)));
     this.fields = init.fields ?? [];
     this.clearSession = init.clearSession ?? false;
   }
@@ -126,9 +136,13 @@ export function normalizeBackendFailure(
     // The string shape carries no code. It is treated as an uncoded failure of that status.
   }
   if (status === 401) {
-    if (authenticated) return new AppError({ status: 401, code: "SESSION_EXPIRED", clearSession: true });
     // A 401 on the bootstrap call is our configuration, never the visitor's mistake.
-    return new AppError({ status: 502, code: "BACKEND_AUTH_FAILED", retryable: false });
+    if (!authenticated) return new AppError({ status: 502, code: "BACKEND_AUTH_FAILED", retryable: false });
+    // Only the backend's own coded rejection of the bearer token (expired, revoked or unknown) is a definite end of session.
+    // An uncoded or differently coded 401 (a proxy, a gateway, a guard) says nothing about the session, so it must not
+    // sign the person out: the cookies stay and the failure is reported as retryable.
+    if (code === "AUTHENTICATION_REQUIRED") return new AppError({ status: 401, code: "SESSION_EXPIRED", clearSession: true });
+    return new AppError({ status: 502, code: "BACKEND_AUTH_FAILED", retryable: true });
   }
   if (status === 503 && code === "AUTH_NOT_CONFIGURED") {
     return new AppError({ status: 502, code: "BACKEND_AUTH_FAILED", retryable: false });

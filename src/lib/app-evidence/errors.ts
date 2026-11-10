@@ -32,6 +32,20 @@ export function describeError(error: unknown, context: ErrorContext): ErrorView 
     case "POLICY_EVIDENCE_UNAVAILABLE":
     case "POLICY_EVIDENCE_DOCUMENTS_REQUIRED":
       return view(code, "Your document is not ready to read yet", "The text of your document is not ready. Check its status in your documents.", "documents");
+    case "POLICY_PROFILE_NOT_FOUND":
+    case "POLICY_FACTS_DISABLED":
+      return view(code, "These details are not available", "Only the person who owns this household can confirm what a document says, and only once it has been read.", "none", false);
+    case "POLICY_PROFILE_VERSION_CONFLICT":
+      return view(code, "These details changed", "They were updated since you last looked. Reload and check them again.", "retry", true);
+    case "POLICY_PROFILE_CONFLICTING_FACTS":
+      return view(code, "The document shows more than one value", "Choose the right one to continue.", "change_answer");
+    case "POLICY_PROFILE_NOT_READY":
+      return view(code, "This document is not ready yet", "Try again in a moment.", "retry", true);
+    case "POLICY_PROFILE_INVALID_UIN":
+    case "POLICY_PROFILE_INVALID":
+      return view(code, "Check the details", "Something you entered does not look right. Change it and try again.", "change_answer");
+    case "STRUCTURING_RESTART_REQUIRED":
+      return view(code, "The earlier reading did not finish", "Start the reading again to continue.", "ask_again");
     case "EVIDENCE_BUSY":
       return view(code, "Knowvia is busy right now", "Too many documents are being read. Wait a minute and try again.", "retry", true);
     case "EVIDENCE_DISABLED":

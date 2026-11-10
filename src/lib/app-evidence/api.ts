@@ -20,6 +20,24 @@ const enc = encodeURIComponent;
 
 export const getOverview = (signal?: AbortSignal) => appFetch<Overview>("/overview", { signal });
 
+// Policy profile: what a document is (product number, insurer, name), confirmed by its owner. Bodies are passed through.
+export const getPolicyProfile = (documentId: string, signal?: AbortSignal) =>
+  appFetch<Record<string, unknown>>(`/documents/${enc(documentId)}/policy-profile`, { signal });
+
+// One Idempotency-Key per user action, so a repeat after a timeout is the same statement and not a second one.
+export const confirmPolicyProfile = (
+  documentId: string,
+  statement: { uin?: string; insurerCode?: string; insurerName?: string; policyName?: string; expectedVersion: number },
+  idempotencyKey: string,
+  signal?: AbortSignal,
+) =>
+  appFetch<Record<string, unknown>>(`/documents/${enc(documentId)}/policy-profile/confirm`, {
+    method: "POST",
+    json: statement,
+    headers: { "Idempotency-Key": idempotencyKey },
+    signal,
+  });
+
 export async function getQuestionNotice(signal?: AbortSignal): Promise<ConsentNotice | null> {
   const body = await appFetch<{ notices?: ConsentNotice[] }>("/consents/notices", { signal });
   const notice = Array.isArray(body?.notices) ? body.notices.find((n) => n?.scope === "question_gemini") : undefined;
