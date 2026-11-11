@@ -1,1 +1,0 @@
-export { EvidenceScreen } from "./EvidenceScreen";
