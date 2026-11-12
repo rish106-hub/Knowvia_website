@@ -1,7 +1,7 @@
 // Generated from Main.dc.html, then wired to /api/waitlist and the microphone.
 /* eslint-disable @typescript-eslint/no-this-alias -- ported canvas logic keeps its `var self = this` closures */
 import { DCLogic } from "@/lib/dc-logic";
-import { betaBaseUrl } from "@/lib/beta-url";
+import { betaTargetUrl } from "@/lib/beta-url";
 
 export class Component extends DCLogic {
   constructor(props) {
@@ -199,7 +199,7 @@ export class Component extends DCLogic {
       error: errors[st] || '',
       buttonLabel: busy ? 'Joining' : (st === 'network' || st === 'server' ? 'Try again' : 'Join the early list'),
       emailShown: email || 'your address',
-      betaUrl: betaBaseUrl() + (email ? '?email=' + encodeURIComponent(email) + (key === 'close' && self.state.closeName ? '&name=' + encodeURIComponent(self.state.closeName) : '') : ''),
+      betaUrl: betaTargetUrl(email, key === 'close' ? self.state.closeName : ''),
       inputStyle: base + (invalid ? 'border:2px solid #A74335;' : 'border:1px solid #7B918E;'),
       setEmail: function (e) {
         var s = {};
