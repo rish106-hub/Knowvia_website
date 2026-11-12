@@ -26,3 +26,10 @@ export function appAddCoverUrl() {
   if (url.username || url.password) return null;
   return url.origin + url.pathname.replace(/\/+$/, "") + "/covers/add";
 }
+
+// Post-signup target: add-cover entry when configured, else the beta base. The email (and
+// name, closing form only) hand-over query is identical for both.
+export function betaTargetUrl(email, name) {
+  const query = email ? "?email=" + encodeURIComponent(email) + (name ? "&name=" + encodeURIComponent(name) : "") : "";
+  return (appAddCoverUrl() || betaBaseUrl()) + query;
+}

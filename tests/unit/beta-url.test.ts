@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { appAddCoverUrl, betaDemoUrl, DEFAULT_BETA_URL } from "@/lib/beta-url";
+import { appAddCoverUrl, betaDemoUrl, betaTargetUrl, DEFAULT_BETA_URL } from "@/lib/beta-url";
 
 describe("betaDemoUrl", () => {
   afterEach(() => vi.unstubAllEnvs());
@@ -35,5 +35,25 @@ describe("appAddCoverUrl", () => {
   it("rejects invalid values", () => {
     expect(url("not a url")).toBeNull();
     expect(url("javascript:alert(1)")).toBeNull();
+  });
+});
+
+describe("betaTargetUrl", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("keeps email and name on the add-cover target", () => {
+    vi.stubEnv("NEXT_PUBLIC_BETA_URL", "https://app.example.test");
+    expect(betaTargetUrl("a+b@x.test", "Ann Lee")).toBe("https://app.example.test/covers/add?email=a%2Bb%40x.test&name=Ann%20Lee");
+  });
+
+  it("omits query without email", () => {
+    vi.stubEnv("NEXT_PUBLIC_BETA_URL", "https://app.example.test");
+    expect(betaTargetUrl("", "Ann")).toBe("https://app.example.test/covers/add");
+  });
+
+  it("keeps the old target and query when env is unset", () => {
+    vi.stubEnv("NEXT_PUBLIC_BETA_URL", "");
+    expect(betaTargetUrl("a@x.test", "")).toBe(DEFAULT_BETA_URL + "?email=a%40x.test");
+    expect(betaTargetUrl("a@x.test", "Ann")).toBe(DEFAULT_BETA_URL + "?email=a%40x.test&name=Ann");
   });
 });
