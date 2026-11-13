@@ -1,15 +1,26 @@
-// Generated from the approved Claude Design artboard Main.dc.html, then hand-edited: the animated film player is replaced by the silent demo video. Regenerating from the artboard would restore the film.
+// Generated from the approved Claude Design artboard Main.dc.html, then hand-edited: the animated film player is replaced by the silent demo video, framed by a raised 3D bezel with shaped labels (how-frame.css). Regenerating from the artboard would restore the film.
 "use client";
 
 import { Fragment } from "react";
 import { type Any, css } from "@/lib/dc";
+import "./how-frame.css";
 
 export function HowItWorksSection({ v }: { v: Any }) {
   return (
     <>
     <section id="how" aria-labelledby="how-h" style={{background: "#F3F7F6", padding: "clamp(72px,9vw,128px) 0"}}>
       <div className="kv-film">
-        <div>
+        <div className="kv-vframe">
+          <div className="kv-fx" aria-hidden="true">
+            <span className="c-pill on-top">{"Add a policy"}</span>
+            <span className="c-diamond on-top"></span>
+            <span className="c-circle">{"16s"}</span>
+            <span className="c-vert on-right">{"Reads every page"}</span>
+            <span className="c-ring on-right"></span>
+            <span className="c-ticket-wrap on-bottom"><span className="c-ticket">{"Gaps get flagged"}</span></span>
+            <span className="c-plus on-bottom">{"+"}</span>
+            <span className="c-stamp on-bottom">{"Shows its working"}</span>
+          </div>
           <div className="kv-player kv-rise">
             <video
               controls
