@@ -119,6 +119,9 @@
 .sb-nav-links a::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--forest); transform: scaleX(0); transform-origin: left; transition: transform 260ms cubic-bezier(.16,.84,.44,1); }
 .sb-nav-links a:hover::after { transform: none; }
 .sb-nav-cta { height: 46px !important; padding: 0 22px !important; font-size: 16px !important; }
+.sb-nav-links a { white-space: nowrap; }
+.sb-nav-demo + .sb-nav-cta { margin-left: -16px; }
+@media (max-width: 1023px) { .sb-nav-demo { display: none !important; } .sb-nav-demo + .sb-nav-cta { margin-left: 0; } }
 .sb-nav-menu { display: none; margin-left: auto; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--forest); color: #fff; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; }
 .sb-nav-sheet { position: absolute; z-index: 31; left: 12px; right: 12px; top: 68px; display: flex; flex-direction: column; padding: 8px 20px 20px; border-radius: 24px; background: var(--paper, #f5f8f3); box-shadow: 0 24px 50px -20px rgba(10,30,20,.4); animation: sbFade 300ms var(--out, cubic-bezier(.16,.84,.44,1)) both; }
 .sb-nav-sheet a:not(.sb-btn) { min-height: 52px; display: flex; align-items: center; border-bottom: 1px solid var(--line, #c9d7c5); color: var(--forest); text-decoration: none; font-size: 19px; font-weight: 600; }
