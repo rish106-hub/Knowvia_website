@@ -16,11 +16,11 @@ export function HowItWorksSection({ v }: { v: Any }) {
               muted
               playsInline
               preload="metadata"
-              poster="/demo/knowvia-demo-poster.png"
+              poster="/demo/knowvia-walkthrough-poster.png"
               aria-label="Walkthrough of Knowvia: add a policy, give consent, and see what the document says."
               style={{display: "block", width: "100%", height: "auto", aspectRatio: "16 / 10", background: "#163F42"}}
             >
-              <source src="/demo/knowvia-demo.webm" type="video/webm" />
+              <source src="/demo/knowvia-walkthrough.webm" type="video/webm" />
               {"Your browser cannot play this video."}
             </video>
           </div>
@@ -29,7 +29,7 @@ export function HowItWorksSection({ v }: { v: Any }) {
         <div style={{display: "flex", flexDirection: "column", gap: "28px"}}>
           <div style={{display: "flex", flexDirection: "column", gap: "16px"}}>
             <p className="kv-eyebrow kv-reveal" style={{color: "#176F69"}}>
-              {"Watch it work · 33 seconds"}
+              {"Watch it work · 16 seconds"}
             </p>
             <h2 id="how-h" className="kv-h2 kv-reveal" style={{color: "#163F42", maxWidth: "14ch"}}>
               {"See three answers for every person."}

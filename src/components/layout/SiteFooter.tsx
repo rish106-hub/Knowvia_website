@@ -58,6 +58,9 @@ export function SiteFooter() {
             <p style={{margin: "0 0 4px", fontSize: "15px", fontWeight: "600", color: "#FFFFFF"}}>
               {"Contact"}
             </p>
+            <Link className="kv-foot-link" href="/contact">
+              {"Contact us"}
+            </Link>
             <a className="kv-foot-link" href={`mailto:${site.contactEmail}`}>
               {"Write to us"}
             </a>
@@ -71,6 +74,12 @@ export function SiteFooter() {
             </Link>
             <Link className="kv-foot-link" href="/terms">
               {"Terms"}
+            </Link>
+            <Link className="kv-foot-link" href="/cancellation-and-refund">
+              {"Cancellation and refund"}
+            </Link>
+            <Link className="kv-foot-link" href="/shipping-and-exchange">
+              {"Shipping and exchange"}
             </Link>
             <Link className="kv-foot-link" href="/#top" style={{marginTop: "12px", display: "inline-flex", alignItems: "center", gap: "8px"}}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

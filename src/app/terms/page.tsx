@@ -132,8 +132,9 @@ export default function TermsPage() {
       </p>
       <p>
         Future checkout-specific terms shown before payment will form part of these terms. Mandatory rights
-        under the Consumer Protection Act, 2019 and other applicable law are not excluded. Refunds will follow
-        the checkout terms and applicable law. If a partner pays, cancellation of that arrangement may end
+        under the Consumer Protection Act, 2019 and other applicable law are not excluded. All payments are final
+        and non-refundable, as set out in our{" "}
+        <Link href="/cancellation-and-refund">cancellation and refund policy</Link>. If a partner pays, cancellation of that arrangement may end
         partner-funded access without ending your rights over your data.
       </p>
 
