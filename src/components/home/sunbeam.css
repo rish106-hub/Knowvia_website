@@ -1,0 +1,93 @@
+/*
+ * Sunbeam landing foundation. Hand-written. Shared by every home section.
+ * Palette: Sage Mist + Deep Forest base, Sunbeam yellow for highlights only,
+ * clay / sky / plum as supporting accents so the page is not all yellow.
+ * Every rule is scoped under .sb (the LandingPage root) so /app and /onboarding are untouched.
+ */
+.sb {
+  --mist: #e8eee6; --mist-2: #d7e2d3; --paper: #f5f8f3; --leaf: #bfd3b8; --line: #c9d7c5;
+  --forest: #1f3b2e; --forest-2: #2a4e3d; --forest-3: #355f4a; --ink: #13281f; --soft: #506558; --pale: #b9ccbf;
+  --sun: #f4c542; --sun-2: #ffdf6e; --sun-tint: #fff5d1; --sun-ink: #3a2c00;
+  --clay: #d46a45; --clay-tint: #fbe6dc; --clay-ink: #5a2412;
+  --sky: #3f78a8; --sky-tint: #dfebf6; --sky-ink: #14304a;
+  --plum: #7a5ba6; --plum-tint: #ede6f6; --plum-ink: #2e1e48;
+  --serif: var(--font-display), "Iowan Old Style", Georgia, serif;
+  --sans: var(--font-body), system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --out: cubic-bezier(.16,.84,.44,1);
+  --edge: clamp(16px,5vw,72px); --max: 1240px;
+  background: var(--mist); color: var(--ink); font-family: var(--sans); font-size: 18px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased; overflow-x: clip;
+}
+.sb :focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; border-radius: 6px; }
+.sb h1, .sb h2, .sb h3 { font-family: var(--serif); font-weight: 400; margin: 0; letter-spacing: -.02em; text-wrap: balance; }
+.sb p { margin: 0; }
+.sb-wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--edge); }
+.sb-pad { padding: clamp(80px,10vw,140px) 0; }
+.sb-h2 { font-size: clamp(36px,4.6vw,64px); line-height: 1.02; color: var(--forest); }
+.sb-h3 { font-size: clamp(24px,2.2vw,30px); line-height: 1.12; }
+.sb-lede { font-size: clamp(18px,1.4vw,21px); color: var(--soft); max-width: 40ch; }
+.sb-head { display: grid; grid-template-columns: 1.1fr 1fr; gap: 40px; align-items: end; margin-bottom: clamp(40px,5vw,64px); }
+.sb-head .sb-lede { justify-self: end; }
+.sb-head.center { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 18px; }
+.sb-head.center .sb-lede { justify-self: center; max-width: 46ch; }
+.sb .sb-eyebrow { font-size: 16px; font-weight: 700; color: var(--forest-3); }
+.sb .on-dark .sb-eyebrow, .sb .sb-eyebrow.on-dark { color: var(--sun); }
+.sb-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Highlighter: the one sunbeam device. useSunbeamMotion adds .on when it scrolls in. */
+.sb .mk { background-image: linear-gradient(transparent 58%,var(--sun) 58%,var(--sun) 92%,transparent 92%); background-repeat: no-repeat; background-size: 0% 100%; transition: background-size 900ms var(--out) var(--md,200ms); padding: 0 .06em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.sb .mk.on { background-size: 100% 100%; }
+/* On dark grounds the band would hide the top of dark glyphs, so the text turns yellow over a thin underline. */
+.sb .on-dark .mk, .sb .mk.dk { color: #fff; background-image: linear-gradient(transparent 90%,var(--sun) 90%,var(--sun) 98%,transparent 98%); transition: background-size 900ms var(--out) var(--md,200ms), color 600ms 300ms; }
+.sb .on-dark .mk.on, .sb .mk.dk.on { color: var(--sun); }
+
+/* Buttons */
+.sb-btn { position: relative; overflow: hidden; isolation: isolate; display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 56px; padding: 0 28px; border: 0; border-radius: 999px; background: var(--sun); color: var(--sun-ink); font: inherit; font-weight: 600; font-size: 17px; text-decoration: none; cursor: pointer; transition: transform 200ms var(--out), background-color 200ms, box-shadow 200ms; white-space: nowrap; }
+.sb-btn:hover { background: var(--sun-2); transform: translateY(-2px); box-shadow: 0 14px 30px -12px rgba(201,151,26,.7); }
+.sb-btn::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(105deg,transparent 30%,rgba(255,255,255,.65) 50%,transparent 70%); transform: translateX(-120%); transition: transform 800ms var(--out); }
+.sb-btn:hover::after { transform: translateX(120%); }
+.sb-btn.dk { background: var(--forest); color: #fff; }
+.sb-btn.dk:hover { background: var(--forest-2); box-shadow: 0 14px 30px -12px rgba(19,40,31,.6); }
+.sb-btn.ghost { background: transparent; color: var(--forest); box-shadow: inset 0 0 0 1.5px var(--forest); }
+.sb-btn.ghost:hover { background: var(--forest); color: #fff; }
+.sb-btn[disabled] { opacity: .6; cursor: progress; }
+.sb-input { box-sizing: border-box; flex: 1 1 240px; min-width: 0; height: 56px; padding: 0 20px; border-radius: 999px; border: 1.5px solid var(--line); background: #fff; font: inherit; font-size: 17px; color: var(--ink); }
+.sb-input[aria-invalid="true"] { border-color: #a74335; }
+
+/* Reveal: useSunbeamMotion adds .in once in view. */
+.sb-rv { opacity: 0; transform: translateY(24px); transition: opacity 800ms var(--out) var(--d,0ms), transform 800ms var(--out) var(--d,0ms); }
+.sb-rv.in { opacity: 1; transform: none; }
+/* Uber-careers style line mask: headings rise out of a clipped line. */
+.sb-mask { opacity: 1; transform: translateY(.4em); clip-path: inset(0 0 100% 0); transition: clip-path 900ms var(--out) var(--d,0ms), transform 900ms var(--out) var(--d,0ms); }
+.sb-mask.in { clip-path: inset(0 0 -12% 0); transform: none; }
+
+/* Uber-careers style kinetic line: giant type that slides sideways as the page scrolls (--sx set by the hook). */
+.sb-kinetic { overflow: hidden; white-space: nowrap; padding: clamp(24px,4vw,56px) 0; }
+.sb-kinetic > span { display: inline-block; font-family: var(--serif); font-size: clamp(64px,11vw,170px); line-height: 1; letter-spacing: -.04em; color: var(--forest); transform: translate3d(var(--sx,0px),0,0); will-change: transform; }
+.sb-kinetic > span em { font-style: italic; color: var(--clay); }
+
+/* Uber-careers style expanding media: a rounded card that grows to full bleed as --p goes 0 to 1. */
+.sb-expand { --p: 0; width: calc(100% - (1 - var(--p)) * 2 * clamp(16px,8vw,140px)); margin: 0 auto; border-radius: calc((1 - var(--p)) * 36px + 8px); overflow: hidden; background: var(--forest); transform: translateZ(0); }
+
+/* Parallax drift for floating tiles (data-sb-speed), set by the hook as --py. */
+[data-sb-speed] { transform: translate3d(0,var(--py,0px),0); will-change: transform; }
+
+@media (max-width: 900px) {
+  .sb { font-size: 17px; }
+  .sb-head { grid-template-columns: 1fr; }
+  .sb-head .sb-lede { justify-self: start; }
+  .sb-head.center .sb-lede { justify-self: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sb-rv, .sb-mask { opacity: 1; transform: none; clip-path: none; transition: none; }
+  .sb .mk { background-size: 100% 100%; transition: none; }
+  .sb-kinetic > span, [data-sb-speed] { transform: none; }
+  .sb-expand { --p: 1 !important; }
+}
+
+/* Tools band (ToolsSegment): collapsed room test. */
+.sb-tools { background: var(--sky-tint); padding: clamp(56px,6vw,88px) 0; }
+.sb-tools .sb-h2 { color: var(--sky-ink); }
+.sb-tools .sb-lede { color: var(--sky-ink); opacity: .85; margin-top: 16px; }
+.sb-tools-row { display: flex; align-items: end; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
+.sb-tools-copy { flex: 1 1 520px; }
