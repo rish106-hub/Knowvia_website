@@ -16,6 +16,7 @@ export const metadata: Metadata = {
   applicationName: "Knowvia",
   alternates: { canonical: "/" },
   openGraph: { title: "Knowvia | Know your health cover", description: site.description, type: "website", url: "/" },
+  twitter: { card: "summary", creator: "@RishavAtKnowvia" },
   robots: { index: true, follow: true },
 };
 
