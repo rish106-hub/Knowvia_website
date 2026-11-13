@@ -2,7 +2,7 @@
 
 import Lenis from "lenis";
 import "lenis/dist/lenis.css";
-import { type CSSProperties, useEffect, useRef } from "react";
+import { type CSSProperties, useEffect } from "react";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteNav } from "@/components/layout/SiteNav";
 import type { Any } from "@/lib/dc";
@@ -12,6 +12,7 @@ import { ContrastSection } from "./ContrastSection";
 import { EarlyListSection } from "./EarlyListSection";
 import { FamilyQuote } from "./FamilyQuote";
 import { HeroSection } from "./HeroSection";
+import { HouseholdControl } from "./HouseholdControl";
 import { HowItWorksSection } from "./HowItWorksSection";
 import { IndustrySection } from "./IndustrySection";
 import { LimitsSection } from "./LimitsSection";
@@ -20,9 +21,6 @@ import { QuestionsSection } from "./QuestionsSection";
 import { ResearchSegment } from "./ResearchSegment";
 import { RoomTeaser } from "./RoomTeaser";
 import { StoriesSection } from "./StoriesSection";
-import { ToolsSegment } from "./ToolsSegment";
-import { useSunbeamMotion } from "./useSunbeamMotion";
-import "./sunbeam.css";
 import { Component as LandingModel } from "./landing-model";
 
 /** The design's page wrapper: body text colour, ground and smoothing, with the browser's default type size. */
@@ -62,26 +60,25 @@ function useSmoothScroll() {
 
 export function LandingPage() {
   const v: Any = useDcModel(LandingModel, modelProps);
-  const root = useRef<HTMLDivElement>(null);
   useSmoothScroll();
-  useSunbeamMotion(root);
   return (
-    <div ref={root} className="sb">
+    <div style={designRoot}>
       <a className="kv-skip" href="#main">Skip to main content</a>
       <SiteNav />
       <main id="main">
-        <HeroSection v={v} />
-        <HowItWorksSection v={v} />
+        <div className="kv-curtain">
+          <HeroSection v={v} />
+          <HowItWorksSection v={v} />
+        </div>
         <ClauseBand v={v} />
         <ContrastSection v={v} />
+        <RoomTeaser v={v} />
         <FamilyQuote />
         <QuestionsSection v={v} />
-        <ToolsSegment>
-          <RoomTeaser v={v} />
-        </ToolsSegment>
         <ResearchSegment>
           <IndustrySection v={v} />
           <StoriesSection v={v} />
+          <HouseholdControl v={v} />
           <LimitsSection v={v} />
         </ResearchSegment>
         <PartnersSection v={v} />

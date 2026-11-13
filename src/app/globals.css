@@ -208,7 +208,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .legal-page article li { line-height: 1.7; }
 .legal-page article ul { padding-left: 24px; }
 .legal-page article li + li { margin-top: 8px; }
-.legal-page article p + p, .legal-page article p + ul, .legal-page article ul + p { margin-top: 16px; }
 
 @keyframes mark { from { background-size: 0 .26em; } }
 @keyframes rise { from { opacity: 0; transform: translateY(24px); } }
