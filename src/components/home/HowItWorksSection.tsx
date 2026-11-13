@@ -1,65 +1,50 @@
-// Generated from the approved Claude Design artboard Main.dc.html, then hand-edited: the animated film player is replaced by the silent demo video. Regenerating from the artboard would restore the film.
 "use client";
 
-import { Fragment } from "react";
-import { type Any, css } from "@/lib/dc";
+import type { Any } from "@/lib/dc";
+import "./sb-story.css";
 
 export function HowItWorksSection({ v }: { v: Any }) {
   return (
-    <>
-    <section id="how" aria-labelledby="how-h" style={{background: "#F3F7F6", padding: "clamp(72px,9vw,128px) 0"}}>
-      <div className="kv-film">
-        <div>
-          <div className="kv-player kv-rise">
-            <video
-              controls
-              muted
-              playsInline
-              preload="metadata"
-              poster="/demo/knowvia-demo-poster.png"
-              aria-label="Walkthrough of Knowvia: add a policy, give consent, and see what the document says."
-              style={{display: "block", width: "100%", height: "auto", aspectRatio: "16 / 10", background: "#163F42"}}
-            >
-              <source src="/demo/knowvia-demo.webm" type="video/webm" />
-              {"Your browser cannot play this video."}
-            </video>
-          </div>
-        </div>
-        {" "}
-        <div style={{display: "flex", flexDirection: "column", gap: "28px"}}>
-          <div style={{display: "flex", flexDirection: "column", gap: "16px"}}>
-            <p className="kv-eyebrow kv-reveal" style={{color: "#176F69"}}>
-              {"Watch it work · 33 seconds"}
-            </p>
-            <h2 id="how-h" className="kv-h2 kv-reveal" style={{color: "#163F42", maxWidth: "14ch"}}>
-              {"See three answers for every person."}
-            </h2>
-            <p className="kv-lede kv-reveal kv-d120" style={{color: "#55696D", maxWidth: "40ch"}}>
-              {"Add the health policies you already have. It reads them person by person, and shows its working."}
-            </p>
-          </div>
-          <div style={{display: "flex", flexDirection: "column", borderTop: "1px solid #CFDCDA"}}>
-            {(v.film.chaps ?? []).map((ch: Any, i2: number) => (
-              <Fragment key={i2}>
-                <div className="kv-chap" style={{cursor: "default"}}>
-                  <span style={css(ch.numStyle)}>
-                    {ch.n}
-                  </span>
-                  <span>
-                    <strong style={{display: "block", fontSize: "19px"}}>
-                      {ch.title}
-                    </strong>
-                    <span style={{display: "block", fontSize: "15px", lineHeight: "1.45", marginTop: "2px"}}>
-                      {ch.text}
-                    </span>
-                  </span>
-                </div>
-              </Fragment>
-            ))}
-          </div>
+    <section id="how" aria-labelledby="how-h" className="sb-how">
+      <div className="sb-wrap sb-how-body">
+        <div className="sb-head center">
+          <p className="sb-eyebrow sb-rv">
+            {"Watch it work · 15 seconds"}
+          </p>
+          <h2 id="how-h" className="sb-h2 sb-mask">
+            {"See three answers for "}<span className="mk">{"every person."}</span>
+          </h2>
+          <p className="sb-lede sb-rv" style={{ "--d": "120ms" } as React.CSSProperties}>
+            {"Add the health policies you already have. It reads them person by person, and shows its working."}
+          </p>
         </div>
       </div>
+
+      <div className="sb-expand sb-how-video sb-rv" data-sb-progress="">
+        <video
+          controls
+          muted
+          playsInline
+          preload="metadata"
+          poster="/demo/knowvia-walkthrough-poster.png"
+          aria-label="Walkthrough of Knowvia: add a policy, give consent, ask a question and see the page that answers it."
+        >
+          <source src="/demo/knowvia-walkthrough.webm" type="video/webm" />
+          Your browser cannot play this video.
+        </video>
+      </div>
+
+      <div className="sb-wrap">
+        <ol className="sb-steps">
+          {(v.film.chaps ?? []).map((ch: Any, i: number) => (
+            <li key={i} className="sb-step sb-rv" style={{ "--d": `${i * 90}ms` } as React.CSSProperties}>
+              <span className="sb-step-n" aria-hidden="true">{ch.n}</span>
+              <h3>{ch.title}</h3>
+              <p>{ch.text}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
     </section>
-    </>
   );
 }
