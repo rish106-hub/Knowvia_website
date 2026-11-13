@@ -2,15 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import "../home/sunbeam.css";
-import "../home/sb-hero.css";
-
-const LINKS: [string, string][] = [
-  ["/#research", "Our research"],
-  ["/#how", "How it works"],
-  ["/#try", "Room test"],
-  ["/#questions", "Questions"],
-];
+import { betaDemoUrl } from "@/lib/beta-url";
 
 export function SiteNav() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -31,24 +23,50 @@ export function SiteNav() {
             <Link key={href} href={href}>{label}</Link>
           ))}
         </div>
-        <Link className="sb-btn sb-nav-cta" href="/#early-list">
-          {"Join the early list"}
-        </Link>
-        <button className="sb-nav-menu" type="button" onClick={() => setMenuOpen((o) => !o)} aria-expanded={menuOpen ? "true" : "false"} aria-controls="mobile-menu">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-            <path d="M4 7h16M4 12h16M4 17h16"></path>
-          </svg>
-          {"Menu"}
-        </button>
-      </nav>
-      {menuOpen && (
-        <div id="mobile-menu" className="sb-nav-sheet">
-          {LINKS.map(([href, label]) => (
-            <Link key={href} href={href} onClick={() => setMenuOpen(false)}>{label}</Link>
-          ))}
-          <Link className="sb-btn" href="/#early-list" onClick={() => setMenuOpen(false)}>
+        <div className="kv-desktop" style={{display: "flex", alignItems: "center", gap: "12px"}}>
+          <a className="kv-btn-ghost" href={betaDemoUrl()} style={{display: "inline-flex", alignItems: "center", height: "44px", padding: "0 22px", borderRadius: "999px", border: "1px solid #176F69", background: "transparent", color: "#176F69", fontSize: "16px", fontWeight: "600", textDecoration: "none", whiteSpace: "nowrap"}}>
+            {"View demo"}
+          </a>
+          <Link className="kv-btn" href="/#early-list" style={{display: "inline-flex", alignItems: "center", height: "44px", padding: "0 22px", borderRadius: "999px", background: "#176F69", color: "#FFFFFF", fontSize: "16px", fontWeight: "600", textDecoration: "none", whiteSpace: "nowrap"}}>
             {"Join the early list"}
           </Link>
+        </div>
+        <div className="kv-mobile">
+          <button type="button" onClick={v.toggleMenu} aria-expanded={v.menuOpenStr} aria-controls="mobile-menu" style={{display: "flex", alignItems: "center", gap: "8px", height: "44px", padding: "0 14px", border: "1px solid #7B918E", borderRadius: "10px", background: "#FFFFFF", color: "#163F42", font: "inherit", fontSize: "16px", fontWeight: "600", cursor: "pointer"}}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <path d="M4 7h16M4 12h16M4 17h16"></path>
+            </svg>
+            {"Menu"}
+          </button>
+        </div>
+      </nav>
+      {" "}
+      {truthy(v.menuOpen) && (
+        <>
+        <div id="mobile-menu" className="kv-mobile" style={{padding: "8px 0 24px"}}>
+          <div style={{display: "flex", flexDirection: "column", fontSize: "19px", fontWeight: "600"}}>
+            <Link href="/#research" style={{minHeight: "52px", display: "flex", alignItems: "center", borderBottom: "1px solid #CFDCDA", color: "#1A3034", textDecoration: "none"}}>
+              {"Our research"}
+            </Link>
+            <Link href="/#how" style={{minHeight: "52px", display: "flex", alignItems: "center", borderBottom: "1px solid #CFDCDA", color: "#1A3034", textDecoration: "none"}}>
+              {"How it works"}
+            </Link>
+            <Link href="/#try" style={{minHeight: "52px", display: "flex", alignItems: "center", borderBottom: "1px solid #CFDCDA", color: "#1A3034", textDecoration: "none"}}>
+              {"Room test"}
+            </Link>
+            <Link href="/#privacy" style={{minHeight: "52px", display: "flex", alignItems: "center", borderBottom: "1px solid #CFDCDA", color: "#1A3034", textDecoration: "none"}}>
+              {"Privacy"}
+            </Link>
+            <Link href="/#questions" style={{minHeight: "52px", display: "flex", alignItems: "center", borderBottom: "1px solid #CFDCDA", color: "#1A3034", textDecoration: "none"}}>
+              {"Questions"}
+            </Link>
+            <a className="kv-btn-ghost" href={betaDemoUrl()} style={{marginTop: "20px", display: "flex", alignItems: "center", justifyContent: "center", height: "56px", borderRadius: "999px", border: "1px solid #176F69", background: "transparent", color: "#176F69", fontSize: "17px", textDecoration: "none"}}>
+              {"View demo"}
+            </a>
+            <Link className="kv-btn" href="/#early-list" style={{marginTop: "12px", display: "flex", alignItems: "center", justifyContent: "center", height: "56px", borderRadius: "999px", background: "#176F69", color: "#FFFFFF", fontSize: "17px", textDecoration: "none"}}>
+              {"Join the early list"}
+            </Link>
+          </div>
         </div>
       )}
     </header>
