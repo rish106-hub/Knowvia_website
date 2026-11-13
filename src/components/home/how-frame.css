@@ -1,0 +1,143 @@
+/* Raised 3D bezel around the walkthrough video, with short labels in different shapes sitting on its edge. */
+.kv-vframe {
+  --inset: 10px;
+  --lift: 10px;
+  position: relative;
+  isolation: isolate;
+  padding: 30px 30px 30px 0;
+}
+/* the bezel: light face, dark outline, lime slab offset behind it */
+.kv-vframe::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: var(--inset) var(--inset) var(--inset) -4px;
+  border: 2px solid #163F42;
+  border-left: 0;
+  border-radius: 0 40px 40px 0;
+  background: linear-gradient(150deg, #FFFFFF 0%, #EEF5F2 45%, #DCEAE5 100%);
+  box-shadow:
+    inset 0 2px 0 #FFFFFF,
+    inset 0 -3px 0 rgba(22, 63, 66, 0.08),
+    var(--lift) calc(var(--lift) + 2px) 0 0 #C8E6A0,
+    var(--lift) calc(var(--lift) + 2px) 0 2px #163F42,
+    0 34px 60px -24px rgba(22, 63, 66, 0.55);
+  transition: transform 300ms cubic-bezier(0.16, 0.84, 0.44, 1), box-shadow 300ms cubic-bezier(0.16, 0.84, 0.44, 1);
+}
+.kv-vframe .kv-player { position: relative; box-shadow: 0 10px 24px -12px rgba(11, 56, 59, 0.6); }
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .kv-vframe:hover::before {
+    transform: translate(-3px, -3px);
+    box-shadow:
+      inset 0 2px 0 #FFFFFF,
+      inset 0 -3px 0 rgba(22, 63, 66, 0.08),
+      calc(var(--lift) + 4px) calc(var(--lift) + 6px) 0 0 #C8E6A0,
+      calc(var(--lift) + 4px) calc(var(--lift) + 6px) 0 2px #163F42,
+      0 44px 70px -24px rgba(22, 63, 66, 0.6);
+  }
+}
+
+.kv-fx { position: absolute; inset: 0; pointer-events: none; }
+.kv-fx > * {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+/* centre a shape on the top, right, or bottom edge */
+.kv-fx .on-top { top: var(--inset); transform: translateY(-50%); }
+.kv-fx .on-bottom { bottom: var(--inset); transform: translateY(50%); }
+.kv-fx .on-right { right: var(--inset); transform: translateX(50%); }
+
+/* pill */
+.kv-fx .c-pill {
+  left: 10%; height: 34px; padding: 0 16px; border-radius: 999px;
+  background: #C8E6A0; color: #0F4A3A; border: 2px solid #163F42;
+  box-shadow: 0 4px 0 #163F42;
+}
+.kv-fx .c-pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #0F4A3A; }
+
+/* circle on the corner */
+.kv-fx .c-circle {
+  top: var(--inset); right: var(--inset); transform: translate(50%, -50%);
+  width: 60px; height: 60px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #F6C766, #E0A02B 60%, #C4861A);
+  color: #3B2803; border: 2px solid #163F42;
+  font-family: var(--font-display), "Iowan Old Style", Georgia, serif; font-size: 20px; font-weight: 600;
+  box-shadow: 0 5px 0 #163F42, inset 0 2px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* vertical pill on the right edge */
+.kv-fx .c-vert {
+  top: 28%; width: 34px; padding: 16px 0; border-radius: 999px;
+  background: linear-gradient(90deg, #1E5457, #163F42); color: #FFFFFF; border: 2px solid #0B2A2C;
+  writing-mode: vertical-rl; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+  box-shadow: 4px 0 0 #0B2A2C;
+}
+
+/* ticket with cut corners */
+.kv-fx .c-ticket {
+  display: inline-flex; align-items: center; height: 34px; padding: 0 22px;
+  background: #FBF1DD; color: #7A5207;
+  clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 12px 100%, 0 50%);
+}
+/* drop-shadows follow the clipped shape: four 2px ones draw the outline, the last one the 3D edge */
+.kv-fx .c-ticket-wrap {
+  left: 14%;
+  filter: drop-shadow(2px 0 0 #163F42) drop-shadow(-2px 0 0 #163F42) drop-shadow(0 -2px 0 #163F42) drop-shadow(0 4px 0 #163F42);
+}
+
+/* dashed capsule */
+.kv-fx .c-stamp {
+  right: 16%; height: 34px; padding: 0 14px; border-radius: 999px;
+  background: #FFFFFF; color: #176F69;
+  border: 2px dashed #176F69;
+  box-shadow: 0 4px 0 #176F69;
+}
+.kv-fx .c-stamp::before { content: "✦"; font-size: 12px; }
+
+/* small accents */
+.kv-fx .c-diamond { left: 52%; width: 16px; height: 16px; background: #E0A02B; border: 2px solid #163F42; box-shadow: 3px 3px 0 #163F42; }
+.kv-fx .c-diamond.on-top { transform: translateY(-50%) rotate(45deg); }
+.kv-fx .c-ring { top: 74%; width: 18px; height: 18px; border-radius: 50%; border: 4px solid #176F69; background: #FFFFFF; box-shadow: 0 3px 0 #163F42; }
+.kv-fx .c-plus { left: 46%; width: 26px; height: 26px; border-radius: 8px; background: #FFFFFF; color: #176F69; border: 2px solid #163F42; box-shadow: 0 3px 0 #163F42; font-size: 18px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .kv-fx .c-pill, .kv-fx .c-ticket-wrap, .kv-fx .c-stamp { animation: kvBobY 5s ease-in-out infinite; }
+  .kv-fx .c-vert { animation: kvBobX 6s ease-in-out infinite; }
+  .kv-fx .c-ticket-wrap { animation-delay: -1.6s; }
+  .kv-fx .c-stamp { animation-delay: -3.2s; }
+  .kv-fx .c-circle { animation: kvTilt 9s ease-in-out infinite; }
+}
+@keyframes kvBobY { 50% { margin-top: -4px; } }
+@keyframes kvBobX { 50% { margin-right: 4px; } }
+@keyframes kvTilt { 0%, 100% { rotate: -6deg; } 50% { rotate: 6deg; } }
+
+@media (max-width: 900px) {
+  .kv-vframe { --inset: 8px; --lift: 7px; padding: 26px 30px 30px 26px; }
+  .kv-vframe::before { inset: var(--inset); border-left: 2px solid #163F42; border-radius: 30px; }
+  .kv-fx > * { font-size: 13px; }
+  .kv-fx .c-pill { left: 8%; height: 30px; padding: 0 12px; }
+  .kv-fx .c-circle { width: 50px; height: 50px; font-size: 17px; }
+  .kv-fx .c-vert { width: 30px; padding: 12px 0; font-size: 11px; }
+  .kv-fx .c-ticket { height: 30px; padding: 0 18px; }
+  .kv-fx .c-ticket-wrap { left: 6%; }
+  .kv-fx .c-stamp { right: 8%; height: 30px; padding: 0 11px; }
+  .kv-fx .c-ring { display: none; }
+}
+@media (max-width: 520px) {
+  .kv-fx .c-vert, .kv-fx .c-plus { display: none; }
+}
+@media (max-width: 400px) {
+  .kv-fx .c-stamp { display: none; }
+  .kv-fx .c-diamond { left: 64%; }
+}

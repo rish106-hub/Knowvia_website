@@ -53,51 +53,55 @@ export function RoomTeaser({ v }: { v: Any }) {
 
   return (
     <>
-      <section id="try" className="sb-try on-dark" aria-labelledby="room-h">
-        <div className="sb-wrap sb-try-grid">
-          <div className="sb-try-copy">
-            <p className="sb-eyebrow sb-rv">{"Try it · the room test"}</p>
-            <h2 id="room-h" className="sb-h2 sb-mask">
-              {"One room choice can "}
-              <span className="mk">{"cut your whole claim."}</span>
+      <section id="try" className="kv-rt" aria-labelledby="room-h">
+        <div className="kv-wrap kv-rt-grid">
+          <div style={{display: "flex", flexDirection: "column", gap: "22px"}}>
+            <p className="kv-eyebrow kv-reveal" style={{color: "#7A5207"}}>
+              {"Try it · the room test"}
+            </p>
+            <h2 id="room-h" className="kv-h2 kv-reveal" style={{color: "#7A5207", maxWidth: "16ch"}}>
+              {"One room choice can cut your whole claim."}
             </h2>
-            <p className="sb-lede sb-rv">
+            <p className="kv-lede kv-reveal kv-d120" style={{color: "#1A3034", maxWidth: "40ch"}}>
               {`Pay ₹3,000 a day more for a room and you could pay ${inr(upgrade)} yourself. Find out what your room would cost you.`}
             </p>
-            <button className="sb-btn" type="button" onClick={() => setOpen(true)} aria-haspopup="dialog">
+            <button className="kv-rt-cta" type="button" onClick={() => setOpen(true)} aria-haspopup="dialog">
               {"Try the room test"}
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6"></path>
+              </svg>
             </button>
-            <p className="sb-try-fine">
+            <p style={{margin: "0", fontSize: "15px", lineHeight: "1.5", color: "#7A5207"}}>
               {"₹5,00,000 cover, room limit 1% a day, 4 nights. Rules differ by policy."}
             </p>
           </div>
-          <button className="sb-result sb-try-card" type="button" onClick={() => setOpen(true)} aria-label="Open the room test">
-            <small>{"YOU WOULD PAY OUT OF POCKET"}</small>
-            <div className="sb-rooms" aria-hidden="true">
+          <button className="kv-rt-card" type="button" onClick={() => setOpen(true)} aria-label="Open the room test">
+            <p style={{margin: "0", fontSize: "14px", fontWeight: "700", letterSpacing: "0.06em", color: "#F6D38A"}}>
+              {"YOU WOULD PAY OUT OF POCKET"}
+            </p>
+            <div className="kv-rt-chips" aria-hidden="true">
               {ROOMS.map((r, i) => (
-                <span key={r.name} className="sb-rchip" data-on={i === idx}>
+                <span key={r.name} className="kv-rt-chip" data-on={i === idx}>
                   <b>{r.name}</b>
-                  <small>{`${inr(r.rate)}/day`}</small>
+                  <span>{`${inr(r.rate)}/day`}</span>
                 </span>
               ))}
             </div>
-            <p className={`sb-oop${oop ? " hit" : ""}`} aria-live="off">
+            <p className="kv-rt-num" aria-live="off" style={{margin: "0", color: oop ? "#F6D38A" : "#C8E6A0"}}>
               {inr(oop)}
             </p>
-            <div className="sb-split" aria-hidden="true">
-              <span className="paid" style={{ width: `${((1 - oop / (room.rate * NIGHTS + LINKED + 40000)) * 100).toFixed(2)}%` }}></span>
-              <span className="you" style={{ width: `${((oop / (room.rate * NIGHTS + LINKED + 40000)) * 100).toFixed(2)}%` }}></span>
-            </div>
-            <p className="sb-verdict">
+            <p className="kv-rt-hint">
               {oop ? `Over the ₹5,000 limit, so room-linked charges are cut too.` : "Within the limit. Everything is paid."}
             </p>
-            <span className="sb-try-tap">{"Tap to try your own room →"}</span>
+            <p className="kv-rt-hint" style={{color: "#F6D38A", fontWeight: "600"}}>
+              {"Tap to try your own room →"}
+            </p>
           </button>
         </div>
       </section>
       <dialog
         ref={dialogRef}
-        className="sb-room-dialog"
+        className="kv-rt-dialog"
         aria-label="The room test"
         onClose={() => setOpen(false)}
         onClick={(e) => {
@@ -107,7 +111,7 @@ export function RoomTeaser({ v }: { v: Any }) {
       >
         {open && (
           <>
-            <div className="sb-room-close">
+            <div className="kv-rt-close">
               <button type="button" onClick={() => setOpen(false)}>
                 {"Close"}
               </button>

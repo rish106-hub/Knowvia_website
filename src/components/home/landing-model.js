@@ -34,7 +34,7 @@ export class Component extends DCLogic {
     });
     watch([document.getElementById('partners')], { threshold: 0.3 }, function (en) { if (en.isIntersecting) self.setState({ flowIn: true }); });
     // section rail
-    var railIds = ['how', 'clauses', 'desk', 'questions', 'try', 'research', 'partners'];
+    var railIds = ['how', 'clauses', 'desk', 'try', 'questions', 'research', 'partners'];
     watch(railIds.map(function (id) { return document.getElementById(id); }), { rootMargin: '-45% 0px -50% 0px' }, function (en) {
       if (en.isIntersecting) self.setState({ railIdx: railIds.indexOf(en.target.id) });
     });
@@ -439,7 +439,7 @@ export class Component extends DCLogic {
       ['Replace your insurer', 'Your insurer, TPA and hospital desk stay your points of contact. Knowvia helps you ask them better questions.']
     ].map(function (p, i) { return { term: p[0], text: p[1], num: '0' + (i + 1), i: String(i), cls: 'kv-pl' + (pSeen[i] ? ' kv-on' : '') }; });
     var faqData = [
-      ['When can I use it, and what will it cost?', 'Knowvia opens soon, and pricing is not set. Join the early list and you will hear about both first.'],
+      ['When can I use it, and what will it cost?', 'Knowvia is not open yet, and pricing is not set. Join the early list and you will hear about both first.'],
       ['Is this only for health insurance?', 'Yes. Knowvia reads health insurance only: employer group cover, personal and family floater policies, parents\' and senior citizen policies, and top-ups. Not motor, not life.'],
       ['What is Knowvia?', 'Knowvia is a reader for the health policies you already have. It shows what they say, with the page each point comes from, and your insurer remains the one that decides claims.'],
       ['Will you sell me a policy?', 'Not by default. Many questions end with a clear answer and nothing to buy. If buying something does make sense, we will explain why and what it costs.'],
@@ -585,7 +585,7 @@ export class Component extends DCLogic {
     var railIdx = this.state.railIdx;
     var rail = {
       show: this.state.railShow ? 'true' : 'false',
-      items: [['#how', 'Watch it work'], ['#clauses', 'The clauses'], ['#desk', 'Two ways'], ['#questions', 'Questions'], ['#try', 'Room test'], ['#research', 'Our research'], ['#partners', 'For business']].map(function (r, i) {
+      items: [['#how', 'Watch it work'], ['#clauses', 'The clauses'], ['#desk', 'Two ways'], ['#try', 'Room test'], ['#questions', 'Questions'], ['#research', 'Our research'], ['#partners', 'For business']].map(function (r, i) {
         return { href: r[0], label: r[1], cur: i === railIdx ? 'true' : 'false' };
       })
     };
