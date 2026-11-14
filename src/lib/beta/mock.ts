@@ -31,7 +31,7 @@ export type Answers = Record<string, string[]>;
 export const itemKey = (q: CatalogueQuestion, m?: Member) => `${q.id}:${m?.id ?? ""}`;
 
 /**
- * Deterministic planner stub. Per-member questions expand to one item per member. Before the card: at most 2 items; the rest go to the strip.
+ * Deterministic planner stub. Per-member questions expand to one item per member. Before the card: at most 2 items; the strip (shown with the card) lists every unanswered item.
  * Any answer, "Not sure" included, keeps an item from being asked again. A followup question appears only after its trigger answer
  * ("*" means any real answer, never "Not sure"); "Not sure" and "No" never open followups.
  */
@@ -48,8 +48,8 @@ export function planQuestions(catalogue: CatalogueQuestion[], phase: Phase, answ
       if (!(key in answers) && triggered(q, m)) items.push({ key, question: q, member: m });
     }
   }
-  const first = items.filter(i => i.question.phase === "before_card").slice(0, 2);
-  return phase === "before_card" ? first : items.filter(i => !first.includes(i));
+  // Strip runs after the card: every unanswered item, including before-card items the 2-item cap left out.
+  return phase === "before_card" ? items.filter(i => i.question.phase === "before_card").slice(0, 2) : items;
 }
 
 export const MOCK_MEMBERS: Member[] = [{ id: "m1", label: "Asha, spouse" }, { id: "m2", label: "Kabir, child" }];

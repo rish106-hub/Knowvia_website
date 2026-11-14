@@ -1,6 +1,6 @@
 // The beta flow talks to this adapter only. `realAdapter` calls the existing /api/beta/* routes; `mockAdapter` runs the whole flow with no backend.
 import { api, type ChatAnswer, formatValue, readAnswer } from "./client";
-import { type Answers, MOCK_CATALOGUE, MOCK_PRODUCT_LINE, MOCK_PRODUCTS, MOCK_TILES, MOCK_TRANSCRIPT, MOCK_UNKNOWN, mockAnswer, type PlanItem, planQuestions } from "./mock";
+import { type Answers, MOCK_CATALOGUE, MOCK_PRODUCTS, MOCK_TILES, MOCK_TRANSCRIPT, MOCK_UNKNOWN, mockAnswer, type PlanItem, planQuestions } from "./mock";
 import { TILE_ORDER, badgeFor } from "./tiles";
 import type { AnswerCardData, CardTileData, Phase, TileId } from "./types";
 
@@ -112,6 +112,7 @@ export function realAdapter(): Adapter {
 export function mockAdapter(opts: { voiceBusy?: boolean; uinFromPdf?: boolean } = {}): Adapter {
   const answers: Answers = {};
   const tiles = MOCK_TILES.map(t => ({ ...t }));
+  let picked = MOCK_PRODUCTS[0];
   return {
     mock: true,
     voiceEnabled: true,
@@ -120,12 +121,12 @@ export function mockAdapter(opts: { voiceBusy?: boolean; uinFromPdf?: boolean } 
     upload: async () => { await delay(150); },
     status: async () => { await delay(600); return { stage: "ready" }; },
     product: async () => ({ profileVersion: 1, candidates: opts.uinFromPdf ? [{ ...MOCK_PRODUCTS[0], uinSource: "pdf_text" }] : MOCK_PRODUCTS }),
-    confirmProduct: async () => undefined,
+    confirmProduct: async candidateId => { picked = MOCK_PRODUCTS.find(p => p.candidateId === candidateId) ?? picked; },
     searchProduct: async fragment => MOCK_PRODUCTS.filter(p => `${p.productName} ${p.insurerName}`.toLowerCase().includes(fragment.trim().toLowerCase())),
     questions: async phase => planQuestions(MOCK_CATALOGUE, phase, answers),
     lookup: async id => { const q = MOCK_CATALOGUE.find(c => c.id === id); return q ? { key: q.id + ":", question: q } : null; },
     answer: async (item, optionIds) => { answers[item.key] = optionIds; },
-    card: async () => { await delay(400); return { productLine: MOCK_PRODUCT_LINE, tiles: tiles.map(t => ({ ...t })) }; },
+    card: async () => { await delay(400); return { productLine: `${picked.insurerName} ${picked.productName}`, tiles: tiles.map(t => ({ ...t })) }; },
     resolveConflict: async (tileId, pick) => {
       const t = tiles.find(x => x.id === tileId);
       if (!t?.conflict) return;

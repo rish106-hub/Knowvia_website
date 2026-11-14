@@ -43,8 +43,17 @@ describe("QuestionScreen", () => {
     const first = planQuestions(MOCK_CATALOGUE, "before_card");
     expect(first).toHaveLength(2);
     expect(first.map(i => i.member?.label)).toEqual(["Asha, spouse", "Kabir, child"]);
-    const keys = new Set(first.map(i => i.key));
-    expect(planQuestions(MOCK_CATALOGUE, "strip").every(i => !keys.has(i.key))).toBe(true);
+    const answers = Object.fromEntries(first.map(i => [i.key, ["yes"]]));
+    const strip = planQuestions(MOCK_CATALOGUE, "strip", answers);
+    expect(strip.some(i => first.some(f => f.key === i.key))).toBe(false);
+    // Before-card items past the 2-item cap must reach the strip, not vanish.
+    expect(strip.filter(i => i.question.id === "ped.has_any").map(i => i.member?.label)).toEqual(["Asha, spouse", "Kabir, child"]);
+    expect(strip.some(i => i.question.id === "ped.which_conditions")).toBe(false);
+  });
+  it("mock card names the product the user picked", async () => {
+    const a = mockAdapter();
+    await a.confirmProduct(MOCK_PRODUCTS[1].candidateId, 1);
+    expect((await a.card())?.productLine).toBe(`${MOCK_PRODUCTS[1].insurerName} ${MOCK_PRODUCTS[1].productName}`);
   });
   it("shows the member chip above a per-member prompt", () => {
     const item = planQuestions(MOCK_CATALOGUE, "before_card")[0];
