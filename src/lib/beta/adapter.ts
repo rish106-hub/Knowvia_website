@@ -1,8 +1,8 @@
 // The beta flow talks to this adapter only. `realAdapter` calls the existing /api/beta/* routes; `mockAdapter` runs the whole flow with no backend.
 import { api, type ChatAnswer, formatValue, readAnswer } from "./client";
-import { type Answers, MOCK_CATALOGUE, MOCK_PRODUCTS, MOCK_TILES, MOCK_TRANSCRIPT, MOCK_UNKNOWN_NO_CONTACT, mockAnswer, type PlanItem, planQuestions } from "./mock";
+import { type Answers, itemKey, MOCK_CATALOGUE, MOCK_PRODUCTS, MOCK_TILES, MOCK_TRANSCRIPT, MOCK_UNKNOWN_NO_CONTACT, mockAnswer, type PlanItem, planQuestions } from "./mock";
 import { TILE_ORDER, badgeFor } from "./tiles";
-import type { AnswerCardData, CardTileData, Phase, TileId } from "./types";
+import type { AnswerCardData, CardTileData, CatalogueQuestion, Phase, TileId } from "./types";
 
 /** uinSource "pdf_text" means the UIN came from the document itself; anything else is a weaker tag and is always confirmed by the person. */
 export type Candidate = { candidateId: string; insurerName: string; productName: string; uinSource?: string };
@@ -73,9 +73,29 @@ export function fromLegacyAnswer(a: ChatAnswer): AnswerCardData {
   };
 }
 
+type PlanResponse = {
+  catalogueVersion: string;
+  questions: { questionId: string; memberId: string | null; memberLabel: string | null }[];
+  catalogue: Record<string, Omit<CatalogueQuestion, "weight"> | null>;
+};
+
+/** Planner output from the backend into plan items. The wording is the backend's reviewed catalogue entry; unknown ids are dropped. */
+export function planFromBackend(plan: PlanResponse): PlanItem[] {
+  const items: PlanItem[] = [];
+  for (const q of plan.questions) {
+    const entry = plan.catalogue[q.questionId];
+    if (!entry) continue;
+    const question: CatalogueQuestion = { ...entry, weight: 0 };
+    const member = q.memberId ? { id: q.memberId, label: q.memberLabel ?? "Family member" } : undefined;
+    items.push({ key: itemKey(question, member), question, member });
+  }
+  return items;
+}
+
 export function realAdapter(): Adapter {
   let thread: string | null = null;
-  const answers: Answers = {};
+  let catalogueVersion = "";
+  const seen = new Map<string, CatalogueQuestion>();
   return {
     mock: false,
     voiceEnabled: false, // TODO(backend): voice status + POST /api/v1/voice/turns do not exist yet. Mic stays hidden until the backend reports it enabled.
@@ -85,16 +105,23 @@ export function realAdapter(): Adapter {
     status: () => api("/api/beta/status"),
     product: () => api("/api/beta/product"),
     confirmProduct: async (candidateId, expectedVersion) => { await api("/api/beta/product", json({ candidateId, expectedVersion })); },
-    // TODO(backend): GET questions endpoint (planner output) does not exist yet; the synthetic catalogue stands in.
     searchProduct: async fragment => {
       const q = fragment.trim();
       if (q.length < 2) return [];
       return (await api<{ candidates: Candidate[] }>(`/api/beta/product/search?q=${encodeURIComponent(q)}`)).candidates;
     },
-    questions: async phase => planQuestions(MOCK_CATALOGUE, phase, answers),
-    lookup: async id => { const q = MOCK_CATALOGUE.find(c => c.id === id); return q ? { key: q.id + ":", question: q } : null; },
-    // TODO(backend): POST answer route (user_declaration under profile_intake consent) does not exist yet; the answer is not stored.
-    answer: async (item, ids) => { answers[item.key] = ids; },
+    questions: async phase => {
+      const plan = await api<PlanResponse>(`/api/beta/questions?phase=${phase}`);
+      catalogueVersion = plan.catalogueVersion;
+      const items = planFromBackend(plan);
+      for (const item of items) seen.set(item.question.id, item.question);
+      return items;
+    },
+    // Only questions the planner already served can be looked up; anything else stays closed rather than guessed.
+    lookup: async id => { const q = seen.get(id); return q && !q.perMember ? { key: itemKey(q), question: q } : null; },
+    answer: async (item, optionIds) => {
+      await api("/api/beta/answers", json({ questionId: item.question.id, memberId: item.member?.id ?? null, optionIds, catalogueVersion }));
+    },
     card: async () => {
       const r = await api<{ facts: { facts: Fact[] }; holding: { summary?: { insurerName?: string; productName?: string } } }>("/api/beta/facts");
       if (r.facts.facts.length === 0) return null;
