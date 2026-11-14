@@ -99,7 +99,15 @@ export const MOCK_UNKNOWN: AnswerCardData = {
   headline: "Your documents don't say.",
   explanation: "We did not find this in your policy or the insurer wording. Your insurer can tell you.",
   conditions: [], sources: [],
-  actions: [{ kind: "call_insurer", label: "Call your insurer" }],
+  actions: [{ kind: "call_insurer", label: "Call your insurer", contactId: "mock-svc", contact: { kind: "phone", value: "1800-000-0001" } }],
+  followups: ["Is cataract surgery covered?", "Is my knee surgery covered?", "How long is the waiting period?"],
+};/** No trusted contact exists: the action is a plain label. Real-mode answers use this card. */
+export const MOCK_UNKNOWN_NO_CONTACT: AnswerCardData = {
+  ...base, status: "unknown", verdict: "unknown",
+  headline: "Your documents don't say.",
+  explanation: "We did not find this in your policy or the insurer wording. Your insurer can tell you.",
+  conditions: [], sources: [],
+  actions: [{ kind: "call_insurer", label: "Call the number on your policy card" }],
   followups: ["Is cataract surgery covered?", "Is my knee surgery covered?", "How long is the waiting period?"],
 };
 
@@ -109,6 +117,7 @@ export function mockAnswer(question: string): AnswerCardData {
   const t = question.toLowerCase();
   if (/cataract|waiting/.test(t)) return COVERED;
   if (/knee|joint|diabet|pre-?exist/.test(t)) return DEPENDS;
+  if (/claim|reject|refus/.test(t)) return MOCK_UNKNOWN_NO_CONTACT;
   return MOCK_UNKNOWN;
 }
 

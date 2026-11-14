@@ -1,6 +1,6 @@
 // The beta flow talks to this adapter only. `realAdapter` calls the existing /api/beta/* routes; `mockAdapter` runs the whole flow with no backend.
 import { api, type ChatAnswer, formatValue, readAnswer } from "./client";
-import { type Answers, MOCK_CATALOGUE, MOCK_PRODUCTS, MOCK_TILES, MOCK_TRANSCRIPT, MOCK_UNKNOWN, mockAnswer, type PlanItem, planQuestions } from "./mock";
+import { type Answers, MOCK_CATALOGUE, MOCK_PRODUCTS, MOCK_TILES, MOCK_TRANSCRIPT, MOCK_UNKNOWN_NO_CONTACT, mockAnswer, type PlanItem, planQuestions } from "./mock";
 import { TILE_ORDER, badgeFor } from "./tiles";
 import type { AnswerCardData, CardTileData, Phase, TileId } from "./types";
 
@@ -61,7 +61,7 @@ export function tilesFromFacts(facts: Fact[]): CardTileData[] {
 
 /** Maps today's free-text chat answer into the card shape until the answer-card route exists. */
 export function fromLegacyAnswer(a: ChatAnswer): AnswerCardData {
-  if (a.status === "unknown") return { ...MOCK_UNKNOWN, explanation: a.answer || MOCK_UNKNOWN.explanation, followups: [] };
+  if (a.status === "unknown") return { ...MOCK_UNKNOWN_NO_CONTACT, explanation: a.answer || MOCK_UNKNOWN_NO_CONTACT.explanation, followups: [] };
   const text = a.answer.trim();
   const headline = text.length <= 90 ? text : `${text.slice(0, 87).trimEnd()}...`;
   return {

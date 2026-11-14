@@ -1,13 +1,13 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { AnswerCard } from "@/components/beta/AnswerCard";
+import { AnswerCard, contactHref } from "@/components/beta/AnswerCard";
 import { BUSY_MESSAGE, MicButton } from "@/components/beta/MicButton";
 import { isVoiceBusy, mockAdapter } from "@/lib/beta/adapter";
 import { PolicyCard } from "@/components/beta/PolicyCard";
 import { QuestionScreen, questionOptions, toggleSelection } from "@/components/beta/QuestionScreen";
 import { answerEvent } from "@/lib/beta/analytics";
-import { MOCK_CATALOGUE, MOCK_MEMBERS, MOCK_PRODUCTS, MOCK_TILES, MOCK_UNKNOWN, mockAnswer, planQuestions } from "@/lib/beta/mock";
+import { MOCK_CATALOGUE, MOCK_MEMBERS, MOCK_PRODUCTS, MOCK_TILES, MOCK_UNKNOWN, MOCK_UNKNOWN_NO_CONTACT, mockAnswer, planQuestions } from "@/lib/beta/mock";
 import { BADGE_LABEL, badgeFor } from "@/lib/beta/tiles";
 import type { InputKind } from "@/lib/beta/types";
 
@@ -99,7 +99,27 @@ describe("AnswerCard", () => {
   it("unknown card says the documents don't say and offers the insurer call", () => {
     const html = render(createElement(AnswerCard, { card: { ...MOCK_UNKNOWN, actions: [] } }));
     expect(html).toContain("Your documents don&#x27;t say.");
-    expect(html).toContain("Call your insurer");
+    expect(html).toContain("Call the number on your policy card");
+    expect(html).not.toContain("<a ");
+  });
+  it("phone contact is a tel link with digits only, label unchanged", () => {
+    const html = render(createElement(AnswerCard, { card: MOCK_UNKNOWN }));
+    expect(html).toContain('href="tel:18000000001"');
+    expect(html).toContain("Call your insurer: 1800-000-0001");
+    expect(contactHref({ kind: "grievance_path", label: "x", contact: { kind: "phone", value: "+91 (800) 000-0002" } })).toBe("tel:918000000002");
+  });
+  it("email contact is a mailto link", () => {
+    const card = { ...MOCK_UNKNOWN, actions: [{ kind: "grievance_path" as const, label: "Write to the insurer", contactId: "c2", contact: { kind: "email" as const, value: "help@insurer.test" } }] };
+    expect(render(createElement(AnswerCard, { card }))).toContain('href="mailto:help@insurer.test"');
+    expect(contactHref({ kind: "call_insurer", label: "x", contact: { kind: "email", value: "not an email" } })).toBeNull();
+  });
+  it("no contact renders no link; contact is ignored on other kinds and other fields never make a number", () => {
+    const html = render(createElement(AnswerCard, { card: mockAnswer("my claim was rejected") }));
+    expect(html).toContain("Call the number on your policy card");
+    expect(html).not.toMatch(/href="(tel|mailto):/);
+    expect(contactHref({ kind: "find_hospital", label: "x", contact: { kind: "phone", value: "100" } })).toBeNull();
+    const sneaky = { ...MOCK_UNKNOWN_NO_CONTACT, explanation: "Call 1800-111-2222", actions: [{ kind: "call_insurer" as const, label: "Call 1800-111-2222" }] };
+    expect(render(createElement(AnswerCard, { card: sneaky }))).not.toMatch(/href="tel:/);
   });
 });
 

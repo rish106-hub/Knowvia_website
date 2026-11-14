@@ -30,7 +30,9 @@ export type ActionKind = "answer_question" | "find_hospital" | "call_insurer" | 
 export type CardSource = { id: string; factIds: string[]; tier: SourceTier; status: SourceStatus; page?: number | null; clause?: string | null; quote: string };
 export type CardCondition = { kind: ConditionKind; text: string; sourceIds: string[] };
 // questionId is a client extension: an answer_question action opens that catalogue question inline.
-export type CardAction = { kind: ActionKind; label: string; questionId?: string };
+export type ActionContact = { kind: "phone" | "email"; value: string };
+// contactId and contact are set only by the server guard on call_insurer and grievance_path. The client never builds a number itself.
+export type CardAction = { kind: ActionKind; label: string; questionId?: string; contactId?: string; contact?: ActionContact };
 export type AnswerCardData = {
   contract: "answer-card/v1";
   status: "evidence_found" | "unknown" | "out_of_scope";

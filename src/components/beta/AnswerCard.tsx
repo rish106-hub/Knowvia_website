@@ -16,6 +16,16 @@ export const VERDICT_LINE: Record<Verdict, string> = {
 export const CONDITION_LABEL: Record<ConditionKind, string> = {
   waiting_period: "Waiting period", sublimit: "Limit", copay: "Co-pay", deductible: "Deductible", exclusion: "Exclusion", room_rent: "Room rent", document_needed: "Document needed",
 };
+export const POLICY_CARD_LABEL = "Call the number on your policy card";
+
+/** href for a guard-resolved contact, or null. Phone: digits only. Only the action's own `contact` is ever used. */
+export function contactHref(action: CardAction): string | null {
+  const c = action.contact;
+  if (!c || (action.kind !== "call_insurer" && action.kind !== "grievance_path")) return null;
+  if (c.kind === "phone") { const d = c.value.replace(/\D/g, ""); return d ? `tel:${d}` : null; }
+  return /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(c.value) ? `mailto:${c.value}` : null;
+}
+
 const REASONS = ["Wrong fact", "Not what I asked", "Hard to follow"];
 
 export function verdictLine(card: AnswerCardData) {
@@ -39,7 +49,7 @@ export function AnswerCard({ card, onAction, onFollowup, onFeedback, onCorrect }
   const [fixed, setFixed] = useState(false);
   const unknown = card.status === "unknown";
   const line = verdictLine(card);
-  const actions = unknown && !card.actions.some(a => a.kind === "call_insurer") ? [...card.actions, { kind: "call_insurer" as const, label: "Call your insurer" }] : card.actions;
+  const actions = unknown && !card.actions.some(a => a.kind === "call_insurer") ? [...card.actions, { kind: "call_insurer" as const, label: POLICY_CARD_LABEL }] : card.actions;
   const ownSource = card.sources.find(s => s.tier === "own_pdf");
   const correct = (value: string) => { if (ownSource && value.trim()) { onCorrect?.(ownSource.id, value.trim()); setFixed(true); } };
 
@@ -67,7 +77,12 @@ export function AnswerCard({ card, onAction, onFollowup, onFeedback, onCorrect }
         </details>
       )}
 
-      {actions.length > 0 && <div className="beta-actions">{actions.map((a, i) => <button key={i} type="button" className="beta-button" data-kind={a.kind} onClick={() => onAction?.(a)}>{a.label}</button>)}</div>}
+      {actions.length > 0 && <div className="beta-actions">{actions.map((a, i) => {
+        const href = contactHref(a);
+        return href
+          ? <a key={i} className="beta-button" data-kind={a.kind} href={href}>{a.label}: {a.contact!.value}</a>
+          : <button key={i} type="button" className="beta-button" data-kind={a.kind} onClick={() => onAction?.(a)}>{a.label}</button>;
+      })}</div>}
 
       {card.followups.length > 0 && <div className="beta-chips" aria-label="Ask next">{card.followups.slice(0, 3).map(f => <button key={f} type="button" className="beta-chip" onClick={() => onFollowup?.(f)}>{f}</button>)}</div>}
 
