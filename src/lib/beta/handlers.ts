@@ -190,6 +190,43 @@ export const saveDeclarations = route(async ctx => {
   return jsonResponse(ctx, { saved: saved.length }, 201);
 });
 
+const PHASES = ["before_card", "strip"] as const;
+const ID = /^[A-Za-z0-9_.:-]{1,100}$/;
+
+/** GET /api/beta/questions?phase=: the planner's next questions for the holding, with the reviewed catalogue entries for them. */
+export const intakeQuestions = route(async ctx => {
+  const s = ctx.require();
+  if (!s.holdingId) throw new BackendError(409, "HOLDING_NOT_READY", "Your policy is still being read.");
+  const phase = new URL(ctx.request.url).searchParams.get("phase") ?? "before_card";
+  if (!(PHASES as readonly string[]).includes(phase)) throw new BackendError(400, "INVALID_REQUEST", "Unknown question step.");
+  const plan = await backendJson<Json>(ctx, `/api/v1/holdings/${encodeURIComponent(s.holdingId)}/intake-questions?phase=${phase}`);
+  // Member ids stay opaque; the only member the beta knows is the person themself.
+  const questions = (Array.isArray(plan.questions) ? plan.questions : []).map(raw => {
+    const q = obj(raw);
+    const memberId = str(q.memberId) || null;
+    return { questionId: str(q.questionId), memberId, memberLabel: memberId ? (memberId === s.memberId ? "You" : "Family member") : null, reason: str(q.reason) };
+  });
+  return jsonResponse(ctx, { catalogueVersion: str(plan.catalogueVersion), phase, questions, catalogue: obj(plan.catalogue) });
+});
+
+/** POST /api/beta/answers { questionId, memberId?, optionIds, catalogueVersion }: stored under the profile_intake grant held here. */
+export const intakeAnswer = route(async ctx => {
+  const s = ctx.require();
+  if (!s.holdingId) throw new BackendError(409, "HOLDING_NOT_READY", "Your policy is still being read.");
+  const body = await readJson(ctx);
+  const questionId = str(body.questionId);
+  const memberId = body.memberId == null ? null : str(body.memberId);
+  const optionIds = Array.isArray(body.optionIds) ? body.optionIds.filter((id): id is string => typeof id === "string").slice(0, 10) : [];
+  if (!ID.test(questionId) || (memberId !== null && !ID.test(memberId)) || optionIds.length === 0 || !str(body.catalogueVersion)) {
+    throw new BackendError(400, "INVALID_REQUEST", "Pick an answer to continue.");
+  }
+  const consentGrantId = await profileGrant(ctx);
+  const result = await backendJson(ctx, `/api/v1/holdings/${encodeURIComponent(s.holdingId)}/intake-answers`, {
+    body: { questionId, memberId, optionIds, catalogueVersion: str(body.catalogueVersion), consentGrantId },
+  });
+  return jsonResponse(ctx, result);
+});
+
 /** GET /api/beta/facts: the policy card source (facts with page citations). */
 export const holdingFacts = route(async ctx => {
   const s = ctx.require();
