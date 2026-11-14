@@ -129,6 +129,15 @@ export const productCandidates = route(async ctx => {
   return jsonResponse(ctx, await backendJson(ctx, `/api/v1/holdings/${encodeURIComponent(s.holdingId)}/product-candidates`));
 });
 
+/** GET /api/beta/product/search?q=: a typed product name fragment, matched on the server against the cached registry. */
+export const productSearch = route(async ctx => {
+  const s = ctx.require();
+  if (!s.holdingId) throw new BackendError(409, "HOLDING_NOT_READY", "Your policy is still being read.");
+  const q = (new URL(ctx.request.url).searchParams.get("q") ?? "").replace(/\s+/g, " ").trim();
+  if (q.length < 2 || q.length > 80 || q.split(" ").length > 8) throw new BackendError(400, "INVALID_REQUEST", "Type 2 to 80 characters of the product name.");
+  return jsonResponse(ctx, await backendJson(ctx, `/api/v1/holdings/${encodeURIComponent(s.holdingId)}/product-search?q=${encodeURIComponent(q)}`));
+});
+
 export const confirmProduct = route(async ctx => {
   const s = ctx.require();
   if (!s.holdingId) throw new BackendError(409, "HOLDING_NOT_READY", "Your policy is still being read.");
