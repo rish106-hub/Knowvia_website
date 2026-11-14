@@ -86,7 +86,11 @@ export function realAdapter(): Adapter {
     product: () => api("/api/beta/product"),
     confirmProduct: async (candidateId, expectedVersion) => { await api("/api/beta/product", json({ candidateId, expectedVersion })); },
     // TODO(backend): GET questions endpoint (planner output) does not exist yet; the synthetic catalogue stands in.
-    searchProduct: async () => [], // TODO(backend): name-fragment product search does not exist yet.
+    searchProduct: async fragment => {
+      const q = fragment.trim();
+      if (q.length < 2) return [];
+      return (await api<{ candidates: Candidate[] }>(`/api/beta/product/search?q=${encodeURIComponent(q)}`)).candidates;
+    },
     questions: async phase => planQuestions(MOCK_CATALOGUE, phase, answers),
     lookup: async id => { const q = MOCK_CATALOGUE.find(c => c.id === id); return q ? { key: q.id + ":", question: q } : null; },
     // TODO(backend): POST answer route (user_declaration under profile_intake consent) does not exist yet; the answer is not stored.
