@@ -12,7 +12,8 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export type ChatSource = { kind?: string; document_id?: string; page?: number | null; quote?: string | null; fact_key?: string };
-export type ChatAnswer = { status: "evidence_found" | "unknown"; answer: string; sources: ChatSource[] };
+// `card` is the backend answer-card/v1 released by its guard (CoverSaath chat-answer-card); older backends send only the text fields.
+export type ChatAnswer = { status: "evidence_found" | "unknown"; answer: string; sources: ChatSource[]; card?: unknown };
 
 /** Parses a text/event-stream body and returns the `answer` event (or throws the coded `error` event). */
 export async function readAnswer(res: Response): Promise<ChatAnswer> {
@@ -37,7 +38,7 @@ export async function readAnswer(res: Response): Promise<ChatAnswer> {
       if (!event || !dataLine) continue;
       const data = JSON.parse(dataLine);
       if (event === "error") throw { code: String(data.code || "CHAT_TURN_FAILED"), message: "We could not answer that. Try again.", status: 500 } satisfies ApiError;
-      if (event === "answer") answer = { status: data.status === "evidence_found" ? "evidence_found" : "unknown", answer: String(data.answer || ""), sources: Array.isArray(data.sources) ? data.sources : [] };
+      if (event === "answer") answer = { status: data.status === "evidence_found" ? "evidence_found" : "unknown", answer: String(data.answer || ""), sources: Array.isArray(data.sources) ? data.sources : [], card: data.card ?? undefined };
     }
     if (done) break;
   }
