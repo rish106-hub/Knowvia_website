@@ -1,10 +1,11 @@
 // The beta flow talks to this adapter only. `realAdapter` calls the existing /api/beta/* routes; `mockAdapter` runs the whole flow with no backend.
 import { api, type ChatAnswer, formatValue, readAnswer } from "./client";
-import { MOCK_CATALOGUE, MOCK_PRODUCT, MOCK_PRODUCT_LINE, MOCK_TILES, MOCK_TRANSCRIPT, MOCK_UNKNOWN, mockAnswer, planQuestions } from "./mock";
+import { type Answers, MOCK_CATALOGUE, MOCK_PRODUCT_LINE, MOCK_PRODUCTS, MOCK_TILES, MOCK_TRANSCRIPT, MOCK_UNKNOWN, mockAnswer, type PlanItem, planQuestions } from "./mock";
 import { TILE_ORDER, badgeFor } from "./tiles";
-import type { AnswerCardData, CardTileData, CatalogueQuestion, Phase, TileId } from "./types";
+import type { AnswerCardData, CardTileData, Phase, TileId } from "./types";
 
-export type Candidate = { candidateId: string; insurerName: string; productName: string };
+/** uinSource "pdf_text" means the UIN came from the document itself; anything else is a weaker tag and is always confirmed by the person. */
+export type Candidate = { candidateId: string; insurerName: string; productName: string; uinSource?: string };
 export type SessionState = { signedIn: boolean; hasDocument: boolean; hasHolding: boolean };
 // ASSUMED code: the backend voice-busy code (queue full or breaker open) is not defined yet; align when the route exists.
 export const VOICE_BUSY = "VOICE_BUSY";
@@ -20,8 +21,10 @@ export type Adapter = {
   status(): Promise<{ stage: string; code?: string }>;
   product(): Promise<{ profileVersion: number; candidates: Candidate[] }>;
   confirmProduct(candidateId: string, expectedVersion: number): Promise<void>;
-  questions(phase: Phase): Promise<CatalogueQuestion[]>;
-  answer(question: CatalogueQuestion, optionIds: string[]): Promise<void>;
+  searchProduct(fragment: string): Promise<Candidate[]>;
+  questions(phase: Phase): Promise<PlanItem[]>;
+  lookup(questionId: string): Promise<PlanItem | null>;
+  answer(item: PlanItem, optionIds: string[]): Promise<void>;
   /** null while the policy is still being read. */
   card(): Promise<CardState | null>;
   resolveConflict(tileId: TileId, pick: 0 | 1): Promise<void>;
@@ -72,6 +75,7 @@ export function fromLegacyAnswer(a: ChatAnswer): AnswerCardData {
 
 export function realAdapter(): Adapter {
   let thread: string | null = null;
+  const answers: Answers = {};
   return {
     mock: false,
     voiceEnabled: false, // TODO(backend): voice status + POST /api/v1/voice/turns do not exist yet. Mic stays hidden until the backend reports it enabled.
@@ -82,9 +86,11 @@ export function realAdapter(): Adapter {
     product: () => api("/api/beta/product"),
     confirmProduct: async (candidateId, expectedVersion) => { await api("/api/beta/product", json({ candidateId, expectedVersion })); },
     // TODO(backend): GET questions endpoint (planner output) does not exist yet; the synthetic catalogue stands in.
-    questions: async phase => planQuestions(MOCK_CATALOGUE, phase),
+    searchProduct: async () => [], // TODO(backend): name-fragment product search does not exist yet.
+    questions: async phase => planQuestions(MOCK_CATALOGUE, phase, answers),
+    lookup: async id => { const q = MOCK_CATALOGUE.find(c => c.id === id); return q ? { key: q.id + ":", question: q } : null; },
     // TODO(backend): POST answer route (user_declaration under profile_intake consent) does not exist yet; the answer is not stored.
-    answer: async () => undefined,
+    answer: async (item, ids) => { answers[item.key] = ids; },
     card: async () => {
       const r = await api<{ facts: { facts: Fact[] }; holding: { summary?: { insurerName?: string; productName?: string } } }>("/api/beta/facts");
       if (r.facts.facts.length === 0) return null;
@@ -103,8 +109,8 @@ export function realAdapter(): Adapter {
   };
 }
 
-export function mockAdapter(opts: { voiceBusy?: boolean } = {}): Adapter {
-  const answered = new Set<string>();
+export function mockAdapter(opts: { voiceBusy?: boolean; uinFromPdf?: boolean } = {}): Adapter {
+  const answers: Answers = {};
   const tiles = MOCK_TILES.map(t => ({ ...t }));
   return {
     mock: true,
@@ -113,10 +119,12 @@ export function mockAdapter(opts: { voiceBusy?: boolean } = {}): Adapter {
     start: async () => { await delay(150); },
     upload: async () => { await delay(150); },
     status: async () => { await delay(600); return { stage: "ready" }; },
-    product: async () => ({ profileVersion: 1, candidates: [MOCK_PRODUCT] }),
+    product: async () => ({ profileVersion: 1, candidates: opts.uinFromPdf ? [{ ...MOCK_PRODUCTS[0], uinSource: "pdf_text" }] : MOCK_PRODUCTS }),
     confirmProduct: async () => undefined,
-    questions: async phase => planQuestions(MOCK_CATALOGUE, phase, answered),
-    answer: async (question, optionIds) => { if (!optionIds.includes("not_sure")) answered.add(question.id); },
+    searchProduct: async fragment => MOCK_PRODUCTS.filter(p => `${p.productName} ${p.insurerName}`.toLowerCase().includes(fragment.trim().toLowerCase())),
+    questions: async phase => planQuestions(MOCK_CATALOGUE, phase, answers),
+    lookup: async id => { const q = MOCK_CATALOGUE.find(c => c.id === id); return q ? { key: q.id + ":", question: q } : null; },
+    answer: async (item, optionIds) => { answers[item.key] = optionIds; },
     card: async () => { await delay(400); return { productLine: MOCK_PRODUCT_LINE, tiles: tiles.map(t => ({ ...t })) }; },
     resolveConflict: async (tileId, pick) => {
       const t = tiles.find(x => x.id === tileId);
@@ -135,5 +143,5 @@ export function mockAdapter(opts: { voiceBusy?: boolean } = {}): Adapter {
 export function pickAdapter(): Adapter {
   const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
   const flag = params?.get("mock") === "1";
-  return flag || process.env.NEXT_PUBLIC_BETA_MOCK === "1" ? mockAdapter({ voiceBusy: params?.get("voicebusy") === "1" }) : realAdapter();
+  return flag || process.env.NEXT_PUBLIC_BETA_MOCK === "1" ? mockAdapter({ voiceBusy: params?.get("voicebusy") === "1", uinFromPdf: params?.get("uinpdf") === "1" }) : realAdapter();
 }

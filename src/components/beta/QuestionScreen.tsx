@@ -17,9 +17,9 @@ export function toggleSelection(kind: InputKind, current: string[], id: string):
   return rest.includes(id) ? rest.filter(x => x !== id) : [...rest, id];
 }
 
-type Props = { question: CatalogueQuestion; index: number; total: number; members?: Member[]; busy?: boolean; onAnswer: (optionIds: string[]) => void };
+type Props = { question: CatalogueQuestion; member?: Member; index: number; total: number; members?: Member[]; busy?: boolean; onAnswer: (optionIds: string[]) => void };
 
-export function QuestionScreen({ question, index, total, members, busy, onAnswer }: Props) {
+export function QuestionScreen({ question, member, index, total, members, busy, onAnswer }: Props) {
   const [picked, setPicked] = useState<string[]>([]);
   const kind = question.input.kind;
   const multi = kind === "multi_choice_chips";
@@ -32,6 +32,7 @@ export function QuestionScreen({ question, index, total, members, busy, onAnswer
   return (
     <section className="beta-card" aria-labelledby="beta-q-title" data-kind={kind}>
       <p className="beta-count">{index + 1} of {total}</p>
+      {question.perMember && member && <p className="beta-member"><span className="beta-chip" data-static="true">{member.label}</span></p>}
       <h1 id="beta-q-title">{question.prompt.en}</h1>
       <p className="beta-why">{question.why.en}</p>
       <div className="beta-chips" role={multi ? "group" : "radiogroup"} aria-labelledby="beta-q-title">

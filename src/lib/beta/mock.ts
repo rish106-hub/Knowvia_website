@@ -1,5 +1,5 @@
 // Synthetic data for the beta flow when no backend is configured. Invented names and numbers only. FOR LEGAL REVIEW: all wording.
-import { type AnswerCardData, type CardTileData, type CatalogueOption, type CatalogueQuestion, type InputKind, NOT_SURE, OTHER, type Phase, type Sensitivity } from "./types";
+import { type AnswerCardData, type CardTileData, type CatalogueOption, type CatalogueQuestion, type InputKind, type Member, NOT_SURE, OTHER, type Phase, type Sensitivity } from "./types";
 
 const l = (en: string) => ({ en, hi: null });
 const opt = (id: string, en: string): CatalogueOption => ({ id, label: l(en) });
@@ -7,15 +7,15 @@ const NS = opt(NOT_SURE, "Not sure");
 const YES_NO = [opt("yes", "Yes"), opt("no", "No"), NS];
 const DATES = [opt("this_year", "This year"), opt("last_year", "Last year"), opt("two_to_four_years", "2 to 4 years ago"), opt("longer", "Longer ago"), NS];
 
-const q = (id: string, prompt: string, why: string, kind: InputKind, options: CatalogueOption[] | undefined, x: { phase?: Phase; sensitivity?: Sensitivity; weight: number; followups?: Record<string, string[]> }): CatalogueQuestion => ({
-  id, prompt: l(prompt), why: l(why), input: { kind, options }, sensitivity: x.sensitivity ?? "none", phase: x.phase ?? "strip", perMember: false, weight: x.weight, followups: x.followups ?? {},
+const q = (id: string, prompt: string, why: string, kind: InputKind, options: CatalogueOption[] | undefined, x: { phase?: Phase; sensitivity?: Sensitivity; perMember?: boolean; weight: number; followups?: Record<string, string[]> }): CatalogueQuestion => ({
+  id, prompt: l(prompt), why: l(why), input: { kind, options }, sensitivity: x.sensitivity ?? "none", phase: x.phase ?? "strip", perMember: x.perMember ?? false, weight: x.weight, followups: x.followups ?? {},
 });
 
 export const MOCK_CATALOGUE: CatalogueQuestion[] = [
-  q("members.confirm", "Is this person covered under this policy?", "We show cover for each person on the policy.", "yes_no_unsure", YES_NO, { phase: "before_card", weight: 0.95 }),
-  q("ped.has_any", "When you bought this policy, did you tell the insurer about any illness?", "Illnesses you told them about have their own waiting period.", "yes_no_unsure", YES_NO, { phase: "before_card", sensitivity: "health", weight: 0.9, followups: { yes: ["ped.which_conditions"] } }),
+  q("members.confirm", "Is this person covered under this policy?", "We show cover for each person on the policy.", "yes_no_unsure", YES_NO, { phase: "before_card", perMember: true, weight: 0.95 }),
+  q("ped.has_any", "When you bought this policy, did you tell the insurer about any illness?", "Illnesses you told them about have their own waiting period.", "yes_no_unsure", YES_NO, { phase: "before_card", sensitivity: "health", perMember: true, weight: 0.9, followups: { yes: ["ped.which_conditions"] } }),
   q("ped.which_conditions", "Which illnesses did you tell them about?", "Each illness can have a different waiting period.", "multi_choice_chips",
-    [opt("diabetes", "Diabetes"), opt("high_bp", "High blood pressure"), opt("thyroid", "Thyroid"), opt("heart", "Heart"), opt("asthma", "Asthma"), opt(OTHER, "Other")], { sensitivity: "health", weight: 0.8 }),
+    [opt("diabetes", "Diabetes"), opt("high_bp", "High blood pressure"), opt("thyroid", "Thyroid"), opt("heart", "Heart"), opt("asthma", "Asthma"), opt(OTHER, "Other")], { sensitivity: "health", perMember: true, weight: 0.8 }),
   q("portability.prior_cover_years", "Did you move from another insurer? When did you first get health cover?", "Time on earlier cover can count toward waiting periods.", "date_presets", DATES, { sensitivity: "money", weight: 0.8 }),
   q("home.city", "Which city do you live in?", "We use it to find hospitals near you.", "single_choice",
     [opt("delhi", "Delhi"), opt("mumbai", "Mumbai"), opt("bengaluru", "Bengaluru"), opt("kolkata", "Kolkata"), opt(OTHER, "Another city"), NS], { weight: 0.7 }),
@@ -26,17 +26,40 @@ export const MOCK_CATALOGUE: CatalogueQuestion[] = [
     [opt("cashless_always", "No upfront payment"), opt("reimburse_ok", "I can pay and claim later"), opt("depends", "Depends on the hospital"), NS], { weight: 0.35 }),
 ];
 
-/** Deterministic planner stub: before the card at most 2 questions, the rest in the strip. Answered ids are skipped. */
-export function planQuestions(catalogue: CatalogueQuestion[], phase: Phase, answered: ReadonlySet<string> = new Set()): CatalogueQuestion[] {
-  const open = catalogue.filter(c => !answered.has(c.id)).sort((a, b) => b.weight - a.weight);
-  const first = open.filter(c => c.phase === "before_card").slice(0, 2);
-  if (phase === "before_card") return first;
-  const firstIds = new Set(first.map(c => c.id));
-  return open.filter(c => !firstIds.has(c.id));
+export type PlanItem = { key: string; question: CatalogueQuestion; member?: Member };
+export type Answers = Record<string, string[]>;
+export const itemKey = (q: CatalogueQuestion, m?: Member) => `${q.id}:${m?.id ?? ""}`;
+
+/**
+ * Deterministic planner stub. Per-member questions expand to one item per member. Before the card: at most 2 items; the rest go to the strip.
+ * Any answer, "Not sure" included, keeps an item from being asked again. A followup question appears only after its trigger answer
+ * ("*" means any real answer, never "Not sure"); "Not sure" and "No" never open followups.
+ */
+export function planQuestions(catalogue: CatalogueQuestion[], phase: Phase, answers: Answers = {}, members: Member[] = MOCK_MEMBERS): PlanItem[] {
+  const targets = new Set(catalogue.flatMap(c => Object.values(c.followups).flat()));
+  const triggered = (q: CatalogueQuestion, m?: Member) => !targets.has(q.id) || catalogue.some(p => {
+    const given = answers[itemKey(p, p.perMember ? m : undefined)];
+    return given && Object.entries(p.followups).some(([trigger, ids]) => ids.includes(q.id) && (trigger === "*" ? given.some(g => g !== NOT_SURE) : given.includes(trigger)));
+  });
+  const items: PlanItem[] = [];
+  for (const q of [...catalogue].sort((a, b) => b.weight - a.weight)) {
+    for (const m of q.perMember ? members : [undefined]) {
+      const key = itemKey(q, m);
+      if (!(key in answers) && triggered(q, m)) items.push({ key, question: q, member: m });
+    }
+  }
+  const first = items.filter(i => i.question.phase === "before_card").slice(0, 2);
+  return phase === "before_card" ? first : items.filter(i => !first.includes(i));
 }
 
-export const MOCK_MEMBERS = [{ id: "m1", label: "Asha (you)" }, { id: "m2", label: "Ravi (spouse)" }];
-export const MOCK_PRODUCT = { candidateId: "c1", insurerName: "Example Health Insurance", productName: "Example Care Plus" };
+export const MOCK_MEMBERS: Member[] = [{ id: "m1", label: "Asha, spouse" }, { id: "m2", label: "Kabir, child" }];
+// uinSource "link_page" is a weaker tag, so the product screen is shown. Only "pdf_text" (the document's own UIN) skips it.
+export const MOCK_PRODUCTS = [
+  { candidateId: "c1", insurerName: "Suraksha Health", productName: "Care Plus 360", uinSource: "link_page" },
+  { candidateId: "c2", insurerName: "Suraksha Health", productName: "Care Plus 180", uinSource: "link_page" },
+  { candidateId: "c3", insurerName: "Suraksha Health", productName: "Care Plus Senior", uinSource: "link_page" },
+];
+export const MOCK_PRODUCT = MOCK_PRODUCTS[0];
 export const MOCK_PRODUCT_LINE = `${MOCK_PRODUCT.insurerName} ${MOCK_PRODUCT.productName}`;
 
 export const MOCK_TILES: CardTileData[] = [
@@ -49,7 +72,7 @@ export const MOCK_TILES: CardTileData[] = [
   { id: "waiting_periods", title: "Waiting periods still running", value: "Depends: did you move from another insurer?", badge: "not_checked" },
   { id: "copay_deductible", title: "Co-pay and deductible", value: null, badge: "unknown" },
   { id: "exclusions", title: "Top exclusions for your household", value: "Cosmetic treatment, dental unless from an accident, and war injuries", badge: "ida_wording", source: { tier: "ida_wording", page: 14, clause: "5", quote: "We will not pay for cosmetic or plastic surgery, dental treatment unless due to accident, or injury due to war" } },
-  { id: "cashless", title: "Cashless hospitals in your city", value: "Bengaluru: 3 example hospitals", badge: "user_declaration", source: { tier: "user_declaration", quote: "You said you live in Bengaluru" } },
+  { id: "cashless", title: "Cashless hospitals in your city", value: "Bengaluru: 3 hospitals near you", badge: "user_declaration", source: { tier: "user_declaration", quote: "You said you live in Bengaluru" } },
 ];
 
 const base = { contract: "answer-card/v1" as const, ruleResultId: null };

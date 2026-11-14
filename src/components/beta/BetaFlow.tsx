@@ -4,8 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { type ApiError } from "@/lib/beta/client";
 import { type Adapter, type Candidate, type CardState, pickAdapter } from "@/lib/beta/adapter";
 import { trackAnswer } from "@/lib/beta/analytics";
-import { MOCK_MEMBERS, SUGGESTED_QUESTIONS } from "@/lib/beta/mock";
-import type { AnswerCardData, CardAction, CatalogueQuestion } from "@/lib/beta/types";
+import { MOCK_MEMBERS, type PlanItem, SUGGESTED_QUESTIONS } from "@/lib/beta/mock";
+import type { AnswerCardData, CardAction } from "@/lib/beta/types";
 import { AnswerCard } from "./AnswerCard";
 import { HospitalCard } from "./HospitalCard";
 import { MicButton } from "./MicButton";
@@ -42,11 +42,14 @@ export function BetaFlow() {
   const [stage, setStage] = useState("scanning");
   const [candidates, setCandidates] = useState<Candidate[] | null>(null);
   const [version, setVersion] = useState(0);
-  const [picked, setPicked] = useState("");
-  const [queue, setQueue] = useState<CatalogueQuestion[]>([]);
+  const [queue, setQueue] = useState<PlanItem[]>([]);
   const [qi, setQi] = useState(0);
-  const [strip, setStrip] = useState<CatalogueQuestion[]>([]);
-  const [inline, setInline] = useState<CatalogueQuestion | null>(null);
+  const [strip, setStrip] = useState<PlanItem[]>([]);
+  const [inline, setInline] = useState<PlanItem | null>(null);
+  const [others, setOthers] = useState(false);
+  const [none, setNone] = useState(false);
+  const [fragment, setFragment] = useState("");
+  const [found, setFound] = useState<Candidate[] | null>(null);
   const [card, setCard] = useState<CardState | null>(null);
   const [thread, setThread] = useState(false);
   const [turns, setTurns] = useState<Turn[]>([]);
@@ -93,7 +96,6 @@ export function BetaFlow() {
         const r = await adapter.product();
         if (stop) return;
         setCandidates(r.candidates); setVersion(r.profileVersion);
-        if (r.candidates.length === 1) setPicked(r.candidates[0].candidateId);
       } catch (e) {
         if (stop) return;
         if ((e as ApiError).code === "HOLDING_REGISTRY_UNAVAILABLE") { setTimeout(tick, 3000); return; }
@@ -123,16 +125,24 @@ export function BetaFlow() {
   const start = () => run(async () => { await adapter.start(name, email); setStep("upload"); });
   const upload = () => run(async () => { if (!file) return; setStage("scanning"); await adapter.upload(file); setStep("processing"); });
 
-  const confirm = () => run(async () => {
-    await adapter.confirmProduct(picked, version);
+  const confirm = (candidateId: string) => run(async () => {
+    await adapter.confirmProduct(candidateId, version);
     const first = await adapter.questions("before_card");
     setQueue(first); setQi(0);
     if (first.length === 0) { setStrip(await adapter.questions("strip")); setStep("card"); } else setStep("questions");
   });
 
-  const record = async (q: CatalogueQuestion, ids: string[]) => {
-    trackAnswer(q.id, ids, q.sensitivity);
-    await adapter.answer(q, ids);
+  // Skip the product screen only on a single match whose UIN came from the document itself.
+  useEffect(() => {
+    if (step === "product" && candidates?.length === 1 && candidates[0].uinSource === "pdf_text") queueMicrotask(() => void confirm(candidates[0].candidateId));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, candidates]);
+
+  const search = () => run(async () => { setFound(await adapter.searchProduct(fragment.trim())); });
+
+  const record = async (item: PlanItem, ids: string[]) => {
+    trackAnswer(item.question.id, ids, item.question.sensitivity);
+    await adapter.answer(item, ids);
   };
 
   const answerQueued = (ids: string[]) => run(async () => {
@@ -164,7 +174,7 @@ export function BetaFlow() {
 
   const onAction = (a: CardAction) => {
     if (a.kind !== "answer_question" || !a.questionId) return;
-    adapter.questions("strip").then(all => setInline(all.find(x => x.id === a.questionId) ?? null)).catch(() => undefined);
+    adapter.lookup(a.questionId).then(setInline).catch(() => undefined);
   };
 
   const at = ORDER.indexOf(step === "hospital" ? "start" : step);
@@ -218,23 +228,43 @@ export function BetaFlow() {
           <h1>Is this your product?</h1>
           {!candidates && !error && <p aria-live="polite">Looking up your insurer</p>}
           {candidates && candidates.length === 0 && <p>We could not match an insurer. Your policy is still read, but we cannot confirm the product.</p>}
-          {candidates && candidates.length > 0 && (
-            <fieldset>
-              <legend>{candidates.length === 1 ? "Confirm the match" : "Pick the closest match"}</legend>
-              {candidates.map(c => (
-                <label key={c.candidateId} className="beta-option">
-                  <input type="radio" name="product" checked={picked === c.candidateId} onChange={() => setPicked(c.candidateId)} />
-                  <span><strong>{c.productName}</strong><br />{c.insurerName}</span>
-                </label>
-              ))}
-            </fieldset>
+          {candidates && candidates.length > 0 && !others && (
+            <>
+              <p className="beta-option"><span><strong>{candidates[0].productName}</strong><br />{candidates[0].insurerName}</span></p>
+              <div className="beta-chips">
+                <button className="beta-button" disabled={busy} onClick={() => confirm(candidates[0].candidateId)}>Yes, this one</button>
+                <button type="button" className="beta-chip" disabled={busy} onClick={() => setOthers(true)}>No, show others</button>
+              </div>
+            </>
           )}
-          <button className="beta-button" disabled={busy || !picked} onClick={confirm}>Confirm</button>
+          {candidates && others && (
+            <>
+              <h2 className="beta-rule">Pick the closest match</h2>
+              {candidates.slice(1, 4).map(c => (
+                <button key={c.candidateId} type="button" className="beta-option" disabled={busy} onClick={() => confirm(c.candidateId)}>
+                  <span><strong>{c.productName}</strong><br />{c.insurerName}</span>
+                </button>
+              ))}
+              {!none && <button type="button" className="beta-chip" onClick={() => setNone(true)}>None of these</button>}
+              {none && (
+                <form className="beta-ask" onSubmit={e => { e.preventDefault(); if (fragment.trim()) void search(); }}>
+                  <input value={fragment} onChange={e => setFragment(e.target.value)} maxLength={80} aria-label="Part of the product name" placeholder="Part of the product name" />
+                  <button className="beta-button" disabled={busy || !fragment.trim()}>Find</button>
+                </form>
+              )}
+              {found && found.length === 0 && <p aria-live="polite">No match. Try another part of the name.</p>}
+              {found?.slice(0, 3).map(c => (
+                <button key={c.candidateId} type="button" className="beta-option" disabled={busy} onClick={() => confirm(c.candidateId)}>
+                  <span><strong>{c.productName}</strong><br />{c.insurerName}</span>
+                </button>
+              ))}
+            </>
+          )}
         </section>
       )}
 
       {step === "questions" && queue[qi] && (
-        <QuestionScreen key={queue[qi].id} question={queue[qi]} index={qi} total={queue.length} members={MOCK_MEMBERS} busy={busy} onAnswer={answerQueued} />
+        <QuestionScreen key={queue[qi].key} question={queue[qi].question} member={queue[qi].member} index={qi} total={queue.length} members={MOCK_MEMBERS} busy={busy} onAnswer={answerQueued} />
       )}
 
       {step === "card" && (
@@ -243,11 +273,11 @@ export function BetaFlow() {
           {!card && !error && <p aria-live="polite">Collecting the key terms</p>}
           {card && <PolicyCard tiles={card.tiles} productLine={card.productLine} onResolve={(id, pick) => { void adapter.resolveConflict(id, pick).then(() => adapter.card()).then(c => { if (c) setCard(c); }); }} />}
           {card && (inline ? (
-            <QuestionScreen key={inline.id} question={inline} index={0} total={1} members={MOCK_MEMBERS} busy={busy} onAnswer={answerInline} />
+            <QuestionScreen key={inline.key} question={inline.question} member={inline.member} index={0} total={1} members={MOCK_MEMBERS} busy={busy} onAnswer={answerInline} />
           ) : strip.length > 0 && (
             <>
               <h2 className="beta-rule">Improve your card</h2>
-              <div className="beta-chips">{strip.map(s => <button key={s.id} type="button" className="beta-chip" onClick={() => setInline(s)}>{s.prompt.en}</button>)}</div>
+              <div className="beta-chips">{strip.map(s => <button key={s.key} type="button" className="beta-chip" onClick={() => setInline(s)}>{s.member ? `${s.member.label}: ` : ""}{s.question.prompt.en}</button>)}</div>
             </>
           ))}
           <button className="beta-button" disabled={busy || !card} onClick={openChat}>Ask a question</button>
@@ -267,7 +297,7 @@ export function BetaFlow() {
               </div>
             ))}
           </div>
-          {inline && <QuestionScreen key={inline.id} question={inline} index={0} total={1} members={MOCK_MEMBERS} busy={busy} onAnswer={ids => { void record(inline, ids).then(() => setInline(null)); }} />}
+          {inline && <QuestionScreen key={inline.key} question={inline.question} member={inline.member} index={0} total={1} members={MOCK_MEMBERS} busy={busy} onAnswer={ids => { void record(inline, ids).then(() => setInline(null)); }} />}
           {turns.length === 0 && <div className="beta-chips" aria-label="Suggested questions">{SUGGESTED_QUESTIONS.map(s => <button key={s} type="button" className="beta-chip" onClick={() => ask(s)}>{s}</button>)}</div>}
           <form className="beta-ask" onSubmit={e => { e.preventDefault(); ask(question); }}>
             <input ref={askBox} value={question} onChange={e => setQuestion(e.target.value)} placeholder="For example: how long is the waiting period?" aria-label="Your question" maxLength={1000} />
