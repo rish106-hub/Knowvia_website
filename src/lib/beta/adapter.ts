@@ -39,7 +39,17 @@ export type Adapter = {
   feedback(helpful: boolean, reason?: string): Promise<void>;
   correct(sourceId: string, value: string): Promise<void>;
   transcribe(blob: Blob | null): Promise<string>;
+  /** Whether another policy can be added now, and its price when it cannot. */
+  policySlots(): Promise<PolicySlots>;
+  /** A Razorpay order for one extra policy (the server holds the secret). */
+  paymentOrder(): Promise<PaymentOrder>;
+  verifyPayment(proof: { orderId: string; paymentId: string; signature: string }): Promise<void>;
+  /** Forget the open chat thread, so the next policy gets its own. */
+  resetThread(): void;
 };
+
+export type PolicySlots = { enabled: boolean; canAdd: boolean; used: number; allowed: number; pricePaise: number; currency: string };
+export type PaymentOrder = { orderId: string; amountPaise: number; currency: string; keyId: string };
 
 const json = (body: unknown) => ({ method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
 const delay = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
@@ -172,6 +182,10 @@ export function realAdapter(): Adapter {
     },
     resolveConflict: async () => undefined, // TODO(backend): conflict resolution route.
     openThread: async allowModel => { if (!thread) thread = (await api<{ threadId: string }>("/api/beta/chat/threads", json({ allowModel }))).threadId; },
+    policySlots: () => api<PolicySlots>("/api/beta/policy-slots"),
+    paymentOrder: () => api<PaymentOrder>("/api/beta/payments/order", json({})),
+    verifyPayment: async proof => { await api("/api/beta/payments/verify", json(proof)); },
+    resetThread: () => { thread = null; },
     ask: async question => {
       const res = await fetch("/api/beta/chat/turn", { credentials: "same-origin", ...json({ threadId: thread, message: question }) });
       const answer = await readAnswer(res);
@@ -208,6 +222,10 @@ export function mockAdapter(opts: { voiceBusy?: boolean; uinFromPdf?: boolean } 
       Object.assign(t, { value: chosen.value, source: chosen.source, badge: chosen.source.tier, conflict: undefined });
     },
     openThread: async () => undefined,
+    policySlots: async () => ({ enabled: false, canAdd: true, used: 1, allowed: 1, pricePaise: 19900, currency: "INR" }),
+    paymentOrder: async () => ({ orderId: "order_mock", amountPaise: 19900, currency: "INR", keyId: "rzp_test_mock" }),
+    verifyPayment: async () => undefined,
+    resetThread: () => undefined,
     ask: async question => { await delay(700); return mockAnswer(question); },
     feedback: async () => undefined,
     correct: async () => undefined,

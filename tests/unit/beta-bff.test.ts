@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chatTurn, confirmProduct, createThread, saveDeclarations, startSession, uploadDocument } from "@/lib/beta/handlers";
+import { chatTurn, confirmProduct, createPaymentOrder, createThread, verifyPayment, saveDeclarations, startSession, uploadDocument } from "@/lib/beta/handlers";
 import { readAnswer } from "@/lib/beta/client";
 import { SESSION_COOKIE } from "@/lib/beta/session";
 
@@ -28,6 +28,19 @@ async function signIn() {
 const withCookie = (cookie: string, init: RequestInit = {}) => ({ ...init, headers: { cookie, ...(init.headers as object) } });
 
 describe("beta BFF", () => {
+  it("creates a payment order through the backend and passes only the three Checkout ids to verify", async () => {
+    const { cookie } = await signIn();
+    const s = stub(call => (call.url.endsWith("/orders") ? json({ orderId: "order_X", amountPaise: 19900, currency: "INR", keyId: "rzp_test_k" }, 201) : json({ paid: true, canAdd: true })));
+    const order = await createPaymentOrder(new Request("http://x", withCookie(cookie, { method: "POST", body: "{}" })), s.deps);
+    expect(order.status).toBe(201);
+    expect(s.calls[0].url).toBe("http://backend.test/api/v1/households/h1/policy-slots/orders");
+    const bad = await verifyPayment(new Request("http://x", withCookie(cookie, { method: "POST", body: JSON.stringify({ orderId: "order_X", paymentId: "" }) })), s.deps);
+    expect(bad.status).toBe(400);
+    const ok = await verifyPayment(new Request("http://x", withCookie(cookie, { method: "POST", body: JSON.stringify({ orderId: "order_X", paymentId: "pay_Y", signature: "a".repeat(64), paid: true }) })), s.deps);
+    expect(ok.status).toBe(200);
+    expect(JSON.parse(String(s.calls.at(-1)!.body))).toEqual({ orderId: "order_X", paymentId: "pay_Y", signature: "a".repeat(64) });
+  });
+
   it("opens chat with a Gemini grant only when the person said yes", async () => {
     for (const allowModel of [true, false]) {
       const { cookie } = await signIn();

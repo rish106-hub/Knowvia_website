@@ -283,3 +283,27 @@ export const memoryDocument = route(async ctx => {
     throw error;
   }
 });
+
+/** GET /api/beta/policy-slots: may this household add another policy, and the price when it may not. */
+export const policySlots = route(async ctx => {
+  const s = ctx.require();
+  return jsonResponse(ctx, await backendJson(ctx, `/api/v1/households/${encodeURIComponent(s.householdId)}/policy-slots`));
+});
+
+/** POST /api/beta/payments/order: a Razorpay order for one extra policy. Returns { orderId, amountPaise, currency, keyId }; never the secret. */
+export const createPaymentOrder = route(async ctx => {
+  const s = ctx.require();
+  const order = await backendJson(ctx, `/api/v1/households/${encodeURIComponent(s.householdId)}/policy-slots/orders`, { body: {} });
+  return jsonResponse(ctx, order, 201);
+});
+
+/** POST /api/beta/payments/verify { orderId, paymentId, signature }: the backend checks the signature; only then is the slot paid. */
+export const verifyPayment = route(async ctx => {
+  const s = ctx.require();
+  const body = await readJson(ctx);
+  const ids = [str(body.orderId), str(body.paymentId), str(body.signature)];
+  if (ids.some(v => !/^[A-Za-z0-9_]{1,100}$/.test(v))) throw new BackendError(400, "INVALID_REQUEST", "The payment details are incomplete.");
+  const [orderId, paymentId, signature] = ids;
+  const result = await backendJson(ctx, `/api/v1/households/${encodeURIComponent(s.householdId)}/policy-slots/verify`, { body: { orderId, paymentId, signature } });
+  return jsonResponse(ctx, result);
+});

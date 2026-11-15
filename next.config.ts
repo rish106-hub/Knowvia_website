@@ -3,12 +3,14 @@ import type { NextConfig } from "next";
 const isDevelopment = process.env.NODE_ENV === "development";
 const contentSecurityPolicy = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDevelopment ? " 'unsafe-eval'" : ""} https://www.googletagmanager.com https://connect.facebook.net`,
+  `script-src 'self' 'unsafe-inline'${isDevelopment ? " 'unsafe-eval'" : ""} https://www.googletagmanager.com https://connect.facebook.net https://checkout.razorpay.com`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: https://www.facebook.com https://www.google-analytics.com",
+  "img-src 'self' data: https://www.facebook.com https://www.google-analytics.com https://*.razorpay.com",
   "font-src 'self'",
   "media-src 'self' blob:",
-  `connect-src 'self'${isDevelopment ? " ws:" : ""} https://www.google-analytics.com https://analytics.google.com https://www.facebook.com`,
+  `connect-src 'self'${isDevelopment ? " ws:" : ""} https://www.google-analytics.com https://analytics.google.com https://www.facebook.com https://api.razorpay.com https://lumberjack.razorpay.com`,
+  // Razorpay Standard Checkout opens its payment window in a frame from these hosts.
+  "frame-src https://api.razorpay.com https://checkout.razorpay.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

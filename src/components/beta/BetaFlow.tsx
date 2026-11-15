@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { type ApiError } from "@/lib/beta/client";
-import { type Adapter, type Candidate, type CardState, candidateLines, pickAdapter } from "@/lib/beta/adapter";
+import { type Adapter, type Candidate, type CardState, type PolicySlots, candidateLines, pickAdapter } from "@/lib/beta/adapter";
+import { payWithRazorpay } from "@/lib/beta/razorpay";
 import { trackAnswer } from "@/lib/beta/analytics";
 import { MOCK_MEMBERS, type PlanItem, SUGGESTED_QUESTIONS } from "@/lib/beta/mock";
 import type { AnswerCardData, CardAction } from "@/lib/beta/types";
@@ -58,6 +59,7 @@ export function BetaFlow() {
   const [card, setCard] = useState<CardState | null>(null);
   const [thread, setThread] = useState(false);
   const [askConsent, setAskConsent] = useState(false);
+  const [pay, setPay] = useState<PolicySlots | null>(null);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [question, setQuestion] = useState("");
   const alive = useRef(true);
@@ -129,7 +131,42 @@ export function BetaFlow() {
   }, [step, adapter]);
 
   const start = () => run(async () => { await adapter.start(name, email); setStep("upload"); });
-  const upload = () => run(async () => { if (!file) return; setStage("scanning"); await adapter.upload(file); setStep("processing"); });
+  const upload = () => run(async () => {
+    if (!file) return;
+    setStage("scanning");
+    try { await adapter.upload(file); } catch (e) {
+      // The backend decides: a second policy needs a paid slot.
+      if ((e as ApiError)?.code === "PAYMENT_REQUIRED") { setPay(await adapter.policySlots()); return; }
+      throw e;
+    }
+    setStep("processing");
+  });
+
+  // Another policy: free while a slot is open, otherwise Rs 199 through Razorpay. The server verifies the payment signature.
+  const startNextPolicy = () => {
+    adapter.resetThread(); setThread(false); setTurns([]); setCard(null); setCandidates(null); setFile(null); setAgreed(false); setAskConsent(false); setPay(null);
+    setStep("upload");
+  };
+  const addPolicy = () => run(async () => {
+    const slots = await adapter.policySlots();
+    if (slots.canAdd) startNextPolicy(); else setPay(slots);
+  });
+  const payForPolicy = () => run(async () => {
+    const order = await adapter.paymentOrder();
+    const proof = await payWithRazorpay(order, { name, email });
+    await adapter.verifyPayment(proof);
+    startNextPolicy();
+  });
+  const rupees = (paise: number) => `Rs ${(paise / 100).toLocaleString("en-IN")}`;
+  const payBox = pay && (
+    <div className="beta-consent" role="group" aria-label="Pay to add another policy">
+      <p>Your first policy is free. Adding another policy costs {rupees(pay.pricePaise)}, paid once through Razorpay.</p>
+      <div className="beta-chips">
+        <button type="button" className="beta-button" disabled={busy} onClick={payForPolicy}>Pay {rupees(pay.pricePaise)}</button>
+        <button type="button" className="beta-chip" disabled={busy} onClick={() => setPay(null)}>Not now</button>
+      </div>
+    </div>
+  );
 
   const confirm = (candidateId: string) => run(async () => {
     await adapter.confirmProduct(candidateId, version);
@@ -218,6 +255,7 @@ export function BetaFlow() {
             <span>I allow Knowvia to store this document, and to send it to our reading service to turn the pages into text. Only you can see it. You can withdraw this and have it erased at any time.</span>
           </label>
           <button className="beta-button" disabled={busy || !file || !agreed} onClick={upload}>{busy ? "Uploading" : "Upload and read"}</button>
+          {payBox}
         </section>
       )}
 
@@ -287,6 +325,8 @@ export function BetaFlow() {
             </>
           ))}
           {!askConsent && <button className="beta-button" disabled={busy || !card} onClick={() => setAskConsent(true)}>Ask a question</button>}
+          {!pay && <button type="button" className="beta-chip" disabled={busy} onClick={addPolicy}>Add another policy</button>}
+          {payBox}
           {askConsent && (
             <div className="beta-consent" role="group" aria-label="Answers by Google Gemini">
               {/* FOR LEGAL REVIEW: consent wording and scope. */}
@@ -320,6 +360,8 @@ export function BetaFlow() {
             <MicButton voiceEnabled={adapter.voiceEnabled} mock={adapter.mock} transcribe={adapter.transcribe} onSend={ask} onBusy={() => askBox.current?.focus()} disabled={busy} />
             <button className="beta-button" disabled={busy || !question.trim()}>Ask</button>
           </form>
+          {!pay && <button type="button" className="beta-chip" disabled={busy} onClick={addPolicy}>Add another policy</button>}
+          {payBox}
         </section>
       )}
     </main>
