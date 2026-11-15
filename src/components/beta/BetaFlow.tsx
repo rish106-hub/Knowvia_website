@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { type ApiError } from "@/lib/beta/client";
-import { type Adapter, type Candidate, type CardState, pickAdapter } from "@/lib/beta/adapter";
+import { type Adapter, type Candidate, type CardState, candidateLines, pickAdapter } from "@/lib/beta/adapter";
 import { trackAnswer } from "@/lib/beta/analytics";
 import { MOCK_MEMBERS, type PlanItem, SUGGESTED_QUESTIONS } from "@/lib/beta/mock";
 import type { AnswerCardData, CardAction } from "@/lib/beta/types";
@@ -28,6 +28,11 @@ const msg = (e: unknown) => {
   const err = e as Partial<ApiError>;
   return (err.code && REJECTIONS[err.code]) || err.message || "Something went wrong. Try again.";
 };
+
+function CandidateLabel({ c }: { c: Pick<Candidate, "insurerName" | "productName"> }) {
+  const { title, subtitle } = candidateLines(c);
+  return <span><strong>{title}</strong>{subtitle && <><br />{subtitle}</>}</span>;
+}
 
 export function BetaFlow() {
   const [adapter] = useState<Adapter>(() => pickAdapter());
@@ -230,7 +235,7 @@ export function BetaFlow() {
           {candidates && candidates.length === 0 && <p>We could not match an insurer. Your policy is still read, but we cannot confirm the product.</p>}
           {candidates && candidates.length > 0 && !others && (
             <>
-              <p className="beta-option"><span><strong>{candidates[0].productName}</strong><br />{candidates[0].insurerName}</span></p>
+              <p className="beta-option"><CandidateLabel c={candidates[0]} /></p>
               <div className="beta-chips">
                 <button className="beta-button" disabled={busy} onClick={() => confirm(candidates[0].candidateId)}>Yes, this one</button>
                 <button type="button" className="beta-chip" disabled={busy} onClick={() => setOthers(true)}>No, show others</button>
@@ -242,7 +247,7 @@ export function BetaFlow() {
               <h2 className="beta-rule">Pick the closest match</h2>
               {candidates.slice(1, 4).map(c => (
                 <button key={c.candidateId} type="button" className="beta-option" disabled={busy} onClick={() => confirm(c.candidateId)}>
-                  <span><strong>{c.productName}</strong><br />{c.insurerName}</span>
+                  <CandidateLabel c={c} />
                 </button>
               ))}
               {!none && <button type="button" className="beta-chip" onClick={() => setNone(true)}>None of these</button>}
@@ -255,7 +260,7 @@ export function BetaFlow() {
               {found && found.length === 0 && <p aria-live="polite">No match. Try another part of the name.</p>}
               {found?.slice(0, 3).map(c => (
                 <button key={c.candidateId} type="button" className="beta-option" disabled={busy} onClick={() => confirm(c.candidateId)}>
-                  <span><strong>{c.productName}</strong><br />{c.insurerName}</span>
+                  <CandidateLabel c={c} />
                 </button>
               ))}
             </>
