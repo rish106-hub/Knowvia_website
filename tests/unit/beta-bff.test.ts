@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chatTurn, confirmProduct, saveDeclarations, startSession, uploadDocument } from "@/lib/beta/handlers";
+import { chatTurn, confirmProduct, createThread, saveDeclarations, startSession, uploadDocument } from "@/lib/beta/handlers";
 import { readAnswer } from "@/lib/beta/client";
 import { SESSION_COOKIE } from "@/lib/beta/session";
 
@@ -28,6 +28,23 @@ async function signIn() {
 const withCookie = (cookie: string, init: RequestInit = {}) => ({ ...init, headers: { cookie, ...(init.headers as object) } });
 
 describe("beta BFF", () => {
+  it("opens chat with a Gemini grant only when the person said yes", async () => {
+    for (const allowModel of [true, false]) {
+      const { cookie } = await signIn();
+      const s = stub(call => (call.url.endsWith("/api/v1/consents") ? json({ id: "g1" }, 201) : json({ thread: { id: "t1" } }, 201)));
+      const res = await createThread(new Request("http://x", withCookie(cookie, { method: "POST", body: JSON.stringify({ allowModel }) })), s.deps);
+      expect(res.status).toBe(201);
+      const consents = s.calls.filter(c => c.url.endsWith("/api/v1/consents"));
+      expect(consents).toHaveLength(allowModel ? 1 : 0);
+      if (allowModel) {
+        const body = JSON.parse(String(consents[0].body));
+        expect(body.purpose).toBe("coverage_reconstruction");
+        expect(body.scopes).toEqual([{ resourceType: "household", action: "derive", dataCategory: "insurance_question", recipient: "gemini" }]);
+      }
+      expect(s.calls.at(-1)!.url).toMatch(/\/api\/v1\/chat\/threads$/);
+    }
+  });
+
   it("opens a session with the bootstrap token and never returns the bearer to the client", async () => {
     const { res, cookie, s } = await signIn();
     expect(s.calls[0].headers.authorization).toBe(`Bearer ${BOOT}`);
