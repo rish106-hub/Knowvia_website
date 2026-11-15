@@ -5,7 +5,13 @@ import { TILE_ORDER, badgeFor } from "./tiles";
 import type { AnswerCardData, CardTileData, CatalogueQuestion, Phase, TileId } from "./types";
 
 /** uinSource "pdf_text" means the UIN came from the document itself; anything else is a weaker tag and is always confirmed by the person. */
-export type Candidate = { candidateId: string; insurerName: string; productName: string; uinSource?: string };
+export type Candidate = { candidateId: string; insurerName: string; productName: string | null; uinSource?: string };
+
+/** The two lines a candidate shows. A product the reference data has no clean name for (productName null) shows its insurer only. */
+export function candidateLines(c: Pick<Candidate, "insurerName" | "productName">): { title: string; subtitle: string | null } {
+  const name = typeof c.productName === "string" ? c.productName.trim() : "";
+  return name ? { title: name, subtitle: c.insurerName } : { title: c.insurerName, subtitle: null };
+}
 export type SessionState = { signedIn: boolean; hasDocument: boolean; hasHolding: boolean };
 // ASSUMED code: the backend voice-busy code (queue full or breaker open) is not defined yet; align when the route exists.
 export const VOICE_BUSY = "VOICE_BUSY";
