@@ -238,9 +238,28 @@ export const holdingFacts = route(async ctx => {
   return jsonResponse(ctx, { facts, holding });
 });
 
-/** POST /api/beta/chat/threads: open a thread on the policy. */
+/** The chat-model provider the backend routes to on prod (MODEL_PROVIDERS). One grant per provider: a grant never covers another one. */
+export const CHAT_MODEL_RECIPIENT = "openai";
+
+async function chatGrant(ctx: Ctx) {
+  const s = ctx.require();
+  if (s.chatGrantId) return s.chatGrantId;
+  // FOR LEGAL REVIEW: permission to send the question and the masked policy evidence to the chat model provider (cross-border).
+  const grant = await backendJson<{ id: string }>(ctx, "/api/v1/consents", {
+    headers: { "idempotency-key": `chat-${CHAT_MODEL_RECIPIENT}-${s.householdId}` },
+    body: {
+      householdId: s.householdId, subjectAdultId: s.adultId, grantedToActor: CHAT_MODEL_RECIPIENT, purpose: "coverage_reconstruction",
+      scopes: [{ resourceType: "household", resourceId: s.householdId, action: "derive", dataCategory: "insurance_question", recipient: CHAT_MODEL_RECIPIENT }],
+    },
+  });
+  ctx.update({ chatGrantId: grant.id });
+  return grant.id;
+}
+
+/** POST /api/beta/chat/threads: open a thread on the policy, after the chat-model grant is held. */
 export const createThread = route(async ctx => {
   const s = ctx.require();
+  await chatGrant(ctx);
   const result = await backendJson<{ thread: { id: string } }>(ctx, "/api/v1/chat/threads", { body: { household_id: s.householdId, holding_id: s.holdingId ?? undefined } });
   return jsonResponse(ctx, { threadId: result.thread.id }, 201);
 });

@@ -12,6 +12,7 @@ export type BetaSession = {
   ocrGrantId?: string;
   holdingId?: string;
   profileGrantId?: string;
+  chatGrantId?: string;
 };
 
 export const SESSION_COOKIE = "kv_beta";
