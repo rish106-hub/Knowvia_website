@@ -34,7 +34,7 @@ export type Adapter = {
   /** null while the policy is still being read. */
   card(): Promise<CardState | null>;
   resolveConflict(tileId: TileId, pick: 0 | 1): Promise<void>;
-  openThread(): Promise<void>;
+  openThread(allowModel: boolean): Promise<void>;
   ask(question: string): Promise<AnswerCardData>;
   feedback(helpful: boolean, reason?: string): Promise<void>;
   correct(sourceId: string, value: string): Promise<void>;
@@ -171,7 +171,7 @@ export function realAdapter(): Adapter {
       return { productLine: s?.insurerName ? `${s.insurerName} ${s.productName || ""}`.trim() : "", tiles: tilesFromFacts(r.facts.facts) };
     },
     resolveConflict: async () => undefined, // TODO(backend): conflict resolution route.
-    openThread: async () => { if (!thread) thread = (await api<{ threadId: string }>("/api/beta/chat/threads", { method: "POST" })).threadId; },
+    openThread: async allowModel => { if (!thread) thread = (await api<{ threadId: string }>("/api/beta/chat/threads", json({ allowModel }))).threadId; },
     ask: async question => {
       const res = await fetch("/api/beta/chat/turn", { credentials: "same-origin", ...json({ threadId: thread, message: question }) });
       const answer = await readAnswer(res);

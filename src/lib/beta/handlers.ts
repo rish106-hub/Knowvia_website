@@ -241,6 +241,19 @@ export const holdingFacts = route(async ctx => {
 /** POST /api/beta/chat/threads: open a thread on the policy. */
 export const createThread = route(async ctx => {
   const s = ctx.require();
+  const body = await readJson(ctx).catch(() => ({} as Record<string, unknown>));
+  // The person said yes on screen to answers written by Google Gemini. Without this grant the backend never sends to a model and
+  // answers from the policy text and stored facts only. FOR LEGAL REVIEW: wording and scope.
+  if (body.allowModel === true && !s.chatGrantId) {
+    const grant = await backendJson<{ id: string }>(ctx, "/api/v1/consents", {
+      headers: { "idempotency-key": `chat-gemini-${s.householdId}-${s.adultId}` },
+      body: {
+        householdId: s.householdId, subjectAdultId: s.adultId, grantedToActor: "gemini", purpose: "coverage_reconstruction",
+        scopes: [{ resourceType: "household", action: "derive", dataCategory: "insurance_question", recipient: "gemini" }],
+      },
+    });
+    ctx.update({ chatGrantId: grant.id });
+  }
   const result = await backendJson<{ thread: { id: string } }>(ctx, "/api/v1/chat/threads", { body: { household_id: s.householdId, holding_id: s.holdingId ?? undefined } });
   return jsonResponse(ctx, { threadId: result.thread.id }, 201);
 });

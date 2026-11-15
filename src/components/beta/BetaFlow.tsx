@@ -57,6 +57,7 @@ export function BetaFlow() {
   const [found, setFound] = useState<Candidate[] | null>(null);
   const [card, setCard] = useState<CardState | null>(null);
   const [thread, setThread] = useState(false);
+  const [askConsent, setAskConsent] = useState(false);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [question, setQuestion] = useState("");
   const alive = useRef(true);
@@ -165,7 +166,7 @@ export function BetaFlow() {
     const refreshed = await adapter.card(); if (refreshed) setCard(refreshed);
   });
 
-  const openChat = () => run(async () => { await adapter.openThread(); setThread(true); setStep("chat"); });
+  const openChat = (allowModel: boolean) => run(async () => { await adapter.openThread(allowModel); setThread(true); setAskConsent(false); setStep("chat"); });
 
   const ask = (text: string) => {
     const q = text.trim();
@@ -285,7 +286,17 @@ export function BetaFlow() {
               <div className="beta-chips">{strip.map(s => <button key={s.key} type="button" className="beta-chip" onClick={() => setInline(s)}>{s.member ? `${s.member.label}: ` : ""}{s.question.prompt.en}</button>)}</div>
             </>
           ))}
-          <button className="beta-button" disabled={busy || !card} onClick={openChat}>Ask a question</button>
+          {!askConsent && <button className="beta-button" disabled={busy || !card} onClick={() => setAskConsent(true)}>Ask a question</button>}
+          {askConsent && (
+            <div className="beta-consent" role="group" aria-label="Answers by Google Gemini">
+              {/* FOR LEGAL REVIEW: consent wording and scope. */}
+              <p>Can we send your question and the matching parts of your policy to Google Gemini to write the answer? If you say no, we answer from your policy text only.</p>
+              <div className="beta-chips">
+                <button type="button" className="beta-button" disabled={busy} onClick={() => openChat(true)}>Yes</button>
+                <button type="button" className="beta-chip" disabled={busy} onClick={() => openChat(false)}>No</button>
+              </div>
+            </div>
+          )}
         </section>
       )}
 
