@@ -25,7 +25,7 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { browserName: "chromium" } }],
   webServer: {
     command: `npm run build && npm run start -- --hostname 127.0.0.1 --port ${PORT}`,
-    url: `http://127.0.0.1:${PORT}/onboarding`,
+    url: `http://127.0.0.1:${PORT}/`,
     reuseExistingServer: !process.env.CI,
     timeout: 300_000,
     stdout: "ignore",

@@ -15,12 +15,22 @@ const contentSecurityPolicy = [
   "object-src 'none'",
 ].join("; ");
 
+// The product app lives at knowviafrontend; this site is the landing page only.
+const appUrl = (process.env.NEXT_PUBLIC_BETA_URL || "https://knowviafrontend.vercel.app/").replace(/\/+$/, "");
+
 const nextConfig: NextConfig = {
   // Parallel dev servers (e2e) need separate build dirs; unset in normal use.
   ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
   output: "standalone",
   poweredByHeader: false,
   reactStrictMode: true,
+  async redirects() {
+    return ["/beta", "/beta/:path*", "/onboarding", "/onboarding/:path*"].map(source => ({
+      source,
+      destination: appUrl + "/",
+      permanent: false,
+    }));
+  },
   async headers() {
     return [
       {

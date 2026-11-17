@@ -14,51 +14,6 @@ describe("design port contract", () => {
     expect(run.stderr, run.stderr).toBe("");
     expect(run.status).toBe(0);
   });
-
-  it("onboarding upload is PDF only, in the artboard and the generated component", () => {
-    const files = ["src/components/onboarding/OnboardingAddPolicies.tsx"];
-    if (hasArtboards) files.unshift("design/claude-design/O5-Upload.dc.html");
-    for (const rel of files) {
-      const text = read(rel);
-      expect(text, rel).not.toMatch(/jpe?g|png|photo/i);
-      expect(text, rel).toContain("PDF, up to 15 MB each");
-      expect(text, rel).toMatch(/accept=\{?"\.pdf,application\/pdf"/);
-    }
-  });
-
-  it("onboarding no longer makes claims the backend cannot back", () => {
-    const banned = [
-      /files are encrypted/i,
-      /we will email you/i,
-      /invites sent/i,
-      /get an invite/i,
-      /your sister/i,
-    ];
-    for (const rel of [
-      "OnboardingAddPolicies",
-      "OnboardingReading",
-      "OnboardingSharing",
-      "OnboardingPeople",
-      "OnboardingStart",
-      "OnboardingComingUp",
-      "OnboardingCoverMobile",
-      "OnboardingCoverDesktop",
-    ]) {
-      const text = read(`src/components/onboarding/${rel}.tsx`);
-      for (const re of banned) expect(text, `${rel} ${re}`).not.toMatch(re);
-    }
-  });
-
-  it("per-artboard styles reach a separate stylesheet that is scoped to onboarding", () => {
-    const css = read("src/app/design-onboarding.css");
-    expect(css).toContain(".kv-file:focus-within");
-    expect(css).toContain("@keyframes kvOut");
-    // kvIn differs between Main and O6, so O6 gets its own name and the landing keyframes stay untouched.
-    expect(css).toContain("@keyframes kvIn-o6");
-    expect(css).not.toMatch(/@keyframes kvIn\b(?!-)/);
-    expect(read("src/app/onboarding/layout.tsx")).toContain("design-onboarding.css");
-    expect(read("src/app/layout.tsx")).not.toContain("design-onboarding.css");
-  });
 });
 
 describe("token bridge", () => {
@@ -85,6 +40,6 @@ describe("token bridge", () => {
 
   it("defines the four evidence states and keeps the bridge out of generated files", () => {
     for (const name of ["--state-confirmed", "--state-unknown", "--state-conflict", "--state-pending"]) expect(tokens).toContain(`${name}:`);
-    for (const rel of ["src/app/design.css", "src/app/design-onboarding.css", "src/app/layout.tsx"]) expect(read(rel)).not.toContain("tokens.css");
+    for (const rel of ["src/app/design.css", "src/app/layout.tsx"]) expect(read(rel)).not.toContain("tokens.css");
   });
 });
