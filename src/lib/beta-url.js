@@ -7,7 +7,7 @@ export function betaBaseUrl() {
 }
 
 export function betaDemoUrl() {
-  return betaBaseUrl() + "signin?demo=1";
+  return betaBaseUrl() + "signin";
 }
 
 // Entry into the app's add-cover journey. Returns null unless NEXT_PUBLIC_BETA_URL is an
