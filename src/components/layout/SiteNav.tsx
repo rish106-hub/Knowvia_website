@@ -45,7 +45,7 @@ export function SiteNav() {
         </div>
         <div className="kv-desktop" style={{display: "flex", alignItems: "center", gap: "12px"}}>
           <a className="kv-btn-ghost" href={betaDemoUrl()} style={{display: "inline-flex", alignItems: "center", height: "44px", padding: "0 22px", borderRadius: "999px", border: "1px solid #176F69", background: "transparent", color: "#176F69", fontSize: "16px", fontWeight: "600", textDecoration: "none", whiteSpace: "nowrap"}}>
-            {"View demo"}
+            {"Sign in"}
           </a>
           <Link className="kv-btn" href="/#early-list" style={{display: "inline-flex", alignItems: "center", height: "44px", padding: "0 22px", borderRadius: "999px", background: "#176F69", color: "#FFFFFF", fontSize: "16px", fontWeight: "600", textDecoration: "none", whiteSpace: "nowrap"}}>
             {"Join the early list"}
@@ -81,7 +81,7 @@ export function SiteNav() {
               {"Questions"}
             </Link>
             <a className="kv-btn-ghost" href={betaDemoUrl()} style={{marginTop: "20px", display: "flex", alignItems: "center", justifyContent: "center", height: "56px", borderRadius: "999px", border: "1px solid #176F69", background: "transparent", color: "#176F69", fontSize: "17px", textDecoration: "none"}}>
-              {"View demo"}
+              {"Sign in"}
             </a>
             <Link className="kv-btn" href="/#early-list" style={{marginTop: "12px", display: "flex", alignItems: "center", justifyContent: "center", height: "56px", borderRadius: "999px", background: "#176F69", color: "#FFFFFF", fontSize: "17px", textDecoration: "none"}}>
               {"Join the early list"}

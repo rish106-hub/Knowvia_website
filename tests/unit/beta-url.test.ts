@@ -6,17 +6,17 @@ describe("betaDemoUrl", () => {
 
   it("defaults to the shared beta origin", () => {
     vi.stubEnv("NEXT_PUBLIC_BETA_URL", "");
-    expect(betaDemoUrl()).toBe(DEFAULT_BETA_URL + "signin?demo=1");
+    expect(betaDemoUrl()).toBe(DEFAULT_BETA_URL + "signin");
   });
 
   it("uses the env override", () => {
     vi.stubEnv("NEXT_PUBLIC_BETA_URL", "https://beta.example.test/");
-    expect(betaDemoUrl()).toBe("https://beta.example.test/signin?demo=1");
+    expect(betaDemoUrl()).toBe("https://beta.example.test/signin");
   });
 
   it("adds a missing trailing slash", () => {
     vi.stubEnv("NEXT_PUBLIC_BETA_URL", "https://beta.example.test");
-    expect(betaDemoUrl()).toBe("https://beta.example.test/signin?demo=1");
+    expect(betaDemoUrl()).toBe("https://beta.example.test/signin");
   });
 });
 
