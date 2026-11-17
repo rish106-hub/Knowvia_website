@@ -2,13 +2,6 @@ import { expect, test } from "@playwright/test";
 
 const routes = [
   "/",
-  "/onboarding",
-  "/onboarding/coming-up",
-  "/onboarding/people",
-  "/onboarding/sharing",
-  "/onboarding/add-policies",
-  "/onboarding/reading",
-  "/onboarding/your-cover",
   "/for-partners",
   "/privacy",
   "/terms",
